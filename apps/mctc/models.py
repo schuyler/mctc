@@ -1,5 +1,6 @@
 from django.db.models import *
 from django.contrib.auth.models import User
+import md5
 
 def _(arg): return arg
 
@@ -31,10 +32,18 @@ class Provider (Model):
         (DOCTOR_ROLE, _('Doctor'))
     )
     user    = OneToOneField(User)
-    mobile  = CharField(max_length=16, blank=True, unique=True)
+    mobile  = CharField(max_length=16, blank=True)
+    active  = BooleanField(default=True)
     role    = IntegerField(choices=ROLE_CHOICES, default=CHW_ROLE)
     clinic  = ForeignKey(Facility, blank=True)
     manager = ForeignKey("Provider", blank=True)
+
+    @classmethod
+    def by_mobile (cls, mobile)
+        try:
+            return cls.objects.get(mobile=number, active=True)
+        except ObjectDoesNotExist:
+            return None
 
 class Case (Model):
     GENDER_CHOICES = (
@@ -57,11 +66,11 @@ class Case (Model):
         (INACTIVE_STATUS, _('Inactive')),
         (DECEASED_STATUS, _('Deceased'))  
     )
-    ref_id      = IntegerField(_('Case ID #'), unique=True)
+    ref_id      = IntegerField(_('Case ID #'), unique=True, blank=True)
     first_name  = CharField(max_length=255)
     last_name   = CharField(max_length=255)
     gender      = CharField(max_length=1, choices=GENDER_CHOICES)
-    age         = IntegerField(_('Age (mo.)'))
+    dob         = DateField(_('Date of Birth'))
     guardian    = CharField(max_length=255, blank=True)
     mobile      = CharField(max_length=16, blank=True)
     status      = IntegerField(choices=STATUS_CHOICES, default=HEALTHY_STATUS)
@@ -71,8 +80,34 @@ class Case (Model):
     district    = CharField(max_length=255, blank=True)
     created_at  = DateTimeField(auto_now_add=True)
     updated_at  = DateTimeField(auto_now=True)
+
+    def _luhn (self, x):
+        parity = True
+        sum = 0
+        for c in reversed(str(x)):
+            n = int(c)
+            if parity:
+                n *= 2
+                if n > 9: n -= 9
+            sum += n
+    return x * 10 + (10 - (sum % 10)
+
+    def save (self, *args):
+        Model.save(self, *args)
+        if not self.ref_id:
+            self.ref_id = str(self._luhn(self.id))
+            Model.save(self)
     
-class Diagnosis (Model):
+    def age (self):
+        delta = datetime.datetime.now().date() - self.dob
+        years = delta.days / 365.25
+        if years > 3:
+            return str(years)
+        else:
+            # FIXME: i18n
+            return str(int(delta.days/30.4375))+"m"
+        
+class Report (Model):
     EDEMA_OBSERVED         = 1
     APPETITE_LOSS_OBSERVED = 2
     DIARRHEA_OBSERVED      = 3
