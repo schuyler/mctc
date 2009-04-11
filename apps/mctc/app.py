@@ -5,6 +5,8 @@ from models import *
 
 import re, time, datetime
 
+def _(arg): return arg
+
 def authenticated (func):
     def wrapper (self, message, *args):
         if message.sender:
@@ -57,15 +59,16 @@ class App (rapidsms.app.App):
         user = User(**info)
         user.save()
 
+        mobile = message.peer
         in_use = Provider.by_mobile(mobile)
         provider = Provider(mobile=mobile, user=user, active=not bool(in_use))
         provider.save()
     
         if in_use:
             info.update({
-                "last_name"  : in_use.last_name.upper(),
-                "first_name" : in_use.first_name,
-                "other"      : in_use.username,
+                "last_name"  : in_use.user.last_name.upper(),
+                "first_name" : in_use.user.first_name,
+                "other"      : in_use.user.username,
                 "mobile"     : mobile,
             })
             message.respond(_(
@@ -75,7 +78,7 @@ class App (rapidsms.app.App):
             info.update({
                 "id"        : user.id,
                 "mobile"    : mobile,
-                "last_name" : last_name.upper
+                "last_name" : last_name.upper()
             })
             self.respond_to_join(message, info)
         return True

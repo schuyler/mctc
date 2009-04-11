@@ -35,8 +35,8 @@ class Provider (Model):
     mobile  = CharField(max_length=16, blank=True)
     active  = BooleanField(default=True)
     role    = IntegerField(choices=ROLE_CHOICES, default=CHW_ROLE)
-    clinic  = ForeignKey(Facility, blank=True)
-    manager = ForeignKey("Provider", blank=True)
+    clinic  = ForeignKey(Facility, null=True)
+    manager = ForeignKey("Provider", null=True)
 
     @classmethod
     def by_mobile (cls, mobile):
