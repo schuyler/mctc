@@ -25,7 +25,10 @@ class App (rapidsms.app.App):
 
     def parse (self, message):
         provider = Provider.by_mobile(message.peer)
-        message.sender = provider.user
+        if provider:
+            message.sender = provider.user
+        else:
+            message.sender = None
 
     def handle (self, message):
         try:
@@ -83,14 +86,14 @@ class App (rapidsms.app.App):
               "(%(last_name)s, %(first_name)s).") % info)
 
     @keyword(r'confirm (\w+)')
-    def confirm_join (self, message, username)
+    def confirm_join (self, message, username):
         mobile   = message.peer
         try:
             user = User.objects.get(username=username)
         except ObjectDoesNotExist:
             return self.respond_not_registered(username)
         for provider in Provider.objects.filter(mobile=mobile):
-            if provider.user.id = user.id:
+            if provider.user.id == user.id:
                 provider.active = True
             else:
                 provider.active = False
@@ -189,7 +192,7 @@ class App (rapidsms.app.App):
             self.respond_case_not_found(message, ref_id)
         if case.diagnoses.count():
             message.respond(_(
-                "Cannot cancel #%s: case has diagnosis reports.") % ref_id))
+                "Cannot cancel #%s: case has diagnosis reports.") % ref_id)
             return True
         case.delete()
         message.respond(_("Case #%s cancelled.") % ref_id)

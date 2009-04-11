@@ -39,9 +39,9 @@ class Provider (Model):
     manager = ForeignKey("Provider", blank=True)
 
     @classmethod
-    def by_mobile (cls, mobile)
+    def by_mobile (cls, mobile):
         try:
-            return cls.objects.get(mobile=number, active=True)
+            return cls.objects.get(mobile=mobile, active=True)
         except ObjectDoesNotExist:
             return None
 
@@ -90,7 +90,7 @@ class Case (Model):
                 n *= 2
                 if n > 9: n -= 9
             sum += n
-    return x * 10 + (10 - (sum % 10)
+        return x * 10 + 10 - sum % 10
 
     def save (self, *args):
         Model.save(self, *args)
