@@ -193,7 +193,8 @@ class App (rapidsms.app.App):
             case = Case.objects.get(ref_id=int(ref_id))
         except ObjectDoesNotExist:
             self.respond_case_not_found(message, ref_id)
-        if case.diagnoses.count():
+            return True
+        if case.report_set.count():
             message.respond(_(
                 "Cannot cancel #%s: case has diagnosis reports.") % ref_id)
             return True
@@ -208,7 +209,7 @@ class App (rapidsms.app.App):
         cases = Case.objects.filter(provider=message.sender.provider)
         text  = ""
         for case in cases:
-            item = "#%s %s, %s %s/%s" % (case.ref_id, case.last_name.upper(),
+            item = "#%s %s %s. %s/%s" % (case.ref_id, case.last_name.upper(),
                 case.first_name[0].upper(), case.gender, case.age())
             if len(text) + len(item) + 2 >= self.MAX_MSG_LEN:
                 message.respond(text)
