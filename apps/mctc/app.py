@@ -53,8 +53,8 @@ class App (rapidsms.app.App):
         
         info = {
             "username"   : username,
-            "first_name" : first_name,
-            "last_name"  : last_name
+            "first_name" : first_name.title(),
+            "last_name"  : last_name.title()
         }
         user = User(**info)
         user.save()
@@ -137,7 +137,6 @@ class App (rapidsms.app.App):
     @authenticated
     def new_case (self, message, last, first, gender, dob,
                   guardian="", contact=""):
-
         provider = message.sender.provider
         zone     = None
         if provider.clinic:
@@ -153,9 +152,11 @@ class App (rapidsms.app.App):
                 # FIXME: parse failure
                 return False
         dob = datetime.date(*dob[:3])
+        if guardian:
+            guardian = guardian.title()
         info = {
-            "first_name" : first,
-            "last_name"  : last,
+            "first_name" : first.title(),
+            "last_name"  : last.title(),
             "gender"     : gender.upper()[0],
             "dob"        : dob,
             "guardian"   : guardian,

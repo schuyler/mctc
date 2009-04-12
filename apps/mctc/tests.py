@@ -14,7 +14,7 @@ class TestApp (TestScript):
     testJoin = """
         # test registration
         1234567 > join smith john
-        1234567 < 1234567 registered to *1 jsmith (SMITH, john).
+        1234567 < 1234567 registered to *1 jsmith (SMITH, John).
 
         # test re-registration
         1234567 > join smith john
@@ -22,9 +22,9 @@ class TestApp (TestScript):
     
         # test takeover/confirm
         1234567 > join smith john smithj
-        1234567 < Phone 1234567 is already registered to SMITH, john. Reply with 'CONFIRM smithj'.   
+        1234567 < Phone 1234567 is already registered to SMITH, John. Reply with 'CONFIRM smithj'.   
         1234567 > confirm smithj
-        1234567 < 1234567 registered to *2 smithj (SMITH, john).
+        1234567 < 1234567 registered to *2 smithj (SMITH, John).
 
         # test authentication
         7654321 > *2 can you read this?
@@ -32,7 +32,7 @@ class TestApp (TestScript):
 
         # test direct messaging
         7654321 > join doe jane
-        7654321 < 7654321 registered to *3 jdoe (DOE, jane).
+        7654321 < 7654321 registered to *3 jdoe (DOE, Jane).
         7654321 > *2 can you read this? 
         1234567 < *jdoe> can you read this?
         1234567 > *jdoe yes, I can read that
@@ -49,13 +49,13 @@ class TestApp (TestScript):
     
     testNewCase = """
         7654321 > new madison dolly f 080411
-        7654321 < New #18: MADISON, dolly F/%dm (None) None
+        7654321 < New #18: MADISON, Dolly F/%dm (None) None
         7654321 > new madison molly f 20050411 sally
-        7654321 < New #26: MADISON, molly F/%d (sally) None
+        7654321 < New #26: MADISON, Molly F/%d (Sally) None
         7654321 > new madison holly f 090211 sally 230123
-        7654321 < New #34: MADISON, holly F/%dm (sally) None
+        7654321 < New #34: MADISON, Holly F/%dm (Sally) None
         7654321 > new madison wally m 070615 230123
-        7654321 < New #42: MADISON, wally M/%dm (None) None
+        7654321 < New #42: MADISON, Wally M/%dm (None) None
     """ % (
         age_in_months(2008,4,11),
         age_in_years(2005,4,11),
