@@ -153,7 +153,6 @@ class App (rapidsms.app.App):
                 # FIXME: parse failure
                 return False
         dob = datetime.date(*dob[:3])
-
         info = {
             "first_name" : first,
             "last_name"  : last,

@@ -102,7 +102,7 @@ class Case (Model):
         delta = datetime.datetime.now().date() - self.dob
         years = delta.days / 365.25
         if years > 3:
-            return str(years)
+            return str(int(years))
         else:
             # FIXME: i18n
             return str(int(delta.days/30.4375))+"m"

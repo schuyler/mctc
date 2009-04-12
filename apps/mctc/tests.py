@@ -50,4 +50,14 @@ class TestApp (TestScript):
     testNewCase = """
         7654321 > new madison dolly f 080411
         7654321 < New #18: MADISON, dolly F/%dm (None) None
-    """ % age_in_months(2008,4,11)
+        7654321 > new madison molly f 20050411 sally
+        7654321 < New #26: MADISON, molly F/%d (sally) None
+        7654321 > new madison holly f 090211 sally 230123
+        7654321 < New #34: MADISON, holly F/%dm (sally) None
+        7654321 > new madison wally m 070615 230123
+        7654321 < New #42: MADISON, wally M/%dm (None) None
+    """ % (
+        age_in_months(2008,4,11),
+        age_in_years(2005,4,11),
+        age_in_months(2009,2,11),
+        age_in_months(2007,6,15),)
