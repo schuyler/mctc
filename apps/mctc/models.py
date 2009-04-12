@@ -6,8 +6,8 @@ def _(arg): return arg
 
 class Zone (Model):
     name    = CharField(max_length=255)
-    lon     = FloatField(blank=True)
-    lat     = FloatField(blank=True)
+    lon     = FloatField(null=True)
+    lat     = FloatField(null=True)
 
 class Facility (Model):
     CLINIC_ROLE  = 1
@@ -19,8 +19,8 @@ class Facility (Model):
     name    = CharField(max_length=255)
     role    = IntegerField(choices=ROLE_CHOICES, default=CLINIC_ROLE)
     zone    = ForeignKey(Zone)
-    lon     = FloatField(blank=True)
-    lat     = FloatField(blank=True)
+    lon     = FloatField(null=True)
+    lat     = FloatField(null=True)
 
 class Provider (Model):
     CHW_ROLE    = 1
@@ -32,7 +32,7 @@ class Provider (Model):
         (DOCTOR_ROLE, _('Doctor'))
     )
     user    = OneToOneField(User)
-    mobile  = CharField(max_length=16, blank=True)
+    mobile  = CharField(max_length=16, null=True)
     active  = BooleanField(default=True)
     role    = IntegerField(choices=ROLE_CHOICES, default=CHW_ROLE)
     clinic  = ForeignKey(Facility, null=True)
@@ -66,18 +66,18 @@ class Case (Model):
         (INACTIVE_STATUS, _('Inactive')),
         (DECEASED_STATUS, _('Deceased'))  
     )
-    ref_id      = IntegerField(_('Case ID #'), unique=True, blank=True)
+    ref_id      = IntegerField(_('Case ID #'), null=True)
     first_name  = CharField(max_length=255)
     last_name   = CharField(max_length=255)
     gender      = CharField(max_length=1, choices=GENDER_CHOICES)
     dob         = DateField(_('Date of Birth'))
-    guardian    = CharField(max_length=255, blank=True)
-    mobile      = CharField(max_length=16, blank=True)
+    guardian    = CharField(max_length=255, null=True)
+    mobile      = CharField(max_length=16, null=True)
     status      = IntegerField(choices=STATUS_CHOICES, default=HEALTHY_STATUS)
-    provider    = ForeignKey(User)
-    zone        = ForeignKey(Zone, blank=True)
-    village     = CharField(max_length=255, blank=True)
-    district    = CharField(max_length=255, blank=True)
+    provider    = ForeignKey(Provider)
+    zone        = ForeignKey(Zone, null=True)
+    village     = CharField(max_length=255, null=True)
+    district    = CharField(max_length=255, null=True)
     created_at  = DateTimeField(auto_now_add=True)
     updated_at  = DateTimeField(auto_now=True)
 
@@ -127,12 +127,12 @@ class Report (Model):
     case        = ForeignKey(Case)
     provider    = ForeignKey(User)
     entered_at  = DateTimeField(auto_now_add=True)
-    muac        = FloatField(_("MUAC (cm)"), blank=True)
-    height      = FloatField(_("Height (cm)"), blank=True)
-    weight      = FloatField(_("Weight (kg)"), blank=True)
+    muac        = FloatField(_("MUAC (cm)"), null=True)
+    height      = FloatField(_("Height (cm)"), null=True)
+    weight      = FloatField(_("Weight (kg)"), null=True)
     observed    = CommaSeparatedIntegerField(_("Observations"),
-                    choices=OBSERVED_CHOICES, max_length=255, blank=True)
-    note        = TextField(blank=True)
+                    choices=OBSERVED_CHOICES, max_length=255, null=True)
+    note        = TextField(null=True)
 
 class MessageLog (Model):
     user        = ForeignKey(User)

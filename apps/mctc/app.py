@@ -10,7 +10,7 @@ def _(arg): return arg
 def authenticated (func):
     def wrapper (self, message, *args):
         if message.sender:
-            return func(message, *args)
+            return func(self, message, *args)
         else:
             message.respond(_("%s is not a registered number.")
                             % message.peer)
@@ -135,7 +135,7 @@ class App (rapidsms.app.App):
 
     @keyword(r'new (\S+) (\S+) ([MF]) ([\d\-]+)( \D+)?( \d+)?')
     @authenticated
-    def new_case (self, message, first, last, gender, dob,
+    def new_case (self, message, last, first, gender, dob,
                   guardian="", contact=""):
 
         provider = message.sender.provider
@@ -152,12 +152,12 @@ class App (rapidsms.app.App):
             except ValueError:
                 # FIXME: parse failure
                 return False
-        dob = datetime.date(dob[:3])
+        dob = datetime.date(*dob[:3])
 
         info = {
             "first_name" : first,
             "last_name"  : last,
-            "gender"     : gender,
+            "gender"     : gender.upper()[0],
             "dob"        : dob,
             "guardian"   : guardian,
             "mobile"     : contact,
@@ -170,7 +170,7 @@ class App (rapidsms.app.App):
         case = Case(**info)
         case.save()
 
-        info.extend({
+        info.update({
             "id": case.ref_id,
             "last_name": last.upper(),
             "age": case.age()
