@@ -40,8 +40,15 @@ class App (rapidsms.app.App):
             return False
         return func(self, message, *captures)
 
-    @keyword("join (\S+) (\S+)(?: ([a-z]\w+))?")
-    def join (self, message, last_name, first_name, username=None):
+    @keyword("join (\S+) (\S+) (\S+)(?: ([a-z]\w+))?")
+    def join (self, message, code, last_name, first_name, username=None):
+        try:
+            clinic = Facility.objects.get(codename__iexact=code)
+        except ObjectDoesNotExist:
+            message.respond(_(
+                "The given password is not recognized."))
+            return True
+
         if username is None:
             # FIXME: this is going to run into charset issues
             username = (first_name[0] + last_name).lower()
@@ -61,7 +68,8 @@ class App (rapidsms.app.App):
 
         mobile = message.peer
         in_use = Provider.by_mobile(mobile)
-        provider = Provider(mobile=mobile, user=user, active=not bool(in_use))
+        provider = Provider(mobile=mobile, user=user,
+                            clinic=clinic, active=not bool(in_use))
         provider.save()
     
         if in_use:
@@ -70,6 +78,7 @@ class App (rapidsms.app.App):
                 "first_name" : in_use.user.first_name,
                 "other"      : in_use.user.username,
                 "mobile"     : mobile,
+                "clinic"     : provider.clinic.name, 
             })
             message.respond(_(
                 "Phone %(mobile)s is already registered to %(last_name)s, " +
@@ -78,6 +87,7 @@ class App (rapidsms.app.App):
             info.update({
                 "id"        : user.id,
                 "mobile"    : mobile,
+                "clinic"    : provider.clinic.name, 
                 "last_name" : last_name.upper()
             })
             self.respond_to_join(message, info)
@@ -86,7 +96,7 @@ class App (rapidsms.app.App):
     def respond_to_join(self, message, info):
         message.respond(
             _("%(mobile)s registered to *%(id)s %(username)s " +
-              "(%(last_name)s, %(first_name)s).") % info)
+              "(%(last_name)s, %(first_name)s) at %(clinic)s.") % info)
 
     @keyword(r'confirm (\w+)')
     def confirm_join (self, message, username):
@@ -106,6 +116,7 @@ class App (rapidsms.app.App):
             "last_name"     : user.last_name.upper(),
             "id"            : user.id,
             "mobile"        : mobile,
+            "clinic"        : provider.clinic.name,
             "username"      : username
         } 
         self.respond_to_join(message, info) 

@@ -5,24 +5,32 @@ import md5
 def _(arg): return arg
 
 class Zone (Model):
+    def __unicode__ (self): return self.name
+    number  = PositiveIntegerField(unique=True)
     name    = CharField(max_length=255)
-    lon     = FloatField(null=True)
-    lat     = FloatField(null=True)
+    lon     = FloatField(null=True,blank=True)
+    lat     = FloatField(null=True,blank=True)
 
 class Facility (Model):
+    def __unicode__ (self): return self.name
+    class Meta:
+        verbose_name_plural = "Facilities"
+
     CLINIC_ROLE  = 1
     DISTRIB_ROLE = 2
     ROLE_CHOICES = (
         (CLINIC_ROLE,  _('Clinic')),
         (DISTRIB_ROLE, _('Distribution Point')),
     )
-    name    = CharField(max_length=255)
-    role    = IntegerField(choices=ROLE_CHOICES, default=CLINIC_ROLE)
-    zone    = ForeignKey(Zone)
-    lon     = FloatField(null=True)
-    lat     = FloatField(null=True)
+    name        = CharField(max_length=255)
+    role        = IntegerField(choices=ROLE_CHOICES, default=CLINIC_ROLE)
+    zone        = ForeignKey(Zone)
+    codename    = CharField(max_length=255,unique=True)
+    lon         = FloatField(null=True,blank=True)
+    lat         = FloatField(null=True,blank=True)
 
 class Provider (Model):
+    def __unicode__ (self): return self.mobile
     CHW_ROLE    = 1
     NURSE_ROLE  = 2
     DOCTOR_ROLE = 3
@@ -81,6 +89,9 @@ class Case (Model):
     created_at  = DateTimeField(auto_now_add=True)
     updated_at  = DateTimeField(auto_now=True)
 
+    def __unicode__ (self):
+        return "Case #%d" % self.ref_id
+
     def _luhn (self, x):
         parity = True
         sum = 0
@@ -133,6 +144,9 @@ class Report (Model):
     observed    = CommaSeparatedIntegerField(_("Observations"),
                     choices=OBSERVED_CHOICES, max_length=255, null=True)
     note        = TextField(null=True)
+
+    def __unicode__ (self):
+        return "Report #%d" % self.id
 
 class MessageLog (Model):
     user        = ForeignKey(User)
