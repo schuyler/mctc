@@ -1,5 +1,6 @@
 from django.db.models import *
 from django.contrib.auth.models import User
+from fields import SeparatedValuesField
 import md5
 
 def _(arg): return arg
@@ -125,7 +126,7 @@ class Report (Model):
     VOMITING_OBSERVED      = 4
     CHRONIC_COUGH_OBSERVED = 5
     HIGH_FEVER_OBSERVED    = 6
-    UNCONSCIOUS_OBSERVED   = 7
+    UNRESPONSIVE_OBSERVED  = 7
     OBSERVED_CHOICES = (
         (EDEMA_OBSERVED,         _("Edema")),
         (APPETITE_LOSS_OBSERVED, _("Appetite Loss")),
@@ -133,7 +134,7 @@ class Report (Model):
         (VOMITING_OBSERVED,      _("Vomiting")),
         (CHRONIC_COUGH_OBSERVED, _("Chronic Cough")),
         (HIGH_FEVER_OBSERVED,    _("High Fever")),
-        (UNCONSCIOUS_OBSERVED,   _("Unconscious/Unresponsive")),
+        (UNRESPONSIVE_OBSERVED,  _("Unresponsive")),
     )
     case        = ForeignKey(Case)
     provider    = ForeignKey(Provider)
@@ -141,7 +142,7 @@ class Report (Model):
     muac        = FloatField(_("MUAC (cm)"), null=True, blank=True)
     height      = FloatField(_("Height (cm)"), null=True, blank=True)
     weight      = FloatField(_("Weight (kg)"), null=True, blank=True)
-    observed    = CommaSeparatedIntegerField(_("Observations"),
+    observed    = SeparatedValuesField(_("Observations"),
                     choices=OBSERVED_CHOICES, max_length=255,
                     blank=True, null=True)
     note        = TextField(blank=True,default="")

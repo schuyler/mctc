@@ -251,7 +251,7 @@ class App (rapidsms.app.App):
             message.respond(text)
         return True
 
-    @keyword(r'#(\d+) ([\d\.]+) ([\d\.]+) ((?:\w\s*)*)')
+    @keyword(r'#(\d+) ([\d\.]+) ([\d\.]+)( (?:\w\s*)+)?')
     @authenticated
     def report_case (self, message, ref_id, muac, weight, complications):
         case = self.find_case(ref_id)
@@ -259,20 +259,20 @@ class App (rapidsms.app.App):
         try:
             muac = float(muac)
         except ValueError:
-            raise HandlerFailure(
-                _("Couldn't understand MUAC (cm): %s") % muac)
+            raise HandlerFailed(
+                _("Can't understand MUAC (cm): %s") % muac)
 
         try:
             weight = float(weight)
         except ValueError:
-            raise HandlerFailure(
-                _("Couldn't understand weight (kg): %s") % weight)
+            raise HandlerFailed(
+                _("Can't understand weight (kg): %s") % weight)
 
         if muac > 30: # muac is in mm?
             muac /= 10.0
 
         if weight > 100: # muac is in g?
-            muac /= 1000.0
+            weight /= 1000.0
 
         choices  = Report.OBSERVED_CHOICES 
         observed = []
@@ -281,7 +281,7 @@ class App (rapidsms.app.App):
             complications = re.sub(r'\W+', '', complications)
             for observation in complications.lower():
                 if observation not in comp_list:
-                    raise HandlerFailure(_(
+                    raise HandlerFailed(_(
                         "Unknown observation code: %s" % observation))
                 observed.append(comp_list[observation])
                 
@@ -289,16 +289,17 @@ class App (rapidsms.app.App):
                         muac=muac, weight=weight, observed=observed)
         report.save()
 
+        choice_term = dict(choices)
         info = {
             'ref_id'    : case.ref_id,
             'last'      : case.last_name.upper(),
             'first'     : case.first_name[0],
-            'muac'      : "%.1fcm" % muac,
-            'weight'    : "%.1fkg" % weight,
-            'observed'  : ", ".join([choices[k] for k in observed])
+            'muac'      : "%.1f cm" % muac,
+            'weight'    : "%.1f kg" % weight,
+            'observed'  : ", ".join([choice_term[k] for k in observed])
         }
-        msg = _("Report #%(ref_id)s: MUAC %(muac)s, Weight %(weight)") % info
-        if observed: msg += " (%s)" % observed
+        msg = _("Report #%(ref_id)s: MUAC %(muac)s, wt. %(weight)s") % info
+        if observed: msg += ", " + info["observed"]
         message.respond(msg)
         return True
 
