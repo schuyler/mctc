@@ -17,6 +17,9 @@ def authenticated (func):
             return True
     return wrapper
 
+class HandlerFailed (Exception):
+    pass
+
 class App (rapidsms.app.App):
     MAX_MSG_LEN = 140
     keyword = Keyworder()
@@ -38,25 +41,31 @@ class App (rapidsms.app.App):
         except TypeError:
             # didn't find a matching function
             return False
-        return func(self, message, *captures)
+        try:
+            return func(self, message, *captures)
+        except HandlerFailed, e:
+            message.respond(e.message)
+        except Exception, e:
+            # TODO: log this exception
+            # FIXME: also, put the contact number in the config
+            message.respond(_("An error occurred. Please call 999-9999."))
+            raise
+        return True
 
     @keyword("join (\S+) (\S+) (\S+)(?: ([a-z]\w+))?")
     def join (self, message, code, last_name, first_name, username=None):
         try:
             clinic = Facility.objects.get(codename__iexact=code)
         except ObjectDoesNotExist:
-            message.respond(_(
-                "The given password is not recognized."))
-            return True
+            raise HandlerFailed(_("The given password is not recognized."))
 
         if username is None:
             # FIXME: this is going to run into charset issues
             username = (first_name[0] + last_name).lower()
         if User.objects.filter(username=username).count():
-            message.respond(_(
+            raise HandlerFailed(_(
                 "Username '%s' is already in use. " +
                 "Reply with: JOIN <last> <first> <username>") % username)
-            return True
         
         info = {
             "username"   : username,
@@ -104,7 +113,7 @@ class App (rapidsms.app.App):
         try:
             user = User.objects.get(username=username)
         except ObjectDoesNotExist:
-            return self.respond_not_registered(username)
+            self.respond_not_registered(username)
         for provider in Provider.objects.filter(mobile=mobile):
             if provider.user.id == user.id:
                 provider.active = True
@@ -123,8 +132,7 @@ class App (rapidsms.app.App):
         return True
 
     def respond_not_registered (self, message, target):
-        message.respond(_("User *%s is not registered.") % target)
-        return True
+        raise HandlerFailed(_("User *%s is not registered.") % target)
 
     @keyword(r'\*(\w+) (.+)')
     @authenticated
@@ -136,11 +144,11 @@ class App (rapidsms.app.App):
                 user = User.objects.get(username=target)
         except ObjectDoesNotExist:
             # FIXME: try looking up a group
-            return self.respond_not_registered(message, target)
+            self.respond_not_registered(message, target)
         try:
             mobile = user.provider.mobile
         except:
-            return self.respond_not_registered(message, target)
+            self.respond_not_registered(message, target)
         sender = message.sender.username
         return message.forward(mobile, "*%s> %s" % (sender, text))
 
@@ -160,8 +168,7 @@ class App (rapidsms.app.App):
             try:
                 dob = time.strptime(dob, "%Y%m%d")
             except ValueError:
-                # FIXME: parse failure
-                return False
+                raise HandlerFailed(_("Couldn't understand date: %s") % dob)
         dob = datetime.date(*dob[:3])
         if guardian:
             guardian = guardian.title()
@@ -193,22 +200,19 @@ class App (rapidsms.app.App):
             "(%(guardian)s) %(zone)s") % info)
         return True
 
-    def respond_case_not_found (self, message, ref_id):
-        message.respond(_("Case #%s not found.") % ref_id)
-        return True
-
+    def find_case (self, ref_id):
+        try:
+            return Case.objects.get(ref_id=int(ref_id))
+        except ObjectDoesNotExist:
+            raise HandlerFailed(_("Case #%s not found.") % ref_id)
+ 
     @keyword(r'cancel #?(\d+)')
     @authenticated
     def cancel_case (self, message, ref_id):
-        try:
-            case = Case.objects.get(ref_id=int(ref_id))
-        except ObjectDoesNotExist:
-            self.respond_case_not_found(message, ref_id)
-            return True
+        case = self.find_case(ref_id)
         if case.report_set.count():
-            message.respond(_(
+            raise HandlerFailed(_(
                 "Cannot cancel #%s: case has diagnosis reports.") % ref_id)
-            return True
         case.delete()
         message.respond(_("Case #%s cancelled.") % ref_id)
         return True
@@ -245,5 +249,56 @@ class App (rapidsms.app.App):
             text += item
         if text:
             message.respond(text)
+        return True
+
+    @keyword(r'#(\d+) ([\d\.]+) ([\d\.]+) ((?:\w\s*)*)')
+    @authenticated
+    def report_case (self, message, ref_id, muac, weight, complications):
+        case = self.find_case(ref_id)
+
+        try:
+            muac = float(muac)
+        except ValueError:
+            raise HandlerFailure(
+                _("Couldn't understand MUAC (cm): %s") % muac)
+
+        try:
+            weight = float(weight)
+        except ValueError:
+            raise HandlerFailure(
+                _("Couldn't understand weight (kg): %s") % weight)
+
+        if muac > 30: # muac is in mm?
+            muac /= 10.0
+
+        if weight > 100: # muac is in g?
+            muac /= 1000.0
+
+        choices  = Report.OBSERVED_CHOICES 
+        observed = []
+        if complications:
+            comp_list = dict([ (v[0].lower(), k) for k,v in choices ])
+            complications = re.sub(r'\W+', '', complications)
+            for observation in complications.lower():
+                if observation not in comp_list:
+                    raise HandlerFailure(_(
+                        "Unknown observation code: %s" % observation))
+                observed.append(comp_list[observation])
+                
+        report = Report(case=case, provider=message.sender.provider,
+                        muac=muac, weight=weight, observed=observed)
+        report.save()
+
+        info = {
+            'ref_id'    : case.ref_id,
+            'last'      : case.last_name.upper(),
+            'first'     : case.first_name[0],
+            'muac'      : "%.1fcm" % muac,
+            'weight'    : "%.1fkg" % weight,
+            'observed'  : ", ".join([choices[k] for k in observed])
+        }
+        msg = _("Report #%(ref_id)s: MUAC %(muac)s, Weight %(weight)") % info
+        if observed: msg += " (%s)" % observed
+        message.respond(msg)
         return True
 

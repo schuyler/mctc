@@ -119,3 +119,7 @@ class TestApp (TestScript):
         7654321 > cancel 42
         7654321 < Case #42 not found. 
     """ 
+
+    def test_zzz_queue_is_empty (self):
+        self.assertFalse(self.backend.message_waiting)
+

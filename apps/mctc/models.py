@@ -90,7 +90,7 @@ class Case (Model):
     updated_at  = DateTimeField(auto_now=True)
 
     def __unicode__ (self):
-        return "Case #%d" % self.ref_id
+        return "#%d" % self.ref_id
 
     def _luhn (self, x):
         parity = True
@@ -136,17 +136,18 @@ class Report (Model):
         (UNCONSCIOUS_OBSERVED,   _("Unconscious/Unresponsive")),
     )
     case        = ForeignKey(Case)
-    provider    = ForeignKey(User)
+    provider    = ForeignKey(Provider)
     entered_at  = DateTimeField(auto_now_add=True)
-    muac        = FloatField(_("MUAC (cm)"), null=True)
-    height      = FloatField(_("Height (cm)"), null=True)
-    weight      = FloatField(_("Weight (kg)"), null=True)
+    muac        = FloatField(_("MUAC (cm)"), null=True, blank=True)
+    height      = FloatField(_("Height (cm)"), null=True, blank=True)
+    weight      = FloatField(_("Weight (kg)"), null=True, blank=True)
     observed    = CommaSeparatedIntegerField(_("Observations"),
-                    choices=OBSERVED_CHOICES, max_length=255, null=True)
-    note        = TextField(null=True)
+                    choices=OBSERVED_CHOICES, max_length=255,
+                    blank=True, null=True)
+    note        = TextField(blank=True,default="")
 
     def __unicode__ (self):
-        return "Report #%d" % self.id
+        return "#%d" % self.id
 
 class MessageLog (Model):
     user        = ForeignKey(User)
