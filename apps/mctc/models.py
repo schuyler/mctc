@@ -157,7 +157,7 @@ class Report (Model):
     weight      = FloatField(_("Weight (kg)"), null=True, blank=True)
     observed    = SeparatedValuesField(_("Observations"),
                     choices=OBSERVED_CHOICES, max_length=255,
-                    blank=True, null=True)
+                    null=True, blank=True)
     note        = TextField(blank=True,default="")
 
     def __unicode__ (self):
