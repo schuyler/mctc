@@ -62,7 +62,7 @@ class Case (Model):
     )
     UNKNOWN_STATUS          = 1
     HEALTHY_STATUS          = 2
-    MILD_STATUS             = 3
+    ILL_STATUS              = 3
     MODERATE_STATUS         = 4
     SEVERE_STATUS           = 5
     SEVERE_COMP_STATUS      = 6
@@ -74,7 +74,7 @@ class Case (Model):
     STATUS_CHOICES = (
         (UNKNOWN_STATUS,        _('Unknown')),
         (HEALTHY_STATUS,        _('Healthy')),
-        (MILD_STATUS,           _('OTP')),
+        (ILL_STATUS,            _('Ill')),
         (MODERATE_STATUS,       _('MAM')),
         (SEVERE_STATUS,         _('SAM')),
         (SEVERE_COMP_STATUS,    _('SAM+')),
@@ -164,14 +164,18 @@ class Report (Model):
         return "#%d" % self.id
     
     def diagnosis (self):
-        if self.muac < 11.0 or self.observed:
-            if self.observed:
+        complications = [c for c in self.observed if c != self.EDEMA_OBSERVED]
+        edema = self.EDEMA_OBSERVED in self.observed
+        if edema or self.muac < 11.0:
+            if complications:
                 return Case.SEVERE_COMP_STATUS
             else:
                 return Case.SEVERE_STATUS
         elif self.muac < 12.5:
             return Case.MODERATE_STATUS
-        else:
+        elif complications:
+            return Case.ILL_STATUS
+        else: 
             return Case.HEALTHY_STATUS
 
 class MessageLog (Model):
