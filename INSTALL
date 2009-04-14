@@ -26,6 +26,12 @@ Starting with a stock Debian/Ubuntu system:
     $ cd mctc
     $ python manage.py syncdb
 
+# Edit the rapidsms.ini file. Make sure it contains the following:
+
+    [rapidsms]
+    apps=mctc,webui
+    backends=http,spomc
+
 # Start spomskyd in one terminal (or screen):
 
     $ spomskyd --backend=GSM
