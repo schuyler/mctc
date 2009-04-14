@@ -42,8 +42,9 @@ class Provider (Model):
     )
     user    = OneToOneField(User)
     mobile  = CharField(max_length=16, null=True)
-    active  = BooleanField(default=True)
     role    = IntegerField(choices=ROLE_CHOICES, default=CHW_ROLE)
+    active  = BooleanField(default=True)
+    alerts  = BooleanField(default=False)
     clinic  = ForeignKey(Facility, null=True)
     manager = ForeignKey("Provider", null=True)
 
@@ -59,21 +60,29 @@ class Case (Model):
         ('M', _('Male')), 
         ('F', _('Female')), 
     )
-    UNKNOWN_STATUS  = 1
-    HEALTHY_STATUS  = 2
-    MILD_STATUS     = 3
-    MODERATE_STATUS = 4
-    SEVERE_STATUS   = 5
-    INACTIVE_STATUS = 6
-    DECEASED_STATUS = 7
+    UNKNOWN_STATUS          = 1
+    HEALTHY_STATUS          = 2
+    MILD_STATUS             = 3
+    MODERATE_STATUS         = 4
+    SEVERE_STATUS           = 5
+    SEVERE_COMP_STATUS      = 6
+    CURED_STATUS            = 7
+    DECEASED_STATUS         = 8
+    DEFAULTED_STATUS        = 9
+    NOT_RECOVERED_STATUS    = 10
+    TRANSFERRED_STATUS      = 11
     STATUS_CHOICES = (
-        (UNKNOWN_STATUS,  _('Unknown')),
-        (HEALTHY_STATUS,  _('Healthy')),
-        (MILD_STATUS,     _('OTP')),
-        (MODERATE_STATUS, _('MAM')),
-        (SEVERE_STATUS,   _('SAM')),
-        (INACTIVE_STATUS, _('Inactive')),
-        (DECEASED_STATUS, _('Deceased'))  
+        (UNKNOWN_STATUS,        _('Unknown')),
+        (HEALTHY_STATUS,        _('Healthy')),
+        (MILD_STATUS,           _('OTP')),
+        (MODERATE_STATUS,       _('MAM')),
+        (SEVERE_STATUS,         _('SAM')),
+        (SEVERE_COMP_STATUS,    _('SAM+')),
+        (CURED_STATUS,          _('Cured')),
+        (DECEASED_STATUS,       _('Deceased')),
+        (DEFAULTED_STATUS,      _('Defaulted')),
+        (NOT_RECOVERED_STATUS,  _('Not Recovered')),
+        (TRANSFERRED_STATUS,    _('Transferred')),
     )
     ref_id      = IntegerField(_('Case ID #'), null=True)
     first_name  = CharField(max_length=255)
@@ -118,7 +127,11 @@ class Case (Model):
         else:
             # FIXME: i18n
             return str(int(delta.days/30.4375))+"m"
-        
+
+    @classmethod
+    def filter_active (cls):
+        return cls.objects.filter(status__le=cls.CURED_STATUS)
+
 class Report (Model):
     EDEMA_OBSERVED         = 1
     APPETITE_LOSS_OBSERVED = 2
@@ -149,6 +162,17 @@ class Report (Model):
 
     def __unicode__ (self):
         return "#%d" % self.id
+    
+    def diagnosis (self):
+        if self.muac < 11.0 or self.observed:
+            if self.observed:
+                return Case.SEVERE_COMP_STATUS
+            else:
+                return Case.SEVERE_STATUS
+        elif self.muac < 12.5:
+            return Case.MODERATE_STATUS
+        else:
+            return Case.HEALTHY_STATUS
 
 class MessageLog (Model):
     user        = ForeignKey(User)

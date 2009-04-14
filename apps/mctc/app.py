@@ -221,6 +221,7 @@ class App (rapidsms.app.App):
     @keyword(r'list(?: #)?')
     @authenticated
     def list_cases (self, message):
+        # FIXME: should only return active cases here
         cases = Case.objects.filter(provider=message.sender.provider)
         text  = ""
         for case in cases:
@@ -285,9 +286,13 @@ class App (rapidsms.app.App):
                         "Unknown observation code: %s" % observation))
                 observed.append(comp_list[observation])
                 
-        report = Report(case=case, provider=message.sender.provider,
+        provider = message.sender.provider
+        report = Report(case=case, provider=provider,
                         muac=muac, weight=weight, observed=observed)
         report.save()
+
+        case.status = report.diagnosis()
+        case.save()
 
         choice_term = dict(choices)
         info = {
@@ -296,10 +301,24 @@ class App (rapidsms.app.App):
             'first'     : case.first_name[0],
             'muac'      : "%.1f cm" % muac,
             'weight'    : "%.1f kg" % weight,
-            'observed'  : ", ".join([choice_term[k] for k in observed])
+            'observed'  : ", ".join([choice_term[k] for k in observed]),
+            'diagnosis' : case.get_status_display(),
         }
-        msg = _("Report #%(ref_id)s: MUAC %(muac)s, wt. %(weight)s") % info
+        msg = _("#%(ref_id)s: %(diagnosis)s, MUAC %(muac)s, wt. %(weight)s") % info
         if observed: msg += ", " + info["observed"]
-        message.respond(msg)
+        message.respond("Report " + msg)
+
+        if case.status in (case.MODERATE_STATUS,
+                           case.SEVERE_STATUS,
+                           case.SEVERE_COMP_STATUS):
+            alert = _("*%s reports %s") % (provider.user.username,msg)
+            recipients = [provider]
+            for query in (Provider.objects.filter(alerts=True),
+                          Provider.objects.filter(clinic=provider.clinic)):
+                for recipient in query:
+                    if recipient in recipients: continue
+                    recipients.append(recipient)
+                    message.forward(receipient.mobile, alert)
+
         return True
 

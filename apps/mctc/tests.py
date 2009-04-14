@@ -123,26 +123,34 @@ class TestApp (TestScript):
     test_03_ReportCase = """
         # basic test
         7654321 > #26 7.5 21
-        7654321 < Report #26: MUAC 7.5 cm, wt. 21.0 kg 
+        7654321 < Report #26: SAM, MUAC 7.5 cm, wt. 21.0 kg 
 
         # mm get converted to cm, g to kg
         7654321 > #26 75.5 2150
-        7654321 < Report #26: MUAC 7.5 cm, wt. 2.1 kg 
+        7654321 < Report #26: SAM, MUAC 7.5 cm, wt. 2.1 kg 
 
         # TODO: check weight delta over previous report and see if it's
         # within a plausible range
 
         # complications list
         7654321 > #26 75.5 21 e a d
-        7654321 < Report #26: MUAC 7.5 cm, wt. 21.0 kg, Edema, Appetite Loss, Diarrhea
+        7654321 < Report #26: SAM+, MUAC 7.5 cm, wt. 21.0 kg, Edema, Appetite Loss, Diarrhea
 
         # more complications, formatted differently
         7654321 > #26 75.5 21 hcv
-        7654321 < Report #26: MUAC 7.5 cm, wt. 21.0 kg, High Fever, Chronic Cough, Vomiting
+        7654321 < Report #26: SAM+, MUAC 7.5 cm, wt. 21.0 kg, High Fever, Chronic Cough, Vomiting
 
         # one last complication test
         7654321 > #26 75.5 21 u
-        7654321 < Report #26: MUAC 7.5 cm, wt. 21.0 kg, Unresponsive
+        7654321 < Report #26: SAM+, MUAC 7.5 cm, wt. 21.0 kg, Unresponsive
+
+        # MAM logic test
+        7654321 > #26 12 21
+        7654321 < Report #26: MAM, MUAC 12.0 cm, wt. 21.0 kg
+
+        # Healthy logic test
+        7654321 > #26 125 21
+        7654321 < Report #26: Healthy, MUAC 12.5 cm, wt. 21.0 kg
 
         # MUAC fail
         7654321 > #26 45.5.5 83.1 foo
