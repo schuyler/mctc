@@ -1,0 +1,42 @@
+mCTC application installation instructions
+------------------------------------------
+
+Starting with a stock Debian/Ubuntu system:
+
+# Install Ubuntu prerequisites:
+
+    $ sudo apt-get install python-django rubygems libserialport-ruby git-core
+
+# Install rubygsm and spomskyd from github gems
+
+    $ sudo gem sources -a http://gems.github.com
+    $ sudo gem install --ignore-dependencies adammck-rubygsm
+    $ sudo gem install adammck-spomskyd
+
+# Download and install Schuyler's branch of RapidSMS:
+
+    $ git clone git://github.com/schuyler/rapidsms.git
+    $ cd rapidsms
+    $ sudo python setup.py install
+
+# Download the mCTC RapidSMS project:
+
+    $ cd ~
+    $ git clone git://github.com/schuyler/mctc.git
+    $ cd mctc
+    $ python manage.py syncdb
+
+# Start spomskyd in one terminal (or screen):
+
+    $ spomskyd --backend=GSM
+
+# Start the RapidSMS message router in another:
+
+    $ cd ~/mctc
+    $ python manage.py route
+
+# Start the RapidSMS Django server in a third:
+    
+    $ cd ~/mcrc
+    $ python manage.py runserver
+
