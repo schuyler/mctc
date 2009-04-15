@@ -11,6 +11,7 @@ Starting with a stock Debian/Ubuntu system:
 
     $ sudo gem sources -a http://gems.github.com
     $ sudo gem install --ignore-dependencies adammck-rubygsm
+    $ sudo gem install --ignore-dependencies adammck-rubysms
     $ sudo gem install adammck-spomskyd
 
 # Download and install Schuyler's branch of RapidSMS:
