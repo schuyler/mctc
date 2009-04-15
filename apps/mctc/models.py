@@ -7,7 +7,7 @@ def _(arg): return arg
 
 class Zone (Model):
     def __unicode__ (self): return self.name
-    number  = PositiveIntegerField(unique=True)
+    number  = PositiveIntegerField(unique=True,db_index=True)
     name    = CharField(max_length=255)
     lon     = FloatField(null=True,blank=True)
     lat     = FloatField(null=True,blank=True)
@@ -25,8 +25,8 @@ class Facility (Model):
     )
     name        = CharField(max_length=255)
     role        = IntegerField(choices=ROLE_CHOICES, default=CLINIC_ROLE)
-    zone        = ForeignKey(Zone)
-    codename    = CharField(max_length=255,unique=True)
+    zone        = ForeignKey(Zone,db_index=True)
+    codename    = CharField(max_length=255,unique=True,db_index=True)
     lon         = FloatField(null=True,blank=True)
     lat         = FloatField(null=True,blank=True)
 
@@ -41,11 +41,11 @@ class Provider (Model):
         (DOCTOR_ROLE, _('Doctor'))
     )
     user    = OneToOneField(User)
-    mobile  = CharField(max_length=16, null=True)
+    mobile  = CharField(max_length=16, null=True, db_index=True)
     role    = IntegerField(choices=ROLE_CHOICES, default=CHW_ROLE)
     active  = BooleanField(default=True)
-    alerts  = BooleanField(default=False)
-    clinic  = ForeignKey(Facility, null=True)
+    alerts  = BooleanField(default=False, db_index=True)
+    clinic  = ForeignKey(Facility, null=True, db_index=True)
     manager = ForeignKey("Provider", null=True)
 
     @classmethod
@@ -84,16 +84,17 @@ class Case (Model):
         (NOT_RECOVERED_STATUS,  _('Not Recovered')),
         (TRANSFERRED_STATUS,    _('Transferred')),
     )
-    ref_id      = IntegerField(_('Case ID #'), null=True)
-    first_name  = CharField(max_length=255)
-    last_name   = CharField(max_length=255)
+    ref_id      = IntegerField(_('Case ID #'), null=True, db_index=True)
+    first_name  = CharField(max_length=255, db_index=True)
+    last_name   = CharField(max_length=255, db_index=True)
     gender      = CharField(max_length=1, choices=GENDER_CHOICES)
     dob         = DateField(_('Date of Birth'))
     guardian    = CharField(max_length=255, null=True)
     mobile      = CharField(max_length=16, null=True)
-    status      = IntegerField(choices=STATUS_CHOICES, default=HEALTHY_STATUS)
-    provider    = ForeignKey(Provider)
-    zone        = ForeignKey(Zone, null=True)
+    status      = IntegerField(choices=STATUS_CHOICES,
+                               default=HEALTHY_STATUS, db_index=True)
+    provider    = ForeignKey(Provider, db_index=True)
+    zone        = ForeignKey(Zone, null=True, db_index=True)
     village     = CharField(max_length=255, null=True)
     district    = CharField(max_length=255, null=True)
     created_at  = DateTimeField(auto_now_add=True)
@@ -152,9 +153,9 @@ class Report (Model):
         (HIGH_FEVER_OBSERVED,    _("High Fever")),
         (UNRESPONSIVE_OBSERVED,  _("Unresponsive")),
     )
-    case        = ForeignKey(Case)
-    provider    = ForeignKey(Provider)
-    entered_at  = DateTimeField(auto_now_add=True)
+    case        = ForeignKey(Case, db_index=True)
+    provider    = ForeignKey(Provider, db_index=True)
+    entered_at  = DateTimeField(auto_now_add=True, db_index=True)
     muac        = FloatField(_("MUAC (cm)"), null=True, blank=True)
     height      = FloatField(_("Height (cm)"), null=True, blank=True)
     weight      = FloatField(_("Weight (kg)"), null=True, blank=True)
@@ -181,14 +182,14 @@ class Report (Model):
             return Case.HEALTHY_STATUS
 
 class CaseNote (Model):
-    case        = ForeignKey(Case, related_name="notes")
-    created_by  = ForeignKey(User)
-    created_at  = DateTimeField(auto_now_add=True)
+    case        = ForeignKey(Case, related_name="notes", db_index=True)
+    created_by  = ForeignKey(User, db_index=True)
+    created_at  = DateTimeField(auto_now_add=True, db_index=True)
     text        = TextField()
 
 class MessageLog (Model):
-    mobile      = CharField(max_length=255)
+    mobile      = CharField(max_length=255, db_index=True)
     sent_by     = ForeignKey(User, null=True)
     text        = CharField(max_length=255)
-    was_handled = BooleanField(default=False)
-    created_at  = DateTimeField(auto_now_add=True)
+    was_handled = BooleanField(default=False, db_index=True)
+    created_at  = DateTimeField(auto_now_add=True, db_index=True)
