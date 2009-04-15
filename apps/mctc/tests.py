@@ -1,7 +1,7 @@
 from rapidsms.tests.scripted import TestScript
 from django.core.management import call_command
 from app import App
-from models import Case, User
+from models import Case, User, MessageLog
 from datetime import datetime, date
 
 def age_in_months (*ymd):
@@ -164,6 +164,17 @@ class TestApp (TestScript):
         7654321 > #26 800 23 NOT WELL
         7654321 < Unknown observation code: n
     """
+    
+    test_04_MessageLog_1 = """
+        # this should provoke no response at all
+        7654321 > *yawn*
+    """
+
+    def test_04_MessageLog_2 (self):
+        msgs = MessageLog.objects.count()
+        self.assertEqual(33, msgs, "message log count is %d" % msgs)
+        msgs = MessageLog.objects.filter(was_handled=True).count()
+        self.assertEqual(32, msgs, "handled message count is %d" % msgs)
 
     def test_zzz_queue_is_empty (self):
         self.assertFalse(self.backend.message_waiting)

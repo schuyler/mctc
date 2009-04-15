@@ -34,6 +34,14 @@ class App (rapidsms.app.App):
             message.sender = provider.user
         else:
             message.sender = None
+        message.was_handled = False
+
+    def cleanup (self, message):
+        log = MessageLog(mobile=message.peer,
+                         user=message.sender,
+                         text=message.text,
+                         was_handled=message.was_handled)
+        log.save()
 
     def handle (self, message):
         try:
@@ -42,15 +50,17 @@ class App (rapidsms.app.App):
             # didn't find a matching function
             return False
         try:
-            return func(self, message, *captures)
+            handled = func(self, message, *captures)
         except HandlerFailed, e:
             message.respond(e.message)
+            handled = True
         except Exception, e:
             # TODO: log this exception
             # FIXME: also, put the contact number in the config
             message.respond(_("An error occurred. Please call 999-9999."))
             raise
-        return True
+        message.was_handled = bool(handled)
+        return handled
 
     @keyword("join (\S+) (\S+) (\S+)(?: ([a-z]\w+))?")
     def join (self, message, code, last_name, first_name, username=None):

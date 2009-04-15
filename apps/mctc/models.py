@@ -179,6 +179,8 @@ class Report (Model):
             return Case.HEALTHY_STATUS
 
 class MessageLog (Model):
-    user        = ForeignKey(User)
+    mobile      = CharField(max_length=255)
+    user        = ForeignKey(User, null=True)
     text        = CharField(max_length=255)
     was_handled = BooleanField(default=False)
+    created_at  = DateTimeField(auto_now_add=True)
