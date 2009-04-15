@@ -121,6 +121,10 @@ class TestApp (TestScript):
     """ 
 
     test_03_ReportCase = """
+        # authenticated
+        0000000 > #26 7.5 21
+        0000000 < 0000000 is not a registered number.
+        
         # basic test
         7654321 > #26 7.5 21
         7654321 < Report #26: SAM, MUAC 7.5 cm, wt. 21.0 kg 
@@ -172,9 +176,27 @@ class TestApp (TestScript):
 
     def test_04_MessageLog_2 (self):
         msgs = MessageLog.objects.count()
-        self.assertEqual(33, msgs, "message log count is %d" % msgs)
+        self.assertEqual(34, msgs, "message log count is %d" % msgs)
         msgs = MessageLog.objects.filter(was_handled=True).count()
-        self.assertEqual(32, msgs, "handled message count is %d" % msgs)
+        self.assertEqual(33, msgs, "handled message count is %d" % msgs)
+
+    test_04_NoteCase_1 = """
+        # authenticated
+        0000000 > #26 7.5 21
+        0000000 < 0000000 is not a registered number.
+        
+        # add a case note
+        7654321 > n #26 child seems to be recovering.
+        7654321 < Note added to case #26.
+
+        # this syntax works too
+        7654321 > note #26 will check back tomorrow
+        7654321 < Note added to case #26.
+    """
+
+    def test_04_NoteCase_2 (self):
+        notes = Case.objects.get(ref_id=26).notes.count()
+        self.assertEqual(notes, 2, "have %d notes about #26" % notes)
 
     def test_zzz_queue_is_empty (self):
         self.assertFalse(self.backend.message_waiting)

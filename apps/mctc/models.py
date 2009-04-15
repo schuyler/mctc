@@ -158,7 +158,6 @@ class Report (Model):
     observed    = SeparatedValuesField(_("Observations"),
                     choices=OBSERVED_CHOICES, max_length=255,
                     null=True, blank=True)
-    note        = TextField(blank=True,default="")
 
     def __unicode__ (self):
         return "#%d" % self.id
@@ -178,9 +177,15 @@ class Report (Model):
         else: 
             return Case.HEALTHY_STATUS
 
+class CaseNote (Model):
+    case        = ForeignKey(Case, related_name="notes")
+    created_by  = ForeignKey(User)
+    created_at  = DateTimeField(auto_now_add=True)
+    text        = TextField()
+
 class MessageLog (Model):
     mobile      = CharField(max_length=255)
-    user        = ForeignKey(User, null=True)
+    sent_by     = ForeignKey(User, null=True)
     text        = CharField(max_length=255)
     was_handled = BooleanField(default=False)
     created_at  = DateTimeField(auto_now_add=True)

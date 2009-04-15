@@ -38,7 +38,7 @@ class App (rapidsms.app.App):
 
     def cleanup (self, message):
         log = MessageLog(mobile=message.peer,
-                         user=message.sender,
+                         sent_by=message.sender,
                          text=message.text,
                          was_handled=message.was_handled)
         log.save()
@@ -330,5 +330,13 @@ class App (rapidsms.app.App):
                     recipients.append(recipient)
                     message.forward(receipient.mobile, alert)
 
+        return True
+
+    @keyword(r'n(?:ote)? #(\d+) (.+)')
+    @authenticated
+    def note_case (self, message, ref_id, note):
+        case = self.find_case(ref_id)
+        CaseNote(case=case, created_by=message.sender, text=note).save()
+        message.respond(_("Note added to case #%s.") % ref_id)
         return True
 
