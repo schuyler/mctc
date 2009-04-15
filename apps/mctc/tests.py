@@ -21,6 +21,10 @@ class TestApp (TestScript):
 
     test_00_Join = """
         # test registration
+        1234567 > join pear smith john
+        1234567 < The given password is not recognized.
+
+        # test registration
         1234567 > join apple smith john
         1234567 < 1234567 registered to *1 jsmith (SMITH, John) at Alphaville.
 
@@ -186,9 +190,9 @@ class TestApp (TestScript):
 
     def test_04_MessageLog_2 (self):
         msgs = MessageLog.objects.count()
-        self.assertEqual(35, msgs, "message log count is %d" % msgs)
+        self.assertEqual(36, msgs, "message log count is %d" % msgs)
         msgs = MessageLog.objects.filter(was_handled=True).count()
-        self.assertEqual(34, msgs, "handled message count is %d" % msgs)
+        self.assertEqual(35, msgs, "handled message count is %d" % msgs)
 
     test_04_NoteCase_1 = """
         # authenticated
