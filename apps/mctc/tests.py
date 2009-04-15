@@ -169,6 +169,11 @@ class TestApp (TestScript):
         7654321 < Unknown observation code: n
     """
 
+    def test_03_ReportOverwrite (self):
+        reports = Case.objects.get(ref_id=26).report_set.count()
+        self.assertEquals(reports, 1,
+            "only have one report; all others today were overwritten")
+
     test_03_ShowCase = """
         7654321 > show #26
         7654321 < #26 Healthy MADISON, Molly F/4 (Sally) Whiskey

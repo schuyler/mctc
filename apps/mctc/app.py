@@ -314,6 +314,14 @@ class App (rapidsms.app.App):
                         "Unknown observation code: %s" % observation))
                 observed.append(comp_list[observation])
                 
+        try:
+            last_report = case.report_set.latest()
+            if (datetime.datetime.now() - last_report.entered_at).days == 0:
+                # last report was today. so delete it before filing another.
+                last_report.delete()
+        except ObjectDoesNotExist:
+            pass
+
         provider = message.sender.provider
         report = Report(case=case, provider=provider,
                         muac=muac, weight=weight, observed=observed)

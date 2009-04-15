@@ -116,7 +116,7 @@ class Case (Model):
     def save (self, *args):
         Model.save(self, *args)
         if not self.ref_id:
-            self.ref_id = str(self._luhn(self.id))
+            self.ref_id = self._luhn(self.id)
             Model.save(self)
     
     def age (self):
@@ -133,6 +133,9 @@ class Case (Model):
         return cls.objects.filter(status__le=cls.CURED_STATUS)
 
 class Report (Model):
+    class Meta:
+        get_latest_by = 'entered_at'
+
     EDEMA_OBSERVED         = 1
     APPETITE_LOSS_OBSERVED = 2
     DIARRHEA_OBSERVED      = 3
