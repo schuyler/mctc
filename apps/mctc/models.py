@@ -89,14 +89,14 @@ class Case (Model):
     last_name   = CharField(max_length=255, db_index=True)
     gender      = CharField(max_length=1, choices=GENDER_CHOICES)
     dob         = DateField(_('Date of Birth'))
-    guardian    = CharField(max_length=255, null=True)
-    mobile      = CharField(max_length=16, null=True)
+    guardian    = CharField(max_length=255, null=True, blank=True)
+    mobile      = CharField(max_length=16, null=True, blank=True)
     status      = IntegerField(choices=STATUS_CHOICES,
                                default=HEALTHY_STATUS, db_index=True)
     provider    = ForeignKey(Provider, db_index=True)
     zone        = ForeignKey(Zone, null=True, db_index=True)
-    village     = CharField(max_length=255, null=True)
-    district    = CharField(max_length=255, null=True)
+    village     = CharField(max_length=255, null=True, blank=True)
+    district    = CharField(max_length=255, null=True, blank=True)
     created_at  = DateTimeField(auto_now_add=True)
     updated_at  = DateTimeField(auto_now=True)
 
