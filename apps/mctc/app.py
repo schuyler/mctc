@@ -227,7 +227,6 @@ class App (rapidsms.app.App):
         message.respond(_("Case #%s cancelled.") % ref_id)
         return True
 
-
     @keyword(r'list(?: #)?')
     @authenticated
     def list_cases (self, message):
@@ -260,6 +259,25 @@ class App (rapidsms.app.App):
             text += item
         if text:
             message.respond(text)
+        return True
+
+    @keyword(r's(?:how)? #?(\d+)')
+    @authenticated
+    def show_case (self, message, ref_id):
+        case = self.find_case(ref_id)
+        info = {
+            "id"            : case.ref_id,
+            "last_name"     : case.last_name.upper(),
+            "first_name"    : case.first_name,
+            "gender"        : case.gender,
+            "age"           : case.age(),
+            "status"        : case.get_status_display(),
+        }
+        if case.guardian: info["guardian"] = "(%s) " % case.guardian
+        if case.zone: info["zone"] = case.zone.name
+        message.respond(_(
+            "#%(id)s %(status)s %(last_name)s, %(first_name)s "
+            "%(gender)s/%(age)s %(guardian)s%(zone)s") % info)
         return True
 
     @keyword(r'#(\d+) ([\d\.]+) ([\d\.]+)( (?:\w\s*)+)?')

@@ -168,6 +168,11 @@ class TestApp (TestScript):
         7654321 > #26 800 23 NOT WELL
         7654321 < Unknown observation code: n
     """
+
+    test_03_ShowCase = """
+        7654321 > show #26
+        7654321 < #26 Healthy MADISON, Molly F/4 (Sally) Whiskey
+    """
     
     test_04_MessageLog_1 = """
         # this should provoke no response at all
@@ -176,9 +181,9 @@ class TestApp (TestScript):
 
     def test_04_MessageLog_2 (self):
         msgs = MessageLog.objects.count()
-        self.assertEqual(34, msgs, "message log count is %d" % msgs)
+        self.assertEqual(35, msgs, "message log count is %d" % msgs)
         msgs = MessageLog.objects.filter(was_handled=True).count()
-        self.assertEqual(33, msgs, "handled message count is %d" % msgs)
+        self.assertEqual(34, msgs, "handled message count is %d" % msgs)
 
     test_04_NoteCase_1 = """
         # authenticated
