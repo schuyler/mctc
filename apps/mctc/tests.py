@@ -41,7 +41,20 @@ class TestApp (TestScript):
         1234567 < Phone 1234567 is already registered to SMITH, Ken. Reply with 'CONFIRM smithk'.   
         1234567 > confirm smithk
         1234567 < 1234567 registered to *2 smithk (SMITH, Ken) at Bravo Town.
+    """
 
+    test_00_MessageLog_1 = """
+        # this should provoke no response at all
+        7654321 > *yawn*
+    """
+
+    def test_00_MessageLog_2 (self):
+        msgs = MessageLog.objects.count()
+        self.assertEqual(7, msgs, "message log count is %d" % msgs)
+        msgs = MessageLog.objects.filter(was_handled=True).count()
+        self.assertEqual(6, msgs, "handled message count is %d" % msgs)
+
+    test_01_DirectMessage = """
         # test authentication
         7654321 > *2 can you read this?
         7654321 < 7654321 is not a registered number.
@@ -71,7 +84,7 @@ class TestApp (TestScript):
         age_in_months(2009,2,11),
         age_in_months(2007,6,15),)
     
-    test_00_NewCase = """
+    test_01_NewCase = """
         # test basic case creation
         7654321 > new madison dolly f 080411
         7654321 < New #18: MADISON, Dolly F/%dm (None) Whiskey
@@ -91,7 +104,7 @@ class TestApp (TestScript):
         # FIXME: unparsable cases???
     """ % caseAges
 
-    def test_01_CreatedCases (self):
+    def test_02_CreatedCases (self):
         user = User.objects.get(username="jdoe")
         case = Case.objects.get(ref_id=42)
         self.assertEqual(case.mobile, "230123", "case 42 mobile")
@@ -102,7 +115,7 @@ class TestApp (TestScript):
         self.assertEqual(case.guardian, "Sally", "case 34 guardian")
         self.assertEqual(case.provider, user.provider, "case 34 provider")
 
-    test_01_ListCases = """
+    test_02_ListCases = """
         0000000 > list
         0000000 < 0000000 is not a registered number.
 
@@ -110,7 +123,7 @@ class TestApp (TestScript):
         7654321 < #18 MADISON D. F/%dm, #26 MADISON M. F/%d, #34 MADISON H. F/%dm, #42 MADISON W. M/%dm
     """ % caseAges
 
-    test_01_ListProviders = """
+    test_02_ListProviders = """
         0000000 > list *
         0000000 < 0000000 is not a registered number.
 
@@ -118,7 +131,7 @@ class TestApp (TestScript):
         7654321 < *1 ksmith, *2 smithk, *3 jdoe
     """
     
-    test_02_CancelCases = """
+    test_03_CancelCases = """
         0000000 > cancel #34
         0000000 < 0000000 is not a registered number.
         
@@ -132,55 +145,59 @@ class TestApp (TestScript):
 
     test_03_ReportCase = """
         # authenticated
-        0000000 > #26 7.5 21
+        0000000 > #26 7.5 y
         0000000 < 0000000 is not a registered number.
         
         # basic test
-        7654321 > #26 75
+        7654321 > #26 75 n
         7654321 < Report #26: SAM, MUAC 75 mm
 
-        # cm get converted to mm, g to kg
-        7654321 > #26 7.5 2150
-        7654321 < Report #26: SAM, MUAC 75 mm, 2.1 kg 
+        # cm get converted to mm, g to kg, m to cm
+        7654321 > #26 7.5 2150 1.4 n
+        7654321 < Report #26: SAM, MUAC 75 mm, 2.1 kg, 140 cm
 
         # complications list
-        7654321 > #26 75 21 e a d
+        7654321 > #26 75 21 y a d
         7654321 < Report #26: SAM+, MUAC 75 mm, 21.0 kg, Edema, Appetite Loss, Diarrhea
 
         # complications list - weight is optional
-        7654321 > #26 75 e a d
+        7654321 > #26 75 y a d
         7654321 < Report #26: SAM+, MUAC 75 mm, Edema, Appetite Loss, Diarrhea
 
         # complications list - case insensitive
-        7654321 > #26 75 21 E A D
-        7654321 < Report #26: SAM+, MUAC 75 mm, 21.0 kg, Edema, Appetite Loss, Diarrhea
+        7654321 > #26 75 21 N A D
+        7654321 < Report #26: SAM+, MUAC 75 mm, 21.0 kg, Appetite Loss, Diarrhea
 
         # more complications, formatted differently
-        7654321 > #26 75 21 hcv
-        7654321 < Report #26: SAM+, MUAC 75 mm, 21.0 kg, High Fever, Chronic Cough, Vomiting
+        7654321 > #26 75 n hcv
+        7654321 < Report #26: SAM+, MUAC 75 mm, Vomiting, Chronic Cough, High Fever
 
         # one last complication test
-        7654321 > #26 75 21 u
+        7654321 > #26 75 21 n u
         7654321 < Report #26: SAM+, MUAC 75 mm, 21.0 kg, Unresponsive
 
         # MAM logic test
-        7654321 > #26 120 21
-        7654321 < Report #26: MAM, MUAC 120 mm, 21.0 kg
+        7654321 > #26 120 n
+        7654321 < Report #26: MAM, MUAC 120 mm
 
         # Healthy logic test
-        7654321 > #26 125 21
-        7654321 < Report #26: Healthy, MUAC 125 mm, 21.0 kg
+        7654321 > #26 125 n
+        7654321 < Report #26: Healthy, MUAC 125 mm
 
         # MUAC fail
-        7654321 > #26 45.5.5 83.1 foo
+        7654321 > #26 45.5.5 83.1 y foo
         7654321 < Can't understand MUAC (mm): 45.5.5
 
         # weight fail
-        7654321 > #26 45 83.1.1 foo
+        7654321 > #26 45 83.1.1 y foo
         7654321 < Can't understand weight (kg): 83.1.1
 
+        # height fail
+        7654321 > #26 45 83.1 122.1.1 y foo
+        7654321 < Can't understand height (cm): 122.1.1
+
         # complication fail
-        7654321 > #26 800 23 NOT WELL
+        7654321 > #26 800 N NOT WELL
         7654321 < Unknown observation code: n
     """
 
@@ -194,20 +211,9 @@ class TestApp (TestScript):
         7654321 < #26 Healthy MADISON, Molly F/4 (Sally) Whiskey
     """
     
-    test_04_MessageLog_1 = """
-        # this should provoke no response at all
-        7654321 > *yawn*
-    """
-
-    def test_04_MessageLog_2 (self):
-        msgs = MessageLog.objects.count()
-        self.assertEqual(40, msgs, "message log count is %d" % msgs)
-        msgs = MessageLog.objects.filter(was_handled=True).count()
-        self.assertEqual(39, msgs, "handled message count is %d" % msgs)
-
     test_04_NoteCase_1 = """
         # authenticated
-        0000000 > #26 7.5 21
+        0000000 > n #26 how are you gentleman! all your base are belong to us
         0000000 < 0000000 is not a registered number.
         
         # add a case note

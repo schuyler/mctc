@@ -284,9 +284,10 @@ class App (rapidsms.app.App):
             "%(gender)s/%(age)s %(guardian)s%(zone)s") % info)
         return True
 
-    @keyword(r'#(\d+) ([\d\.]+)( [\d\.]+)?( (?:[a-zA-Z]\s*)+)?')
+    @keyword(r'#(\d+) ([\d\.]+)( [\d\.]+)?( [\d\.]+)?( [yn])( (?:[a-z]\s*)+)?')
     @authenticated
-    def report_case (self, message, ref_id, muac, weight, complications):
+    def report_case (self, message, ref_id, muac,
+                     weight, height, edema, complications):
         case = self.find_case(ref_id)
         try:
             muac = float(muac)
@@ -306,8 +307,20 @@ class App (rapidsms.app.App):
                 raise HandlerFailed(
                     _("Can't understand weight (kg): %s") % weight)
 
+        if height is not None:
+            try:
+                height = float(height)
+                if height < 3: # weight height in m?
+                    height *= 100
+                height = int(height)
+            except ValueError:
+                raise HandlerFailed(
+                    _("Can't understand height (cm): %s") % height)
+
         choices  = Report.OBSERVED_CHOICES 
         observed = []
+        if edema and edema[0].upper() <> 'N':
+            observed.append(Report.EDEMA_OBSERVED)
         if complications:
             comp_list = dict([ (v[0].lower(), k) for k,v in choices ])
             complications = re.sub(r'\W+', '', complications)
@@ -316,6 +329,9 @@ class App (rapidsms.app.App):
                     raise HandlerFailed(_(
                         "Unknown observation code: %s" % observation))
                 observed.append(comp_list[observation])
+
+        # make the observed list unique, and sort it
+        observed = sorted(list(set(observed)))
                 
         try:
             last_report = case.report_set.latest()
@@ -326,8 +342,8 @@ class App (rapidsms.app.App):
             pass
 
         provider = message.sender.provider
-        report = Report(case=case, provider=provider,
-                        muac=muac, weight=weight, observed=observed)
+        report = Report(case=case, provider=provider, muac=muac,
+                        weight=weight, height=height, observed=observed)
         report.save()
 
         case.status = report.diagnosis()
@@ -345,6 +361,7 @@ class App (rapidsms.app.App):
         msg = _("#%(ref_id)s: %(diagnosis)s, MUAC %(muac)s") % info
 
         if weight: msg += ", %.1f kg" % weight
+        if height: msg += ", %.1d cm" % height
         if observed: msg += ", " + info["observed"]
         message.respond("Report " + msg)
 
