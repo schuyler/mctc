@@ -289,7 +289,7 @@ class App (rapidsms.app.App):
             muac = float(muac)
         except ValueError:
             raise HandlerFailed(
-                _("Can't understand MUAC (cm): %s") % muac)
+                _("Can't understand MUAC (mm): %s") % muac)
 
         try:
             weight = float(weight)
@@ -297,10 +297,11 @@ class App (rapidsms.app.App):
             raise HandlerFailed(
                 _("Can't understand weight (kg): %s") % weight)
 
-        if muac > 30: # muac is in mm?
-            muac /= 10.0
+        if muac < 30: # muac is in cm?
+            muac *= 10
+        muac = int(muac)
 
-        if weight > 100: # muac is in g?
+        if weight > 100: # weight is in g?
             weight /= 1000.0
 
         choices  = Report.OBSERVED_CHOICES 
@@ -335,7 +336,7 @@ class App (rapidsms.app.App):
             'ref_id'    : case.ref_id,
             'last'      : case.last_name.upper(),
             'first'     : case.first_name[0],
-            'muac'      : "%.1f cm" % muac,
+            'muac'      : "%d mm" % muac,
             'weight'    : "%.1f kg" % weight,
             'observed'  : ", ".join([choice_term[k] for k in observed]),
             'diagnosis' : case.get_status_display(),

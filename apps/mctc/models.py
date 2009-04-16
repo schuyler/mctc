@@ -156,8 +156,8 @@ class Report (Model):
     case        = ForeignKey(Case, db_index=True)
     provider    = ForeignKey(Provider, db_index=True)
     entered_at  = DateTimeField(auto_now_add=True, db_index=True)
-    muac        = FloatField(_("MUAC (cm)"), null=True, blank=True)
-    height      = FloatField(_("Height (cm)"), null=True, blank=True)
+    muac        = IntegerField(_("MUAC (mm)"), null=True, blank=True)
+    height      = IntegerField(_("Height (cm)"), null=True, blank=True)
     weight      = FloatField(_("Weight (kg)"), null=True, blank=True)
     observed    = SeparatedValuesField(_("Observations"),
                     choices=OBSERVED_CHOICES, max_length=255,
@@ -169,12 +169,12 @@ class Report (Model):
     def diagnosis (self):
         complications = [c for c in self.observed if c != self.EDEMA_OBSERVED]
         edema = self.EDEMA_OBSERVED in self.observed
-        if edema or self.muac < 11.0:
+        if edema or self.muac < 110:
             if complications:
                 return Case.SEVERE_COMP_STATUS
             else:
                 return Case.SEVERE_STATUS
-        elif self.muac < 12.5:
+        elif self.muac < 125:
             return Case.MODERATE_STATUS
         elif complications:
             return Case.ILL_STATUS

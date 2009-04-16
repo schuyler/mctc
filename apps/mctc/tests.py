@@ -130,39 +130,39 @@ class TestApp (TestScript):
         0000000 < 0000000 is not a registered number.
         
         # basic test
-        7654321 > #26 7.5 21
-        7654321 < Report #26: SAM, MUAC 7.5 cm, wt. 21.0 kg 
+        7654321 > #26 75 21
+        7654321 < Report #26: SAM, MUAC 75 mm, wt. 21.0 kg 
 
-        # mm get converted to cm, g to kg
-        7654321 > #26 75.5 2150
-        7654321 < Report #26: SAM, MUAC 7.5 cm, wt. 2.1 kg 
+        # cm get converted to mm, g to kg
+        7654321 > #26 7.5 2150
+        7654321 < Report #26: SAM, MUAC 75 mm, wt. 2.1 kg 
 
         # TODO: check weight delta over previous report and see if it's
         # within a plausible range
 
         # complications list
-        7654321 > #26 75.5 21 e a d
-        7654321 < Report #26: SAM+, MUAC 7.5 cm, wt. 21.0 kg, Edema, Appetite Loss, Diarrhea
+        7654321 > #26 75 21 e a d
+        7654321 < Report #26: SAM+, MUAC 75 mm, wt. 21.0 kg, Edema, Appetite Loss, Diarrhea
 
         # more complications, formatted differently
-        7654321 > #26 75.5 21 hcv
-        7654321 < Report #26: SAM+, MUAC 7.5 cm, wt. 21.0 kg, High Fever, Chronic Cough, Vomiting
+        7654321 > #26 75 21 hcv
+        7654321 < Report #26: SAM+, MUAC 75 mm, wt. 21.0 kg, High Fever, Chronic Cough, Vomiting
 
         # one last complication test
-        7654321 > #26 75.5 21 u
-        7654321 < Report #26: SAM+, MUAC 7.5 cm, wt. 21.0 kg, Unresponsive
+        7654321 > #26 75 21 u
+        7654321 < Report #26: SAM+, MUAC 75 mm, wt. 21.0 kg, Unresponsive
 
         # MAM logic test
-        7654321 > #26 12 21
-        7654321 < Report #26: MAM, MUAC 12.0 cm, wt. 21.0 kg
+        7654321 > #26 120 21
+        7654321 < Report #26: MAM, MUAC 120 mm, wt. 21.0 kg
 
         # Healthy logic test
         7654321 > #26 125 21
-        7654321 < Report #26: Healthy, MUAC 12.5 cm, wt. 21.0 kg
+        7654321 < Report #26: Healthy, MUAC 125 mm, wt. 21.0 kg
 
         # MUAC fail
         7654321 > #26 45.5.5 83.1 foo
-        7654321 < Can't understand MUAC (cm): 45.5.5
+        7654321 < Can't understand MUAC (mm): 45.5.5
 
         # weight fail
         7654321 > #26 45 83.1.1 foo
