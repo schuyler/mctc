@@ -21,26 +21,26 @@ class TestApp (TestScript):
 
     test_00_Join = """
         # test registration
-        1234567 > join pear smith john
+        1234567 > join pear smith ken
         1234567 < The given password is not recognized.
 
         # test registration
-        1234567 > join apple smith john
-        1234567 < 1234567 registered to *1 jsmith (SMITH, John) at Alphaville.
+        1234567 > join apple smith ken
+        1234567 < 1234567 registered to *1 ksmith (SMITH, Ken) at Alphaville.
 
         # test re-registration
-        1234567 > join apple smith john
-        1234567 < Username 'jsmith' is already in use. Reply with: JOIN <last> <first> <username>
+        1234567 > join apple smith ken
+        1234567 < Username 'ksmith' is already in use. Reply with: JOIN <last> <first> <username>
 
         # username lookup is case insensitive
-        1234567 > join apple smith john JSMITH
-        1234567 < Username 'jsmith' is already in use. Reply with: JOIN <last> <first> <username>
+        1234567 > join apple smith ken KSMITH
+        1234567 < Username 'ksmith' is already in use. Reply with: JOIN <last> <first> <username>
  
         # test takeover/confirm
-        1234567 > join banana smith john smithj
-        1234567 < Phone 1234567 is already registered to SMITH, John. Reply with 'CONFIRM smithj'.   
-        1234567 > confirm smithj
-        1234567 < 1234567 registered to *2 smithj (SMITH, John) at Bravo Town.
+        1234567 > join banana smith ken smithk
+        1234567 < Phone 1234567 is already registered to SMITH, Ken. Reply with 'CONFIRM smithk'.   
+        1234567 > confirm smithk
+        1234567 < 1234567 registered to *2 smithk (SMITH, Ken) at Bravo Town.
 
         # test authentication
         7654321 > *2 can you read this?
@@ -52,8 +52,8 @@ class TestApp (TestScript):
         7654321 > *2 can you read this? 
         1234567 < *jdoe> can you read this?
         1234567 > *jdoe yes, I can read that
-        7654321 < *smithj> yes, I can read that
-        7654321 > *SMITHJ GOOD THANKS
+        7654321 < *smithk> yes, I can read that
+        7654321 > *SMITHK GOOD THANKS
         1234567 < *jdoe> GOOD THANKS
 
         # test direct messaging to a non-existent user
@@ -115,7 +115,7 @@ class TestApp (TestScript):
         0000000 < 0000000 is not a registered number.
 
         7654321 > list *
-        7654321 < *1 jsmith, *2 smithj, *3 jdoe
+        7654321 < *1 ksmith, *2 smithk, *3 jdoe
     """
     
     test_02_CancelCases = """
@@ -136,35 +136,40 @@ class TestApp (TestScript):
         0000000 < 0000000 is not a registered number.
         
         # basic test
-        7654321 > #26 75 21
-        7654321 < Report #26: SAM, MUAC 75 mm, wt. 21.0 kg 
+        7654321 > #26 75
+        7654321 < Report #26: SAM, MUAC 75 mm
 
         # cm get converted to mm, g to kg
         7654321 > #26 7.5 2150
-        7654321 < Report #26: SAM, MUAC 75 mm, wt. 2.1 kg 
-
-        # TODO: check weight delta over previous report and see if it's
-        # within a plausible range
+        7654321 < Report #26: SAM, MUAC 75 mm, 2.1 kg 
 
         # complications list
         7654321 > #26 75 21 e a d
-        7654321 < Report #26: SAM+, MUAC 75 mm, wt. 21.0 kg, Edema, Appetite Loss, Diarrhea
+        7654321 < Report #26: SAM+, MUAC 75 mm, 21.0 kg, Edema, Appetite Loss, Diarrhea
+
+        # complications list - weight is optional
+        7654321 > #26 75 e a d
+        7654321 < Report #26: SAM+, MUAC 75 mm, Edema, Appetite Loss, Diarrhea
+
+        # complications list - case insensitive
+        7654321 > #26 75 21 E A D
+        7654321 < Report #26: SAM+, MUAC 75 mm, 21.0 kg, Edema, Appetite Loss, Diarrhea
 
         # more complications, formatted differently
         7654321 > #26 75 21 hcv
-        7654321 < Report #26: SAM+, MUAC 75 mm, wt. 21.0 kg, High Fever, Chronic Cough, Vomiting
+        7654321 < Report #26: SAM+, MUAC 75 mm, 21.0 kg, High Fever, Chronic Cough, Vomiting
 
         # one last complication test
         7654321 > #26 75 21 u
-        7654321 < Report #26: SAM+, MUAC 75 mm, wt. 21.0 kg, Unresponsive
+        7654321 < Report #26: SAM+, MUAC 75 mm, 21.0 kg, Unresponsive
 
         # MAM logic test
         7654321 > #26 120 21
-        7654321 < Report #26: MAM, MUAC 120 mm, wt. 21.0 kg
+        7654321 < Report #26: MAM, MUAC 120 mm, 21.0 kg
 
         # Healthy logic test
         7654321 > #26 125 21
-        7654321 < Report #26: Healthy, MUAC 125 mm, wt. 21.0 kg
+        7654321 < Report #26: Healthy, MUAC 125 mm, 21.0 kg
 
         # MUAC fail
         7654321 > #26 45.5.5 83.1 foo
@@ -196,9 +201,9 @@ class TestApp (TestScript):
 
     def test_04_MessageLog_2 (self):
         msgs = MessageLog.objects.count()
-        self.assertEqual(38, msgs, "message log count is %d" % msgs)
+        self.assertEqual(40, msgs, "message log count is %d" % msgs)
         msgs = MessageLog.objects.filter(was_handled=True).count()
-        self.assertEqual(37, msgs, "handled message count is %d" % msgs)
+        self.assertEqual(39, msgs, "handled message count is %d" % msgs)
 
     test_04_NoteCase_1 = """
         # authenticated

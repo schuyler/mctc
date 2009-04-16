@@ -284,29 +284,27 @@ class App (rapidsms.app.App):
             "%(gender)s/%(age)s %(guardian)s%(zone)s") % info)
         return True
 
-    @keyword(r'#(\d+) ([\d\.]+) ([\d\.]+)( (?:\w\s*)+)?')
+    @keyword(r'#(\d+) ([\d\.]+)( [\d\.]+)?( (?:[a-zA-Z]\s*)+)?')
     @authenticated
     def report_case (self, message, ref_id, muac, weight, complications):
         case = self.find_case(ref_id)
-
         try:
             muac = float(muac)
+            if muac < 30: # muac is in cm?
+                muac *= 10
+            muac = int(muac)
         except ValueError:
             raise HandlerFailed(
                 _("Can't understand MUAC (mm): %s") % muac)
 
-        try:
-            weight = float(weight)
-        except ValueError:
-            raise HandlerFailed(
-                _("Can't understand weight (kg): %s") % weight)
-
-        if muac < 30: # muac is in cm?
-            muac *= 10
-        muac = int(muac)
-
-        if weight > 100: # weight is in g?
-            weight /= 1000.0
+        if weight is not None:
+            try:
+                weight = float(weight)
+                if weight > 100: # weight is in g?
+                    weight /= 1000.0
+            except ValueError:
+                raise HandlerFailed(
+                    _("Can't understand weight (kg): %s") % weight)
 
         choices  = Report.OBSERVED_CHOICES 
         observed = []
@@ -341,11 +339,12 @@ class App (rapidsms.app.App):
             'last'      : case.last_name.upper(),
             'first'     : case.first_name[0],
             'muac'      : "%d mm" % muac,
-            'weight'    : "%.1f kg" % weight,
             'observed'  : ", ".join([choice_term[k] for k in observed]),
             'diagnosis' : case.get_status_display(),
         }
-        msg = _("#%(ref_id)s: %(diagnosis)s, MUAC %(muac)s, wt. %(weight)s") % info
+        msg = _("#%(ref_id)s: %(diagnosis)s, MUAC %(muac)s") % info
+
+        if weight: msg += ", %.1f kg" % weight
         if observed: msg += ", " + info["observed"]
         message.respond("Report " + msg)
 
