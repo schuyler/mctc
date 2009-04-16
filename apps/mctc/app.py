@@ -72,7 +72,10 @@ class App (rapidsms.app.App):
         if username is None:
             # FIXME: this is going to run into charset issues
             username = (first_name[0] + last_name).lower()
-        if User.objects.filter(username=username).count():
+        else:
+            # lower case usernames ... also see FIXME above?
+            username = username.lower()
+        if User.objects.filter(username__iexact=username).count():
             raise HandlerFailed(_(
                 "Username '%s' is already in use. " +
                 "Reply with: JOIN <last> <first> <username>") % username)
@@ -104,7 +107,7 @@ class App (rapidsms.app.App):
                 "%(first_name)s. Reply with 'CONFIRM %(username)s'.") % info)
         else:
             info.update({
-                "id"        : user.id,
+                "id"        : provider.id,
                 "mobile"    : mobile,
                 "clinic"    : provider.clinic.name, 
                 "last_name" : last_name.upper()
@@ -121,7 +124,7 @@ class App (rapidsms.app.App):
     def confirm_join (self, message, username):
         mobile   = message.peer
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(username__iexact=username)
         except ObjectDoesNotExist:
             self.respond_not_registered(username)
         for provider in Provider.objects.filter(mobile=mobile):
@@ -149,9 +152,10 @@ class App (rapidsms.app.App):
     def direct_message (self, message, target, text):
         try:
             if re.match(r'^\d+$', target):
-                user = User.objects.get(id=target)
+                provider = Provider.objects.get(id=target)
+                user = provider.user
             else:
-                user = User.objects.get(username=target)
+                user = User.objects.get(username__iexact=target)
         except ObjectDoesNotExist:
             # FIXME: try looking up a group
             self.respond_not_registered(message, target)

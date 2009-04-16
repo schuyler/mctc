@@ -31,7 +31,11 @@ class TestApp (TestScript):
         # test re-registration
         1234567 > join apple smith john
         1234567 < Username 'jsmith' is already in use. Reply with: JOIN <last> <first> <username>
-    
+
+        # username lookup is case insensitive
+        1234567 > join apple smith john JSMITH
+        1234567 < Username 'jsmith' is already in use. Reply with: JOIN <last> <first> <username>
+ 
         # test takeover/confirm
         1234567 > join banana smith john smithj
         1234567 < Phone 1234567 is already registered to SMITH, John. Reply with 'CONFIRM smithj'.   
@@ -49,6 +53,8 @@ class TestApp (TestScript):
         1234567 < *jdoe> can you read this?
         1234567 > *jdoe yes, I can read that
         7654321 < *smithj> yes, I can read that
+        7654321 > *SMITHJ GOOD THANKS
+        1234567 < *jdoe> GOOD THANKS
 
         # test direct messaging to a non-existent user
         7654321 > *14 are you there?
@@ -190,9 +196,9 @@ class TestApp (TestScript):
 
     def test_04_MessageLog_2 (self):
         msgs = MessageLog.objects.count()
-        self.assertEqual(36, msgs, "message log count is %d" % msgs)
+        self.assertEqual(38, msgs, "message log count is %d" % msgs)
         msgs = MessageLog.objects.filter(was_handled=True).count()
-        self.assertEqual(35, msgs, "handled message count is %d" % msgs)
+        self.assertEqual(37, msgs, "handled message count is %d" % msgs)
 
     test_04_NoteCase_1 = """
         # authenticated
