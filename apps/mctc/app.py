@@ -136,7 +136,7 @@ class App (rapidsms.app.App):
         info = {
             "first_name"    : user.first_name,
             "last_name"     : user.last_name.upper(),
-            "id"            : user.id,
+            "id"            : provider.id,
             "mobile"        : mobile,
             "clinic"        : provider.clinic.name,
             "username"      : username
@@ -255,7 +255,7 @@ class App (rapidsms.app.App):
         providers = Provider.objects.all()
         text  = ""
         for provider in providers:
-            item = "*%s %s" % (provider.user.id, provider.user.username)
+            item = "*%s %s" % (provider.id, provider.user.username)
             if len(text) + len(item) + 2 >= self.MAX_MSG_LEN:
                 message.respond(text)
                 text = ""
