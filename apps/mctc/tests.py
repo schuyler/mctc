@@ -145,7 +145,7 @@ class TestApp (TestScript):
 
     test_03_ReportCase = """
         # authenticated
-        0000000 > #26 7.5 y
+        0000000 > #26 7.5 e
         0000000 < 0000000 is not a registered number.
         
         # basic test
@@ -157,11 +157,11 @@ class TestApp (TestScript):
         7654321 < Report #26: SAM, MUAC 75 mm, 2.1 kg, 140 cm
 
         # complications list
-        7654321 > #26 75 21 y a d
+        7654321 > #26 75 21 e a d
         7654321 < Report #26: SAM+, MUAC 75 mm, 21.0 kg, Edema, Appetite Loss, Diarrhea
 
         # complications list - weight is optional
-        7654321 > #26 75 y a d
+        7654321 > #26 75 e a d
         7654321 < Report #26: SAM+, MUAC 75 mm, Edema, Appetite Loss, Diarrhea
 
         # complications list - case insensitive
@@ -185,20 +185,20 @@ class TestApp (TestScript):
         7654321 < Report #26: Healthy, MUAC 125 mm
 
         # MUAC fail
-        7654321 > #26 45.5.5 83.1 y foo
+        7654321 > #26 45.5.5 83.1 e foo
         7654321 < Can't understand MUAC (mm): 45.5.5
 
         # weight fail
-        7654321 > #26 45 83.1.1 y foo
+        7654321 > #26 45 83.1.1 e foo
         7654321 < Can't understand weight (kg): 83.1.1
 
         # height fail
-        7654321 > #26 45 83.1 122.1.1 y foo
+        7654321 > #26 45 83.1 122.1.1 e foo
         7654321 < Can't understand height (cm): 122.1.1
 
         # complication fail
-        7654321 > #26 800 N NOT WELL
-        7654321 < Unknown observation code: n
+        7654321 > #26 800 N MUST RECEIVE HELP
+        7654321 < Unknown observation code: m
     """
 
     def test_03_ReportOverwrite (self):

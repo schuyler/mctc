@@ -284,10 +284,10 @@ class App (rapidsms.app.App):
             "%(gender)s/%(age)s %(guardian)s%(zone)s") % info)
         return True
 
-    @keyword(r'#(\d+) ([\d\.]+)( [\d\.]+)?( [\d\.]+)?( [yn])( (?:[a-z]\s*)+)?')
+    @keyword(r'#(\d+) ([\d\.]+)( [\d\.]+)?( [\d\.]+)?( (?:[a-z]\s*)+)')
     @authenticated
     def report_case (self, message, ref_id, muac,
-                     weight, height, edema, complications):
+                     weight, height, complications):
         case = self.find_case(ref_id)
         try:
             muac = float(muac)
@@ -319,12 +319,12 @@ class App (rapidsms.app.App):
 
         choices  = Report.OBSERVED_CHOICES 
         observed = []
-        if edema and edema[0].upper() <> 'N':
-            observed.append(Report.EDEMA_OBSERVED)
         if complications:
             comp_list = dict([ (v[0].lower(), k) for k,v in choices ])
             complications = re.sub(r'\W+', '', complications)
             for observation in complications.lower():
+                if observation == "n": # no edema
+                    continue
                 if observation not in comp_list:
                     raise HandlerFailed(_(
                         "Unknown observation code: %s" % observation))
