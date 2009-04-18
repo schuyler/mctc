@@ -104,7 +104,7 @@ class TestApp (TestScript):
         # FIXME: unparsable cases???
     """ % caseAges
 
-    def test_02_CreatedCases (self):
+    def test_02_CreatedCases(self):        
         user = User.objects.get(username="jdoe")
         case = Case.objects.get(ref_id=42)
         self.assertEqual(case.mobile, "230123", "case 42 mobile")
@@ -231,4 +231,20 @@ class TestApp (TestScript):
 
     def test_zzz_queue_is_empty (self):
         self.assertFalse(self.backend.message_waiting)
+
+    test_05_Fever = """
+        # requested change to make f be fever, not h
+        7654321 > #26 105 d v f
+        7654321 < Report #26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, High Fever
+    """
+    
+    test_06_Lists = """
+        # test of mulitiple recipients and report of a case
+        7654322 > join cherry bob smith
+        7654322 < 7654322 registered to *4 sbob (BOB, Smith) at Charliesburg.
+        
+        7654321 > #26 105 d v f
+        7654321 < Report #26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, High Fever
+        7654322 < *jdoe reports #26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, High Fever
+    """
 

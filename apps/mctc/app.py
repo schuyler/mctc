@@ -1,11 +1,12 @@
+from django.db import models
+from django.utils.translation import ugettext
+from django.utils.translation import ugettext_lazy as _
+
 import rapidsms
-
 from rapidsms.parsers.keyworder import Keyworder
-from models import *
 
+from models import Provider, User, Report, MessageLog, Facility, Case, CaseNote
 import re, time, datetime
-
-def _(arg): return arg
 
 def authenticated (func):
     def wrapper (self, message, *args):
@@ -66,7 +67,7 @@ class App (rapidsms.app.App):
     def join (self, message, code, last_name, first_name, username=None):
         try:
             clinic = Facility.objects.get(codename__iexact=code)
-        except ObjectDoesNotExist:
+        except Facility.DoesNotExist:
             raise HandlerFailed(_("The given password is not recognized."))
 
         if username is None:
@@ -125,7 +126,7 @@ class App (rapidsms.app.App):
         mobile   = message.peer
         try:
             user = User.objects.get(username__iexact=username)
-        except ObjectDoesNotExist:
+        except User.DoesNotExist:
             self.respond_not_registered(username)
         for provider in Provider.objects.filter(mobile=mobile):
             if provider.user.id == user.id:
@@ -156,7 +157,7 @@ class App (rapidsms.app.App):
                 user = provider.user
             else:
                 user = User.objects.get(username__iexact=target)
-        except ObjectDoesNotExist:
+        except models.ObjectDoesNotExist:
             # FIXME: try looking up a group
             self.respond_not_registered(message, target)
         try:
@@ -217,7 +218,7 @@ class App (rapidsms.app.App):
     def find_case (self, ref_id):
         try:
             return Case.objects.get(ref_id=int(ref_id))
-        except ObjectDoesNotExist:
+        except Case.DoesNotExist:
             raise HandlerFailed(_("Case #%s not found.") % ref_id)
  
     @keyword(r'cancel #?(\d+)')
@@ -323,6 +324,10 @@ class App (rapidsms.app.App):
             comp_list = dict([ (v[0].lower(), k) for k,v in choices ])
             complications = re.sub(r'\W+', '', complications)
             for observation in complications.lower():
+                # request for f to point to High Fever (h)
+                if observation == "f":
+                    observed.append(comp_list["h"])
+                    continue
                 if observation == "n": # no edema
                     continue
                 if observation not in comp_list:
@@ -338,7 +343,7 @@ class App (rapidsms.app.App):
             if (datetime.datetime.now() - last_report.entered_at).days == 0:
                 # last report was today. so delete it before filing another.
                 last_report.delete()
-        except ObjectDoesNotExist:
+        except models.ObjectDoesNotExist:
             pass
 
         provider = message.sender.provider
@@ -355,14 +360,14 @@ class App (rapidsms.app.App):
             'last'      : case.last_name.upper(),
             'first'     : case.first_name[0],
             'muac'      : "%d mm" % muac,
-            'observed'  : ", ".join([choice_term[k] for k in observed]),
+            'observed'  : ", ".join([ugettext(choice_term[k]) for k in observed]),
             'diagnosis' : case.get_status_display(),
         }
         msg = _("#%(ref_id)s: %(diagnosis)s, MUAC %(muac)s") % info
 
         if weight: msg += ", %.1f kg" % weight
         if height: msg += ", %.1d cm" % height
-        if observed: msg += ", " + info["observed"]
+        if observed: msg += ", " + ugettext(info["observed"])
         message.respond("Report " + msg)
 
         if case.status in (case.MODERATE_STATUS,
@@ -375,7 +380,7 @@ class App (rapidsms.app.App):
                 for recipient in query:
                     if recipient in recipients: continue
                     recipients.append(recipient)
-                    message.forward(receipient.mobile, alert)
+                    message.forward(recipient.mobile, alert)
 
         return True
 

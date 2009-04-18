@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<h1>Login required</h1>
+<form method="POST">
+    <fieldset>
+        {{ form.as_p }}
+        <p><input type="submit" value="login" /></p>
+    </fieldset>
+</form>
+
+{% endblock %}

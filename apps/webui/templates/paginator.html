@@ -1,0 +1,17 @@
+{% if paginated_object_list.page.has_previous %}
+    <a class="next" href="{{ paginate_url }}?p={{ paginated_object_list.page.previous_page_number }}">Previous</a>
+{% endif %}
+
+{% for page in paginated_object_list.jump.pages_bit %}
+    {% if paginated_object_list.jump.start_ellipsis and forloop.first %}...{% endif %}
+    {% ifequal page paginated_object_list.page.number %}
+        {{ page }}
+    {% else %}
+        <a href="{{ paginate_url }}?p={{ page }}" class="page">{{ page }}</a>
+    {% endifequal %}
+    {% if paginated_object_list.jump.end_ellipsis and forloop.last %}...{% endif %}
+{% endfor %}
+
+{% if paginated_object_list.page.has_next %}
+    <a class="next" href="{{ paginate_url }}?p={{ paginated_object_list.page.next_page_number }}">Next</a>
+{% endif %}

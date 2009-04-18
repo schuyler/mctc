@@ -1,0 +1,22 @@
+<table>
+    <thead>
+        <th>Message</th>
+        <th>Number</th>
+        <th>Who</th>
+        <th>When</th>
+        <th>Handled</th>
+    </thead>
+    <tbody>
+        {% for message in paginated_object_list.page.object_list %}
+        <tr>
+            <td>{{ message.mobile }}</td>
+            <td>{{ message.text }}</td>
+            <td>{{ message.sent_by }}</td>
+            <td><abbr title="On {{ message.created_at|date:"D M Y" }}">{{ message.created_at|date:"P" }}</abbe></td>
+            <td>{% if message.was_handled %}{% else %}Not handled yet{% endif %}<td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p>Last updated at {% now "h:m:s a" %}</p>
+{% include "paginator.html" %}

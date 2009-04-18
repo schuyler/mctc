@@ -1,18 +1,20 @@
-from django.db.models import *
+from django.db import models
 from django.contrib.auth.models import User
+from django.utils.translation import ugettext_lazy as _
+
 from fields import SeparatedValuesField
+
+from datetime import datetime
 import md5
 
-def _(arg): return arg
-
-class Zone (Model):
+class Zone(models.Model):
     def __unicode__ (self): return self.name
-    number  = PositiveIntegerField(unique=True,db_index=True)
-    name    = CharField(max_length=255)
-    lon     = FloatField(null=True,blank=True)
-    lat     = FloatField(null=True,blank=True)
+    number  = models.PositiveIntegerField(unique=True,db_index=True)
+    name    = models.CharField(max_length=255)
+    lon     = models.FloatField(null=True,blank=True)
+    lat     = models.FloatField(null=True,blank=True)
 
-class Facility (Model):
+class Facility(models.Model):
     def __unicode__ (self): return self.name
     class Meta:
         verbose_name_plural = "Facilities"
@@ -23,14 +25,14 @@ class Facility (Model):
         (CLINIC_ROLE,  _('Clinic')),
         (DISTRIB_ROLE, _('Distribution Point')),
     )
-    name        = CharField(max_length=255)
-    role        = IntegerField(choices=ROLE_CHOICES, default=CLINIC_ROLE)
-    zone        = ForeignKey(Zone,db_index=True)
-    codename    = CharField(max_length=255,unique=True,db_index=True)
-    lon         = FloatField(null=True,blank=True)
-    lat         = FloatField(null=True,blank=True)
+    name        = models.CharField(max_length=255)
+    role        = models.IntegerField(choices=ROLE_CHOICES, default=CLINIC_ROLE)
+    zone        = models.ForeignKey(Zone,db_index=True)
+    codename    = models.CharField(max_length=255,unique=True,db_index=True)
+    lon         = models.FloatField(null=True,blank=True)
+    lat         = models.FloatField(null=True,blank=True)
 
-class Provider (Model):
+class Provider(models.Model):
     def __unicode__ (self): return self.mobile
     CHW_ROLE    = 1
     NURSE_ROLE  = 2
@@ -40,22 +42,22 @@ class Provider (Model):
         (NURSE_ROLE,  _('Nurse')),
         (DOCTOR_ROLE, _('Doctor'))
     )
-    user    = OneToOneField(User)
-    mobile  = CharField(max_length=16, null=True, db_index=True)
-    role    = IntegerField(choices=ROLE_CHOICES, default=CHW_ROLE)
-    active  = BooleanField(default=True)
-    alerts  = BooleanField(default=False, db_index=True)
-    clinic  = ForeignKey(Facility, null=True, db_index=True)
-    manager = ForeignKey("Provider", null=True)
+    user    = models.OneToOneField(User)
+    mobile  = models.CharField(max_length=16, null=True, db_index=True)
+    role    = models.IntegerField(choices=ROLE_CHOICES, default=CHW_ROLE)
+    active  = models.BooleanField(default=True)
+    alerts  = models.BooleanField(default=False, db_index=True)
+    clinic  = models.ForeignKey(Facility, null=True, db_index=True)
+    manager = models.ForeignKey("Provider", null=True)
 
     @classmethod
     def by_mobile (cls, mobile):
         try:
             return cls.objects.get(mobile=mobile, active=True)
-        except ObjectDoesNotExist:
+        except models.ObjectDoesNotExist:
             return None
 
-class Case (Model):
+class Case(models.Model):
     GENDER_CHOICES = (
         ('M', _('Male')), 
         ('F', _('Female')), 
@@ -84,21 +86,21 @@ class Case (Model):
         (NOT_RECOVERED_STATUS,  _('Not Recovered')),
         (TRANSFERRED_STATUS,    _('Transferred')),
     )
-    ref_id      = IntegerField(_('Case ID #'), null=True, db_index=True)
-    first_name  = CharField(max_length=255, db_index=True)
-    last_name   = CharField(max_length=255, db_index=True)
-    gender      = CharField(max_length=1, choices=GENDER_CHOICES)
-    dob         = DateField(_('Date of Birth'))
-    guardian    = CharField(max_length=255, null=True, blank=True)
-    mobile      = CharField(max_length=16, null=True, blank=True)
-    status      = IntegerField(choices=STATUS_CHOICES,
+    ref_id      = models.IntegerField(_('Case ID #'), null=True, db_index=True)
+    first_name  = models.CharField(max_length=255, db_index=True)
+    last_name   = models.CharField(max_length=255, db_index=True)
+    gender      = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    dob         = models.DateField(_('Date of Birth'))
+    guardian    = models.CharField(max_length=255, null=True, blank=True)
+    mobile      = models.CharField(max_length=16, null=True, blank=True)
+    status      = models.IntegerField(choices=STATUS_CHOICES,
                                default=HEALTHY_STATUS, db_index=True)
-    provider    = ForeignKey(Provider, db_index=True)
-    zone        = ForeignKey(Zone, null=True, db_index=True)
-    village     = CharField(max_length=255, null=True, blank=True)
-    district    = CharField(max_length=255, null=True, blank=True)
-    created_at  = DateTimeField(auto_now_add=True)
-    updated_at  = DateTimeField(auto_now=True)
+    provider    = models.ForeignKey(Provider, db_index=True)
+    zone        = models.ForeignKey(Zone, null=True, db_index=True)
+    village     = models.CharField(max_length=255, null=True, blank=True)
+    district    = models.CharField(max_length=255, null=True, blank=True)
+    created_at  = models.DateTimeField()
+    updated_at  = models.DateTimeField()
 
     def __unicode__ (self):
         return "#%d" % self.ref_id
@@ -115,13 +117,17 @@ class Case (Model):
         return x * 10 + 10 - sum % 10
 
     def save (self, *args):
-        Model.save(self, *args)
+        if not self.id:
+            self.created_at = self.updated_at = datetime.now()
+        else:
+            self.updated_at = datetime.now()
+        super(Case, self).save(*args)
         if not self.ref_id:
             self.ref_id = self._luhn(self.id)
-            Model.save(self)
+            super(Case, self).save(*args)
     
     def age (self):
-        delta = datetime.datetime.now().date() - self.dob
+        delta = datetime.now().date() - self.dob
         years = delta.days / 365.25
         if years > 3:
             return str(int(years))
@@ -133,7 +139,7 @@ class Case (Model):
     def filter_active (cls):
         return cls.objects.filter(status__le=cls.CURED_STATUS)
 
-class Report (Model):
+class Report(models.Model):
     class Meta:
         get_latest_by = 'entered_at'
 
@@ -153,12 +159,12 @@ class Report (Model):
         (HIGH_FEVER_OBSERVED,    _("High Fever")),
         (UNRESPONSIVE_OBSERVED,  _("Unresponsive")),
     )
-    case        = ForeignKey(Case, db_index=True)
-    provider    = ForeignKey(Provider, db_index=True)
-    entered_at  = DateTimeField(auto_now_add=True, db_index=True)
-    muac        = IntegerField(_("MUAC (mm)"), null=True, blank=True)
-    height      = IntegerField(_("Height (cm)"), null=True, blank=True)
-    weight      = FloatField(_("Weight (kg)"), null=True, blank=True)
+    case        = models.ForeignKey(Case, db_index=True)
+    provider    = models.ForeignKey(Provider, db_index=True)
+    entered_at  = models.DateTimeField(db_index=True)
+    muac        = models.IntegerField(_("MUAC (mm)"), null=True, blank=True)
+    height      = models.IntegerField(_("Height (cm)"), null=True, blank=True)
+    weight      = models.FloatField(_("Weight (kg)"), null=True, blank=True)
     observed    = SeparatedValuesField(_("Observations"),
                     choices=OBSERVED_CHOICES, max_length=255,
                     null=True, blank=True)
@@ -181,15 +187,31 @@ class Report (Model):
         else: 
             return Case.HEALTHY_STATUS
 
-class CaseNote (Model):
-    case        = ForeignKey(Case, related_name="notes", db_index=True)
-    created_by  = ForeignKey(User, db_index=True)
-    created_at  = DateTimeField(auto_now_add=True, db_index=True)
-    text        = TextField()
+    def save(self, *args):
+        if not self.id:
+            self.entered_at = datetime.now()
+        super(Report, self).save(*args)
 
-class MessageLog (Model):
-    mobile      = CharField(max_length=255, db_index=True)
-    sent_by     = ForeignKey(User, null=True)
-    text        = CharField(max_length=255)
-    was_handled = BooleanField(default=False, db_index=True)
-    created_at  = DateTimeField(auto_now_add=True, db_index=True)
+
+class CaseNote(models.Model):
+    case        = models.ForeignKey(Case, related_name="notes", db_index=True)
+    created_by  = models.ForeignKey(User, db_index=True)
+    created_at  = models.DateTimeField(auto_now_add=True, db_index=True)
+    text        = models.TextField()
+
+    def save(self, *args):
+        if not self.id:
+            self.created_at = datetime.now()
+        super(CaseNote, self).save(*args)
+
+class MessageLog(models.Model):
+    mobile      = models.CharField(max_length=255, db_index=True)
+    sent_by     = models.ForeignKey(User, null=True)
+    text        = models.CharField(max_length=255)
+    was_handled = models.BooleanField(default=False, db_index=True)
+    created_at  = models.DateTimeField(db_index=True)
+
+    def save(self, *args):
+        if not self.id:
+            self.created_at = datetime.now()
+        super(MessageLog, self).save(*args)

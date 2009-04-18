@@ -3,4 +3,27 @@
 {% block content %}
 
 Welcome to RapidSMS!
+
+<h1>Message log</h1>
+<div id="placeholder" style="width:300px;height:500px; float:right"></div>
+<div id="message-log">
+    <p>Please wait, connecting to server for data...</p>
+</div>
+
+
+
+{% block javascripts-bottom %}
+    <script type="text/javascript">
+        function reload() {
+            $('#message-log').load('/ajax/message-log/');  
+            setTimeout(reload, 10000);
+        }                             
+        $(document).ready(reload);
+        $(document).ready(function () {
+            var d1 = {{ counts }};
+            $.plot($("#placeholder"), [ d1, ]);
+        });
+    </script>    
+{% endblock %}
+
 {% endblock %}

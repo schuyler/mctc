@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<h1>Message log</h1>
+<p>Export as: <a href="/message-log/?f=csv">CSV</a>, <a href="/message-log/?f=pdf">PDF</a></p>
+{% include "messagelog-include.html" %} 
+
+{% endblock %}
