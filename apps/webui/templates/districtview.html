@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block title %}District{% endblock %}
+
+{% block breadcrumbs %}
+<div id="breadcrumbs">
+    <a href="/">MCTC</a>   
+    &raquo; District
+</div>
+{% endblock %}
+
+{% block content %}
+
+<ul>
+    {% for district in districts %}
+    <li><a href="/district/?d={{ district.id }}">{{ district.name }}</a></li>
+    {% endfor %}
+</ul>
+
+{% if case_object_list %}
+    {% include "includes/activecases.html" %}
+{% else %}
+    <p class="notice">Select a district</p>
+{% endif %}
+
+{% endblock %}

@@ -1,9 +1,12 @@
 from django.db import models
 from django.utils.translation import ugettext
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import User, Group
 
 import rapidsms
 from rapidsms.parsers.keyworder import Keyworder
+from rapidsms.message import Message
+from rapidsms.connection import Connection
 
 from models import Provider, User, Report, MessageLog, Facility, Case, CaseNote
 import re, time, datetime
@@ -392,3 +395,32 @@ class App (rapidsms.app.App):
         message.respond(_("Note added to case #%s.") % ref_id)
         return True
 
+def message_users(mobile, message=None, groups=None, users=None):
+    """ Matt wants to send a message from the web front end to the users """
+    recipients = []
+    # get all the users
+    user_objects = [ User.objects.get(id=user) for user in users ]
+    for user in user_objects:
+        try:
+            if user.provider not in recipients:
+                recipients.append(user.provider)
+        except models.ObjectDoesNotExist:
+            pass
+
+    # get all the users for the groups
+    group_objects = [ Group.objects.get(id=group) for group in groups ]
+    for group in group_objects:
+        for user in group.user_set.all():
+            try:
+                if user.provider not in recipients:
+                    recipients.append(user.provider)
+            except models.ObjectDoesNotExist:
+                pass
+    
+    # not sure what's going on tbh, I think this needs reviewing
+    from rapidsms.backends import spomc
+    
+    connection = Connection(spomc.Backend, mobile)
+    smsmessage = Message(connection, message)
+    for recipient in recipients:
+        smsmessage.forward(recipient.mobile)

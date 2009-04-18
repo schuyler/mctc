@@ -48,7 +48,7 @@ class Provider(models.Model):
     active  = models.BooleanField(default=True)
     alerts  = models.BooleanField(default=False, db_index=True)
     clinic  = models.ForeignKey(Facility, null=True, db_index=True)
-    manager = models.ForeignKey("Provider", null=True)
+    manager = models.ForeignKey("Provider", blank=True, null=True)
 
     @classmethod
     def by_mobile (cls, mobile):
@@ -102,6 +102,9 @@ class Case(models.Model):
     created_at  = models.DateTimeField()
     updated_at  = models.DateTimeField()
 
+    def get_absolute_url(self):
+        return "/case/%s/" % self.id
+
     def __unicode__ (self):
         return "#%d" % self.ref_id
 
@@ -135,8 +138,18 @@ class Case(models.Model):
             # FIXME: i18n
             return str(int(delta.days/30.4375))+"m"
 
+    def last_report(self):
+        reports = self.report_set.order_by("-entered_at")
+        if reports:
+            return reports[0]
+
     @classmethod
-    def filter_active (cls):
+    def filter_ill(cls):
+        # as per requirements from Matt, to show MAM, SAM and SAM+
+        return cls.objects.filter(status__in=[cls.MODERATE_STATUS, cls.SEVERE_STATUS, cls.SEVERE_COMP_STATUS])
+
+    @classmethod
+    def filter_active(cls):
         return cls.objects.filter(status__le=cls.CURED_STATUS)
 
 class Report(models.Model):
@@ -169,6 +182,11 @@ class Report(models.Model):
                     choices=OBSERVED_CHOICES, max_length=255,
                     null=True, blank=True)
 
+    def get_observed_display(self):
+        # can we move this to the field?
+        # not sure what i'm going to get back, lets get some data
+        pass
+        
     def __unicode__ (self):
         return "#%d" % self.id
     

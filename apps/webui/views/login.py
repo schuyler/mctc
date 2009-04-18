@@ -1,9 +1,8 @@
 from django.http import HttpResponseRedirect
 from django.contrib import auth
-from django.contrib.auth.decorators import login_required
 
 from apps.webui.forms.login import LoginForm
-from apps.webui.shortcuts import as_html
+from apps.webui.shortcuts import as_html, login_required
 
 def login(request):
     if request.method == "POST" and not request.user.is_authenticated():
@@ -13,10 +12,10 @@ def login(request):
                 username=form.cleaned_data["username"], 
                 password=form.cleaned_data["password"])
             if user:
-                auth.login(request, user)
-                return HttpResponseRedirect("/")
-            else:
-                return HttpResponseRedirect("/?msg=login_failed")
+                if user.is_active and user.is_staff:
+                    auth.login(request, user)
+                    return HttpResponseRedirect("/")
+            return HttpResponseRedirect("/accounts/login/?msg=login_failed")
     else:
         form = LoginForm()
     return as_html(request, "login.html", { "form": form, })

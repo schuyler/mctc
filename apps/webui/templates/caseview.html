@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block title %}Case{% endblock %}
+
+{% block breadcrumbs %}
+<div id="breadcrumbs">
+    <a href="/">MCTC</a>
+    &raquo; <a href="{{ object.get_absolute_url }}">Case</a>    
+    &raquo; Latest Data
+</div>
+{% endblock %}
+
+{% block content %}
+<h2>#{{ object.ref_id }}</h2>
+<p><a href="/case/edit/{{ object.id }}/">Edit this case</a></p>
+<table>
+    <tr>
+        <td>Name:</td><td>{{ object.first_name }} {{ object.last_name }}</td>
+    </tr>
+    <tr>
+        <td>Gender:</td><td>{{ object.gender }}</td>
+    </tr>
+    <tr>
+        <td>Date of birth:</td><td>{{ object.dob }}</td>
+    </tr>
+    <tr>        
+        <td>Guardian:</td><td>{{ object.guardian }}</td>
+    </tr>
+    <tr>        
+        <td>Mobile:</td><td>{{ object.mobile }}</td>
+    </tr>
+    <tr>        
+        <td>Status:</td><td>{{ object.status }}</td>
+    </tr>
+    <tr>        
+        <td>Provider:</td><td>{{ object.provider }}</td>
+    </tr>
+    <tr>        
+        <td>Zone:</td><td>{{ object.zone }}</td>
+    </tr>
+    <tr>        
+        <td>Village:</td><td>{{ object.village }}</td>
+    </tr>
+    <tr>        
+        <td>District:</td><td>{{ object.district }}</td>
+    </tr>
+</table>
+
+<h2>Event log</h2>
+<p class="notice">To come</p>
+<h2>Reports</h2>
+{% include "includes/reports.html" %}
+{% endblock %}

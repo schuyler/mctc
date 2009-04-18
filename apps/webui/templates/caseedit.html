@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}Case{% endblock %}
+
+{% block breadcrumbs %}
+<div id="breadcrumbs">
+    <a href="/">MCTC</a>
+    &raquo; <a href="{{ object.get_absolute_url }}">Case</a>    
+    &raquo; Latest Data
+</div>
+{% endblock %}
+
+{% block content %}
+<h2>#{{ object.ref_id }}</h2>
+<form method="POST">
+    {{ form.as_custom }}
+    <input type="submit" value="save">
+</form>
+{% endblock %}

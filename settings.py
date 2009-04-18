@@ -75,7 +75,8 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
-    "rapidsms.webui.contexts.apps"
+    "rapidsms.webui.contexts.apps",
+    "apps.webui.context.general"
 ]
 
 TEMPLATE_DIRS = [
@@ -83,6 +84,14 @@ TEMPLATE_DIRS = [
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 ]
+
+if "RAPIDSMS_INI" in os.environ:
+    ini = os.environ["RAPIDSMS_INI"]
+elif os.path.isfile("local.ini"):
+    ini = "local.ini"
+else: 
+    ini = "rapidsms.ini"
+os.environ["RAPIDSMS_INI"] = ini
 
 INSTALLED_APPS = (
     'django.contrib.auth',

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block breadcrumbs %}
+<div id="breadcrumbs">
+    <a href="/">MCTC</a>
+    &raquo; Providers
+</div>
+{% endblock %}
+
+{% block content %}
+
+{% if provider_object_list %}
+    {% include "includes/providers.html" %}
+{% else %}
+    <p class="notice">No results found</p>
+{% endif %}
+
+{% endblock %}

@@ -6,6 +6,7 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <link type="text/css" rel="stylesheet" href="/static/webui/stylesheets/layout.css" />
         <link type="text/css" rel="stylesheet" href="/static/webui/stylesheets/modules.css" />
+        <link type="text/css" rel="stylesheet" href="/static/webui/stylesheets/site.css" />        
         {% block stylesheets %}{% endblock %}
         {% block javascripts-top %}{% endblock %}
     </head>
@@ -17,9 +18,22 @@
                 </div>
                 <ul id="tabs">{% for app in apps %}{% if app.tab_link %}
                     <li><a href="{{ app.tab_link }}">{{ app.title }}</a></li>{% endif %}{% endfor %}
+                    {% if user.is_authenticated %}<li><a href="/logout/">Logout</a></li>
+                    <li><a href="/district/">District</a></li>
+                    <li><a href="/providers/">Providers</a></li>{% else %}
+                    <li><a href="/accounts/login/">Login</a></li>{% endif %}
                 </ul>
             </div>
+            {% block breadcrumbs %}
+            <div id="breadcrumbs">
+                <a href="/">MCTC</a>
+                &raquo; Latest Data
+            </div>
+            {% endblock %}
             <div id="inner">
+                {% if msg %}
+                <p class="notice">{{ msg }}</p>
+                {% endif %}
                 {% block content %}{% endblock %}
             </div>
             <div id="footer">

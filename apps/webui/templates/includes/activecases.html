@@ -1,0 +1,28 @@
+<table>
+    <thead>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Provider</th>
+        <th>MUAC</th>
+        <th>Weight</th>
+        <th>Height</th>
+        <th>Symptoms</th>
+    </thead>
+    <tbody>
+        {% for case in case_object_list.page.object_list %}
+        <tr>
+            <td><a href="{{ case.get_absolute_url }}">{{ case.ref_id }}</a></td>
+            <td>{{ case.first_name }} {{ case.last_name }}</td>
+            <td>{{ case.get_status_display }}</td>
+            <td>{{ case.provider }}</td>
+            <td>{{ case.last_report.muac }}</td>
+            <td>{{ case.last_report.height }}</td>
+            <td>{{ case.last_report.weight }}</td>                                                                        
+            <td>{{ case.last_report.get_observed_display }}</td>                                                                                    
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p>Last updated at {% now "h:m:s a" %}</p>
+{% include "paginator.html" %}

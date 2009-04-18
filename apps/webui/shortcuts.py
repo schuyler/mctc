@@ -1,17 +1,31 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.core.paginator import Paginator, InvalidPage
+from django.utils.translation import ugettext_lazy as _
 
 import csv
 import StringIO
 import reportlab
 import os
 
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Table
-from reportlab.lib import colors
+has_reportlab = True
+try:
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Table
+except ImportError:
+    has_reportlab = False
+    
 from tempfile import mkstemp
+
+messages = {
+    "login_failed": _("Username or password did not match"),
+    "logged_out": _("You have been logged out"),
+    "message_sent": _("Your message has been sent")
+}
+
+date_format = "%d/%m/%Y"
+time_format = "%H:%M%p"
 
 pagination_size_default = 20
 
@@ -22,6 +36,9 @@ def as_html(request, template, context):
         )
 
 def as_pdf(request, objects):
+    if not has_reportlab:
+        raise ImportError, "You must have reportlab installed to be able to generate pdf's"
+        
     # this is again some quick and dirty sample code    
     elements = []
     styles = getSampleStyleSheet()
@@ -67,9 +84,7 @@ def as_csv(request, objects):
     response.write(output.getvalue())
     return response
 
-    
-
-def paginate(queryset, number):
+def paginate(queryset, number, size=pagination_size_default):
     try:
         number = int(number)
     except (TypeError, ValueError):
@@ -86,6 +101,18 @@ def paginate(queryset, number):
 
     return result
     
+def login_required(fn):
+    """ We need to limit the front end to authenticated staff """
+    def new(*args, **kw):
+        request = args[0]
+        if request.user.is_authenticated:
+            if request.user.is_staff and request.user.is_active:
+                return fn(*args, **kw)
+        
+        return HttpResponseRedirect("/accounts/login/")
+    return new
+
+
 def jump(pages, index):
     res = {
         "start_ellipsis": False,

@@ -1,0 +1,10 @@
+{% if is_provider %}
+<p class="error">You need to add in phone number to send messages, you are logged in as {{ user }}.</p>
+{% else %}
+<form method="post">
+    <fieldset>
+        {{ message_form.as_custom }}
+        <input type="submit" value="send" />
+    </fieldset>
+</form>
+{% endif %}

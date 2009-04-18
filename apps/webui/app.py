@@ -8,4 +8,5 @@ class App(rapidsms.app.App):
        has no sms functionality. This file and class exist only
        so the router does not print an error messsage.'''
        #TODO find a more sensible way of allowing non-sms apps
-    pass
+    def tab_link(self):
+        return [ { "tab-link": "/foo", "title": "Foo" }]

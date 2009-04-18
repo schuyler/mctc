@@ -2,27 +2,31 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 
-Welcome to RapidSMS!
-
-<h1>Message log</h1>
-<div id="placeholder" style="width:300px;height:500px; float:right"></div>
-<div id="message-log">
-    <p>Please wait, connecting to server for data...</p>
+<h2>Active Cases</h2>
+<div id="activecases">
+{% include "includes/activecases.html" %}
 </div>
-
-
-
+<h2>Event Log</h2>
+<p class="error">To come</p>
+<h2>Alerts</h2>
+<p class="error">To come</p>
+<h2>Case summary</h2>
+{% include "includes/casesummary.html" %}
+<h2>Message users</h2>
+{% include "includes/sendmessage.html" %}
+<h2>Search</h2>
+<form method="get" action="/search/">
+    <input type="search" name="q" />
+</form>
 {% block javascripts-bottom %}
     <script type="text/javascript">
+        /*
         function reload() {
             $('#message-log').load('/ajax/message-log/');  
             setTimeout(reload, 10000);
         }                             
         $(document).ready(reload);
-        $(document).ready(function () {
-            var d1 = {{ counts }};
-            $.plot($("#placeholder"), [ d1, ]);
-        });
+        */
     </script>    
 {% endblock %}
 

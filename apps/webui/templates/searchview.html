@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block breadcrumbs %}
+<div id="breadcrumbs">
+    <a href="/">MCTC</a>
+    &raquo; Search
+</div>
+{% endblock %}
+
+{% block content %}
+<form method="get" action="/search/">
+    <input type="search" name="q" />
+</form>
+
+{% if case_object_list.page.object_list %}
+    {% include "includes/activecases.html" %}
+{% else %}
+    <p class="notice">No results found</p>
+{% endif %}
+
+{% endblock %}
