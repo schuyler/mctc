@@ -1,0 +1,112 @@
+[
+  {
+    "pk": 1, 
+    "model": "mctc.observation", 
+    "fields": {
+      "letter": "e", 
+      "uid": "edema", 
+      "report_type": "", 
+      "name": "Edema"
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "mctc.observation", 
+    "fields": {
+      "letter": "a", 
+      "uid": "appetite", 
+      "report_type": "a", 
+      "name": "Appetite Loss"
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "mctc.observation", 
+    "fields": {
+      "letter": "d", 
+      "uid": "diarrhea", 
+      "report_type": "", 
+      "name": "Diarrhea"
+    }
+  }, 
+  {
+    "pk": 4, 
+    "model": "mctc.observation", 
+    "fields": {
+      "letter": "v", 
+      "uid": "vomiting", 
+      "report_type": "", 
+      "name": "Vomiting"
+    }
+  }, 
+  {
+    "pk": 7, 
+    "model": "mctc.observation", 
+    "fields": {
+      "letter": "u", 
+      "uid": "unresponsive", 
+      "report_type": "", 
+      "name": "Unresponsive"
+    }
+  }, 
+  {
+    "pk": 6, 
+    "model": "mctc.observation", 
+    "fields": {
+      "letter": "f", 
+      "uid": "fever", 
+      "report_type": "", 
+      "name": "Fever"
+    }
+  }, 
+  {
+    "pk": 8, 
+    "model": "mctc.observation", 
+    "fields": {
+      "letter": "b", 
+      "uid": "breathing", 
+      "report_type": "", 
+      "name": "Breathing Difficulty"
+    }
+  }, 
+  {
+    "pk": 5, 
+    "model": "mctc.observation", 
+    "fields": {
+      "letter": "cg", 
+      "uid": "cough", 
+      "report_type": "", 
+      "name": "Coughing"
+    }
+  }, 
+  {
+    "pk": 9, 
+    "model": "mctc.observation", 
+    "fields": {
+      "letter": "cf", 
+      "uid": "confusion", 
+      "report_type": "", 
+      "name": "Confusion"
+    }
+  }, 
+  {
+    "pk": 10, 
+    "model": "mctc.observation", 
+    "fields": {
+      "letter": "nr", 
+      "uid": "responsive", 
+      "report_type": "", 
+      "name": "Non Responsive"
+    }
+  }, 
+  {
+    "pk": 11, 
+    "model": "mctc.observation", 
+    "fields": {
+      "letter": "cv", 
+      "uid": "fits", 
+      "report_type": "", 
+      "name": "Fits/Convulsions"
+    }
+  }
+]
