@@ -32,7 +32,11 @@ admin.site.register(Case, CaseAdmin)
 
 admin.site.register(Zone)
 admin.site.register(Facility)
-admin.site.register(Report)
+
+class ReportAdmin(admin.ModelAdmin):
+    list_display = ("case", "muac", "height", "weight", "entered_at")
+
+admin.site.register(Report, ReportAdmin)
 
 class MessageLogAdmin(admin.ModelAdmin):
     list_display = ("mobile", "sent_by", "text", "created_at", "was_handled")

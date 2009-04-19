@@ -18,6 +18,9 @@
 <form method="get" action="/search/">
     <input type="search" name="q" />
 </form>
+<h2>MUAC Over time</h2>
+{{ averages.muac.javascript_string|safe }}
+
 {% block javascripts-bottom %}
     <script type="text/javascript">
         /*

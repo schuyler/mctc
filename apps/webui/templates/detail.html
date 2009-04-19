@@ -1,0 +1,7 @@
+{% extends "layout.html" %}
+{% block content %}
+ {{graph.javascript_string|safe}}
+<div style="float:left;margin-left:20px;margin-top:50px">
+ {{time_graph.javascript_string|safe}}
+</div>
+{% endblock %}

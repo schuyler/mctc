@@ -6,7 +6,6 @@ from django.utils.translation import ugettext_lazy as _
 
 import csv
 import StringIO
-import reportlab
 import os
 
 has_reportlab = True

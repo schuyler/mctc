@@ -376,7 +376,7 @@ class App (rapidsms.app.App):
         if case.status in (case.MODERATE_STATUS,
                            case.SEVERE_STATUS,
                            case.SEVERE_COMP_STATUS):
-            alert = _("*%s reports %s") % (provider.user.username,msg)
+            alert = _("*%(username)s reports %(msg)s") % {"username":provider.user.username, "msg":msg}
             recipients = [provider]
             for query in (Provider.objects.filter(alerts=True),
                           Provider.objects.filter(clinic=provider.clinic)):

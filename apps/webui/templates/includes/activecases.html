@@ -16,10 +16,10 @@
             <td>{{ case.first_name }} {{ case.last_name }}</td>
             <td>{{ case.get_status_display }}</td>
             <td>{{ case.provider }}</td>
-            <td>{{ case.last_report.muac }}</td>
-            <td>{{ case.last_report.height }}</td>
-            <td>{{ case.last_report.weight }}</td>                                                                        
-            <td>{{ case.last_report.get_observed_display }}</td>                                                                                    
+            <td>{{ case.report_set.latest.muac }}</td>
+            <td>{{ case.report_set.latest.height }}</td>
+            <td>{{ case.report_set.latest.weight }}</td>                                                                        
+            <td>{{ case.report_set.latest.get_observed_display }}</td>                                                                                    
         </tr>
         {% endfor %}
     </tbody>

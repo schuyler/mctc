@@ -3,15 +3,20 @@
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import get_object_or_404
-from django.db.models import Count, ObjectDoesNotExist, Q
+from django.db.models import Count, ObjectDoesNotExist, Q, Avg
+from django.db import connection
 
-from apps.mctc.models import MessageLog, Case, Zone, Provider
+from apps.mctc.models import MessageLog, Case, Zone, Provider, Report, ReportCache
 from apps.mctc.app import message_users
 
 from apps.webui.shortcuts import as_html, as_csv, as_pdf, paginate, login_required
 from apps.webui.forms.general import MessageForm
 
-from datetime import datetime
+from apps.webui.graphs.flot import FlotGraph
+from apps.webui.graphs.average import create_average_for_qs, create_graph
+
+from datetime import datetime, timedelta
+import time
 
 @login_required
 def ajax_message_log(request):
@@ -59,6 +64,7 @@ def active_cases(request):
     else:
         return as_html(request, "activecases.html", context)
 
+    
 @login_required
 def dashboard(request):
     # i don't expect this to last, just a test and messing, ugh!
@@ -66,6 +72,14 @@ def dashboard(request):
     # get totals, yay for aggregation and turn it into a dict for easy use in templates
     totals = Case.objects.values("status").annotate(Count("status"))
     totals = dict([ [t["status"], t["status__count"] ] for t in totals ])
+ 
+    case = Case.objects.get(id=1)
+    averages = { 
+        "muac": create_graph(data=create_average_for_qs(Q(), "muac", 30), name="muac"),
+#        "weight": create_graph(data=create_average_for_qs(Q(), "weight", 90), name="weight"),
+#        "height": create_graph(data=create_average_for_qs(Q(), "height", 90), name="height"),
+    }
+    
     has_provider = True
     try:
         mobile = request.user.provider.mobile
@@ -78,19 +92,22 @@ def dashboard(request):
             messageform = MessageForm()
     except ObjectDoesNotExist:
         has_provider = False
+        messageform = None
         
     context = {
         "case_object_list": res,
         "paginate_url": "#",
         "case_totals": totals,
         "message_form": messageform,
-        "has_provider": has_provider
+        "has_provider": has_provider,
+        "averages": averages,
     }
     return as_html(request, "dashboard.html", context)
 
 @login_required
 def search_view(request):
     term = request.GET.get("q")
+    # need to make this case insensitive
     query = Q(id__contains=term) | Q(first_name__contains=term) | Q(last_name__contains=term)
     queryset = Case.objects.filter(query)
     res = paginate(queryset, 1)
@@ -123,9 +140,20 @@ def district_view(request):
     return as_html(request, "districtview.html", context)
 
 @login_required
-def provider_view(request):
+def provider_list(request):
     res = paginate(Provider.objects.all(), 1)
     context = {
         "provider_object_list": res,
     }
-    return as_html(request, "providers.html", context)
+    return as_html(request, "providerlist.html", context)
+
+@login_required
+def provider_view(request, object_id):
+    provider = get_object_or_404(Provider, id=object_id)
+    context = {
+        "object": provider,
+        "case_object_list": paginate(Case.filter_ill().filter(provider=provider), 1),
+        "message_object_list": paginate(MessageLog.objects.filter(sent_by=provider.user).order_by("-created_at"), 1)
+        
+    }
+    return as_html(request, "providerview.html", context)

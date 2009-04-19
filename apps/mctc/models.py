@@ -50,6 +50,9 @@ class Provider(models.Model):
     clinic  = models.ForeignKey(Facility, null=True, db_index=True)
     manager = models.ForeignKey("Provider", blank=True, null=True)
 
+    def get_absolute_url(self):
+        return "/provider/view/%s/" % self.id
+
     @classmethod
     def by_mobile (cls, mobile):
         try:
@@ -138,11 +141,6 @@ class Case(models.Model):
             # FIXME: i18n
             return str(int(delta.days/30.4375))+"m"
 
-    def last_report(self):
-        reports = self.report_set.order_by("-entered_at")
-        if reports:
-            return reports[0]
-
     @classmethod
     def filter_ill(cls):
         # as per requirements from Matt, to show MAM, SAM and SAM+
@@ -155,6 +153,7 @@ class Case(models.Model):
 class Report(models.Model):
     class Meta:
         get_latest_by = 'entered_at'
+        ordering = ("-entered_at",)
 
     EDEMA_OBSERVED         = 1
     APPETITE_LOSS_OBSERVED = 2
@@ -233,3 +232,10 @@ class MessageLog(models.Model):
         if not self.id:
             self.created_at = datetime.now()
         super(MessageLog, self).save(*args)
+
+class ReportCache(models.Model):
+    case = models.ForeignKey(Case)
+    date = models.DateField(db_index=True)
+    muac = models.IntegerField(_("MUAC (mm)"), null=True, blank=True)
+    height = models.IntegerField(_("Height (cm)"), null=True, blank=True)
+    weight = models.FloatField(_("Weight (kg)"), null=True, blank=True)

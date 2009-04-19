@@ -1,6 +1,9 @@
 from django.test import TestCase                
 from django.test.client import Client
 
+from apps.webui.views.general import create_average
+from apps.mctc.models import Case
+
 class dashboard(TestCase):
     fixtures = ["users.json",]
 
@@ -27,3 +30,10 @@ class dashboard(TestCase):
         clt.login(username='nonactive', password='nonactive')
         res = clt.get("/")
         assert res.status_code == 302
+
+class graphs(TestCase):
+    fixtures = ["overall.json"]
+    
+    def testCaseHistory(self):
+        case = Case.objects.filter(id=1)
+        # erm this isn't working yet

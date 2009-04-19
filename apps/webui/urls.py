@@ -11,10 +11,11 @@ urlpatterns = patterns('',
     (r'^$', "apps.webui.views.general.dashboard"),
     (r'^ajax/message-log/$', "apps.webui.views.general.ajax_message_log"),
     (r'^message-log/$', "apps.webui.views.general.message_log"),
-    
-    (r'^search/', "apps.webui.views.general.search_view"),
-    (r'^district/', "apps.webui.views.general.district_view"),    
-    (r'^providers/', "apps.webui.views.general.provider_view"),    
+    (r'^test/$', "apps.webui.views.details.detail"),
+    (r'^search/$', "apps.webui.views.general.search_view"),
+    (r'^district/$', "apps.webui.views.general.district_view"),    
+    (r'^providers/$', "apps.webui.views.general.provider_list"),    
+    (r'^provider/view/(?P<object_id>\d+)/$', "apps.webui.views.general.provider_view"),        
     
     (r'^case/(?P<object_id>\d+)/$', "apps.webui.views.general.case_view"),
     

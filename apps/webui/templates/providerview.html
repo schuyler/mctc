@@ -1,19 +1,28 @@
 {% extends "layout.html" %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}Providers{% endblock %}
 
 {% block breadcrumbs %}
 <div id="breadcrumbs">
     <a href="/">MCTC</a>
-    &raquo; Providers
+    &raquo; <a href="/providers/">Providers</a>
+    &raquo; {{ object.user }}
 </div>
 {% endblock %}
 
 {% block content %}
 
-{% if provider_object_list %}
-    {% include "includes/providers.html" %}
-{% else %}
-    <p class="notice">No results found</p>
-{% endif %}
+<h2>Active Cases</h2>
+{% include "includes/activecases.html" %}
 
+<h2>Message Log</h2>
+{% include "includes/messagelog.html" %}
+
+<h2>Inactive Cases</h2>
+<p>To do figure out redefine variables in template</p>
+
+<h2>Event log</h2>
+<p class="notice">To come</p>
+
+<h2>Counter</h2>
+<p class="notice">To come</p>
 {% endblock %}
