@@ -5,14 +5,14 @@ from apps.webui.graphs.average import create_average_for_case
 from apps.mctc.models import Case
 
 class dashboard(TestCase):
-    fixtures = ["users.json",]
-
+    fixtures = ["users.json", "overall.json"]
+        
     def testPasses(self):
         clt = Client()
         res = clt.get("/")
         assert res.status_code == 302
         # admin is a superuser
-        clt.login(username='admin', password='admin')
+        clt.login(username='mvp', password='africa')
         res = clt.get("/")
         assert res.status_code == 200
         clt.logout()
@@ -30,6 +30,14 @@ class dashboard(TestCase):
         clt.login(username='nonactive', password='nonactive')
         res = clt.get("/")
         assert res.status_code == 302
+
+    def testCase(self):
+        clt = Client()
+        clt.login(username='mvp', password='africa')
+        res = clt.get("/")
+        assert res.status_code == 200, res.status_code
+        res = clt.get("/case/21/")
+        assert res.status_code == 200, res.status_code
 
 class graphs(TestCase):
     fixtures = ["overall.json"]
