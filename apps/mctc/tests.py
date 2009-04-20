@@ -1,7 +1,13 @@
 from rapidsms.tests.scripted import TestScript
 from django.core.management import call_command
+from django.test import TestCase
 from app import App
-from models import Case, User, MessageLog
+
+
+from models.general import Provider, User, MessageLog, Facility
+from models.general import Case, CaseNote, Observation
+from models.reports import ReportMalnutrition, ReportMalaria
+
 from datetime import datetime, date, timedelta
 
 def age_in_months (*ymd):
@@ -332,4 +338,42 @@ class TestApp (TestScript):
         assert len(reports) == 1
         assert not len(reports[0].observed.all())
 
+class TestAlerts(TestCase):
+    fixtures = ["users.json", "alerts.json"]
+    
+    def testCreateReport(self):
+        provider = Provider.objects.get(id=2)
+        clinic = provider.clinic
         
+        report = ReportMalaria()
+        report.provider = provider
+        recipients = report.get_alert_recipients()
+        assert len(recipients) == 3, [ r.id for r in recipients ]
+        
+        one = Provider.objects.get(id=1)
+        one.alerts = False
+        one.save()
+
+        recipients = report.get_alert_recipients()
+        assert len(recipients) == 2
+
+        one = Provider.objects.get(id=1)
+        one.alerts = True
+        one.save()
+
+        recipients = report.get_alert_recipients()
+        assert len(recipients) == 3
+
+        four = Provider.objects.get(id=4)
+        four.following_users.remove(provider)
+        four.save()
+
+        recipients = report.get_alert_recipients()
+        assert len(recipients) == 2
+
+        one.following_clinics.remove(clinic)
+        one.save()
+
+        recipients = report.get_alert_recipients()        
+        assert len(recipients) == 1, [ r.id for r in recipients ]
+                

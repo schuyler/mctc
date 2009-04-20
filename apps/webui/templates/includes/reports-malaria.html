@@ -1,0 +1,20 @@
+<table>
+    <thead>
+        <th>Date</th>
+        <th>Malaria</th>
+        <th>Bednet</th>
+        <th>Symptoms</th>
+    </thead>
+    <tbody>
+        {% for report in report_malnutrition_object_list.page.object_list %}
+        <tr>
+            <td>{{ report.entered_at }}</td>
+            <td>{{ report.malaria }}</td>
+            <td>{{ report.bednet }}</td>
+            <td>{{ report.get_observed_display }}</td>                                                                                    
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p>Last updated at {% now "h:m:s a" %}</p>
+{% include "paginator.html" %}

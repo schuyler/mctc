@@ -2,22 +2,39 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 
-from fields import SeparatedValuesField
-
 from datetime import datetime
 import md5
 
 class Zone(models.Model):
-    def __unicode__ (self): return self.name
-    number  = models.PositiveIntegerField(unique=True,db_index=True)
-    name    = models.CharField(max_length=255)
-    lon     = models.FloatField(null=True,blank=True)
-    lat     = models.FloatField(null=True,blank=True)
+    def __unicode__ (self): 
+        return self.name
+
+    class Meta:
+        app_label = "mctc"
+    
+    CLUSTER_ZONE = 1
+    VILLAGE_ZONE = 2
+    SUBVILLAGE_ZONE = 3
+    ZONE_TYPES = (
+        (CLUSTER_ZONE, _('Cluster')),
+        (VILLAGE_ZONE, _('Village')),
+        (SUBVILLAGE_ZONE, _('Sub village'))
+    )
+    
+    number = models.PositiveIntegerField(unique=True,db_index=True)
+    name = models.CharField(max_length=255)
+    head = models.ForeignKey("self", null=True,blank=True)
+    category = models.IntegerField(choices=ZONE_TYPES, default=VILLAGE_ZONE)
+    lon = models.FloatField(null=True,blank=True)
+    lat = models.FloatField(null=True,blank=True)
 
 class Facility(models.Model):
-    def __unicode__ (self): return self.name
+    def __unicode__ (self): 
+        return self.name
+        
     class Meta:
         verbose_name_plural = "Facilities"
+        app_label = "mctc"
 
     CLINIC_ROLE  = 1
     DISTRIB_ROLE = 2
@@ -25,6 +42,7 @@ class Facility(models.Model):
         (CLINIC_ROLE,  _('Clinic')),
         (DISTRIB_ROLE, _('Distribution Point')),
     )
+    
     name        = models.CharField(max_length=255)
     role        = models.IntegerField(choices=ROLE_CHOICES, default=CLINIC_ROLE)
     zone        = models.ForeignKey(Zone,db_index=True)
@@ -33,15 +51,32 @@ class Facility(models.Model):
     lat         = models.FloatField(null=True,blank=True)
 
 class Provider(models.Model):
-    def __unicode__ (self): return self.mobile
+    def __unicode__ (self): 
+        return self.mobile
+
+    class Meta:
+        app_label = "mctc"
+    
     CHW_ROLE    = 1
     NURSE_ROLE  = 2
     DOCTOR_ROLE = 3
+    SENIOR_CHW_ROLE = 4
+    CLINICAL_OFFICER_ROLE = 5
+    NUTRITIONIST_ROLE = 6
+    HEALTH_FAC_ROLE = 7
+    HEALTH_COR_ROLE = 8
+    
     ROLE_CHOICES = (
         (CHW_ROLE,    _('CHW')),
         (NURSE_ROLE,  _('Nurse')),
-        (DOCTOR_ROLE, _('Doctor'))
+        (DOCTOR_ROLE, _('Doctor')),
+        (SENIOR_CHW_ROLE, _("Senior CHW")),
+        (CLINICAL_OFFICER_ROLE, _("Clinical Officer")),
+        (NUTRITIONIST_ROLE, _("Nutritionist")),
+        (HEALTH_FAC_ROLE, _("Health Facilitator")),
+        (HEALTH_COR_ROLE, _("Health Co-ordinator")),        
     )
+    
     user    = models.OneToOneField(User)
     mobile  = models.CharField(max_length=16, null=True, db_index=True)
     role    = models.IntegerField(choices=ROLE_CHOICES, default=CHW_ROLE)
@@ -49,6 +84,8 @@ class Provider(models.Model):
     alerts  = models.BooleanField(default=False, db_index=True)
     clinic  = models.ForeignKey(Facility, null=True, db_index=True)
     manager = models.ForeignKey("Provider", blank=True, null=True)
+    following_users = models.ManyToManyField("Provider", related_name="following_users", blank=True, null=True)
+    following_clinics = models.ManyToManyField(Facility, related_name="following_clinics", blank=True, null=True)
 
     def get_absolute_url(self):
         return "/provider/view/%s/" % self.id
@@ -60,11 +97,15 @@ class Provider(models.Model):
         except models.ObjectDoesNotExist:
             return None
 
-class Case(models.Model):
+class Case(models.Model):    
+    class Meta:
+        app_label = "mctc"
+    
     GENDER_CHOICES = (
         ('M', _('Male')), 
         ('F', _('Female')), 
     )
+    
     UNKNOWN_STATUS          = 1
     HEALTHY_STATUS          = 2
     ILL_STATUS              = 3
@@ -89,6 +130,7 @@ class Case(models.Model):
         (NOT_RECOVERED_STATUS,  _('Not Recovered')),
         (TRANSFERRED_STATUS,    _('Transferred')),
     )
+    
     ref_id      = models.IntegerField(_('Case ID #'), null=True, db_index=True)
     first_name  = models.CharField(max_length=255, db_index=True)
     last_name   = models.CharField(max_length=255, db_index=True)
@@ -159,6 +201,9 @@ class Observation(models.Model):
     name = models.CharField(max_length=255)
     letter = models.CharField(max_length=2, unique=True)
 
+    class Meta:
+        app_label = "mctc"
+
     def __unicode__(self):
         return self.name
 
@@ -171,61 +216,7 @@ class Diagnosis(models.Model):
 
     class Meta:
         verbose_name = "Diagnoses"
-
-class ReportMalaria(models.Model):
-    class Meta:
-        get_latest_by = 'entered_at'
-        ordering = ("-entered_at",)
-    
-    case = models.ForeignKey(Case, db_index=True)
-    provider = models.ForeignKey(Provider, db_index=True)
-    entered_at = models.DateTimeField(db_index=True)
-    diagnosis = models.ManyToManyField(Diagnosis)
-    bednet = models.BooleanField(db_index=True)
-    result = models.BooleanField(db_index=True) 
-    observed = models.ManyToManyField(Observation)       
-
-    def save(self, *args):
-        if not self.id:
-            self.entered_at = datetime.now()
-        super(ReportMalaria, self).save(*args)
-        
-class ReportMalnutrition(models.Model):
-    class Meta:
-        get_latest_by = 'entered_at'
-        ordering = ("-entered_at",)
-
-    case        = models.ForeignKey(Case, db_index=True)
-    provider    = models.ForeignKey(Provider, db_index=True)
-    entered_at  = models.DateTimeField(db_index=True)
-    muac        = models.IntegerField(_("MUAC (mm)"), null=True, blank=True)
-    height      = models.IntegerField(_("Height (cm)"), null=True, blank=True)
-    weight      = models.FloatField(_("Weight (kg)"), null=True, blank=True)
-    observed    = models.ManyToManyField(Observation)
-        
-    def __unicode__ (self):
-        return "#%d" % self.id
-    
-    def diagnosis (self):
-        complications = [c for c in self.observed.all() if c.uid != "edema"]
-        edema = "edema" in [ c.uid for c in self.observed.all() ]
-        if edema or self.muac < 110:
-            if complications:
-                return Case.SEVERE_COMP_STATUS
-            else:
-                return Case.SEVERE_STATUS
-        elif self.muac < 125:
-            return Case.MODERATE_STATUS
-        elif complications:
-            return Case.ILL_STATUS
-        else: 
-            return Case.HEALTHY_STATUS
-
-    def save(self, *args):
-        if not self.id:
-            self.entered_at = datetime.now()
-        super(ReportMalnutrition, self).save(*args)
-
+        app_label = "mctc"
 
 class CaseNote(models.Model):
     case        = models.ForeignKey(Case, related_name="notes", db_index=True)
@@ -238,6 +229,9 @@ class CaseNote(models.Model):
             self.created_at = datetime.now()
         super(CaseNote, self).save(*args)
 
+    class Meta:
+        app_label = "mctc"
+
 class MessageLog(models.Model):
     mobile      = models.CharField(max_length=255, db_index=True)
     sent_by     = models.ForeignKey(User, null=True)
@@ -245,14 +239,10 @@ class MessageLog(models.Model):
     was_handled = models.BooleanField(default=False, db_index=True)
     created_at  = models.DateTimeField(db_index=True)
 
+    class Meta:
+        app_label = "mctc"
+
     def save(self, *args):
         if not self.id:
             self.created_at = datetime.now()
         super(MessageLog, self).save(*args)
-
-class ReportMalnutritionCache(models.Model):
-    case = models.ForeignKey(Case)
-    date = models.DateField(db_index=True)
-    muac = models.IntegerField(_("MUAC (mm)"), null=True, blank=True)
-    height = models.IntegerField(_("Height (cm)"), null=True, blank=True)
-    weight = models.FloatField(_("Weight (kg)"), null=True, blank=True)

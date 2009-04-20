@@ -2,17 +2,26 @@
 {% block title %}Providers{% endblock %}
 
 {% block breadcrumbs %}
-<div id="breadcrumbs">
     <a href="/">MCTC</a>
     &raquo; <a href="/providers/">Providers</a>
     &raquo; {{ object.user }}
-</div>
 {% endblock %}
 
 {% block content %}
 
+<h2>{{ object.user.first_name }} {{ object.user.last_name }}</h2>
+<p><a href="/case/edit/{{ object.id }}/">Edit this case</a></p>
+<table>
+    <tr><td>Mobile:</td><td>{{ object.mobile }}</td></tr>
+    <tr><td>Role:</td><td>{{ object.role }}</td></tr>
+    <tr><td>Active:</td><td>{{ object.active }}</td></tr>        
+    <tr><td>Alerts:</td><td>{{ object.alerts }}</td></tr>        
+    <tr><td>Clinic:</td><td>{{ object.clinic }}</td></tr>                
+    <tr><td>Manager:</td><td>{{ object.manager }}</td></tr>                    
+</table>
+
 <h2>Active Cases</h2>
-{% include "includes/activecases.html" %}
+{{ case_table }}
 
 <h2>Message Log</h2>
 {% include "includes/messagelog.html" %}

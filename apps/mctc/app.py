@@ -6,12 +6,15 @@ def _(txt): return txt
 from django.contrib.auth.models import User, Group
 
 import rapidsms
+
 from rapidsms.parsers.keyworder import Keyworder
 from rapidsms.message import Message
 from rapidsms.connection import Connection
 
-from models import Provider, User, MessageLog, Facility, Case, CaseNote, Observation
-from models import ReportMalnutrition, ReportMalaria
+from models.general import Provider, User, MessageLog, Facility
+from models.general import Case, CaseNote, Observation
+from models.reports import ReportMalnutrition, ReportMalaria
+
 import re, time, datetime
 
 def authenticated (func):
@@ -460,7 +463,7 @@ class App (rapidsms.app.App):
     
     def delete_similar(self, set):
         try:
-            last_report = set.latest()
+            last_report = set.latest("entered_at")
             if (datetime.datetime.now() - last_report.entered_at).days == 0:
                 # last report was today. so delete it before filing another.
                 last_report.delete()

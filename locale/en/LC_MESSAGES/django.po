@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-04-19 09:19-0400\n"
+"POT-Creation-Date: 2009-04-20 06:07-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,209 +17,244 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "ReportMalnutrition-Msgid-Bugs-To: \n"
 
-#: apps/mctc/admin.py:15
+#: apps/mctc/admin.py:17
 msgid "Personal info"
 msgstr ""
 
-#: apps/mctc/admin.py:16
+#: apps/mctc/admin.py:18
 msgid "Permissions"
 msgstr ""
 
-#: apps/mctc/admin.py:17 apps/webui/forms/general.py:16
+#: apps/mctc/admin.py:19 apps/webui/forms/general.py:16
 msgid "Groups"
 msgstr ""
 
-#: apps/mctc/app.py:20
+#: apps/mctc/app.py:25
 #, python-format
 msgid "%s is not a registered number."
 msgstr ""
 
-#: apps/mctc/app.py:65
+#: apps/mctc/app.py:70
 msgid "An error occurred. Please call 999-9999."
 msgstr ""
 
-#: apps/mctc/app.py:75
+#: apps/mctc/app.py:80
 msgid "The given password is not recognized."
 msgstr ""
 
-#: apps/mctc/app.py:85
+#: apps/mctc/app.py:90
 #, python-format
 msgid "Username '%s' is already in use. "
 msgstr ""
 
-#: apps/mctc/app.py:111
+#: apps/mctc/app.py:116
 #, python-format
 msgid "Phone %(mobile)s is already registered to %(last_name)s, "
 msgstr ""
 
-#: apps/mctc/app.py:125
+#: apps/mctc/app.py:130
 #, python-format
 msgid "%(mobile)s registered to *%(id)s %(username)s "
 msgstr ""
 
-#: apps/mctc/app.py:153
+#: apps/mctc/app.py:158
 #, python-format
 msgid "User *%s is not registered."
 msgstr ""
 
-#: apps/mctc/app.py:190
+#: apps/mctc/app.py:195
 #, python-format
 msgid "Couldn't understand date: %s"
 msgstr ""
 
-#: apps/mctc/app.py:218
+#: apps/mctc/app.py:223
 #, python-format
 msgid "New +%(id)s: %(last_name)s, %(first_name)s %(gender)s/%(age)s "
 msgstr ""
 
-#: apps/mctc/app.py:226
+#: apps/mctc/app.py:231
 #, python-format
 msgid "Case +%s not found."
 msgstr ""
 
-#: apps/mctc/app.py:234
+#: apps/mctc/app.py:239
 #, python-format
 msgid "Cannot cancel +%s: case has diagnosis reports."
 msgstr ""
 
-#: apps/mctc/app.py:236
+#: apps/mctc/app.py:241
 #, python-format
 msgid "Case +%s cancelled."
 msgstr ""
 
-#: apps/mctc/app.py:289
+#: apps/mctc/app.py:294
 #, python-format
 msgid ""
 "+%(id)s %(status)s %(last_name)s, %(first_name)s %(gender)s/%(age)s %"
 "(guardian)s%(zone)s"
 msgstr ""
 
-#: apps/mctc/app.py:305
+#: apps/mctc/app.py:310
 #, python-format
 msgid "Can't understand MUAC (mm): %s"
 msgstr ""
 
-#: apps/mctc/app.py:347
+#: apps/mctc/app.py:352
 #, python-format
 msgid "+%(ref_id)s: %(diagnosis)s, MUAC %(muac)s"
 msgstr ""
 
-#: apps/mctc/app.py:351 apps/mctc/app.py:411
-msgid "observed"
-msgstr ""
-
-#: apps/mctc/app.py:358
+#: apps/mctc/app.py:363
 #, python-format
 msgid "*%(username)s reports %(msg)s"
 msgstr ""
 
-#: apps/mctc/app.py:374
+#: apps/mctc/app.py:379
 #, python-format
 msgid "Note added to case +%s."
 msgstr ""
 
-#: apps/mctc/app.py:409
+#: apps/mctc/app.py:414
 #, python-format
 msgid "+%(ref_id)s: %(result_text)s %(bednet_text)s"
 msgstr ""
 
-#: apps/mctc/app.py:416
+#: apps/mctc/app.py:421
 #, python-format
 msgid ""
 "MRDT> Child +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)"
-"sM (%(guardian)s), %(village)s. RDT=%(result_text)s, Bednet=%(bednet_text)s%"
-"(observed)s. Please refer patient IMMEDIATELY for clinical evaluation."
+"s (%(guardian)s), %(village)s. RDT=%(result_text)s, Bednet=%(bednet_text)s%"
+"(observed)s. Please refer patient IMMEDIATELY for clinical evaluation"
 msgstr ""
 
-#: apps/mctc/models.py:25
+#: apps/mctc/app.py:455
+#, python-format
+msgid ""
+"MRDT> Child +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)"
+"s has MALARIA%(danger)s. %(instructions)s"
+msgstr ""
+
+#: apps/mctc/models/general.py:19
+msgid "Cluster"
+msgstr ""
+
+#: apps/mctc/models/general.py:20
+msgid "Village"
+msgstr ""
+
+#: apps/mctc/models/general.py:21
+msgid "Sub village"
+msgstr ""
+
+#: apps/mctc/models/general.py:42
 msgid "Clinic"
 msgstr ""
 
-#: apps/mctc/models.py:26
+#: apps/mctc/models/general.py:43
 msgid "Distribution Point"
 msgstr ""
 
-#: apps/mctc/models.py:41
+#: apps/mctc/models/general.py:70
 msgid "CHW"
 msgstr ""
 
-#: apps/mctc/models.py:42
+#: apps/mctc/models/general.py:71
 msgid "Nurse"
 msgstr ""
 
-#: apps/mctc/models.py:43
+#: apps/mctc/models/general.py:72
 msgid "Doctor"
 msgstr ""
 
-#: apps/mctc/models.py:65
+#: apps/mctc/models/general.py:73
+msgid "Senior CHW"
+msgstr ""
+
+#: apps/mctc/models/general.py:74
+msgid "Clinical Officer"
+msgstr ""
+
+#: apps/mctc/models/general.py:75
+msgid "Nutritionist"
+msgstr ""
+
+#: apps/mctc/models/general.py:76
+msgid "Health Facilitator"
+msgstr ""
+
+#: apps/mctc/models/general.py:77
+msgid "Health Co-ordinator"
+msgstr ""
+
+#: apps/mctc/models/general.py:105
 msgid "Male"
 msgstr ""
 
-#: apps/mctc/models.py:66
+#: apps/mctc/models/general.py:106
 msgid "Female"
 msgstr ""
 
-#: apps/mctc/models.py:80
+#: apps/mctc/models/general.py:121
 msgid "Unknown"
 msgstr ""
 
-#: apps/mctc/models.py:81
+#: apps/mctc/models/general.py:122
 msgid "Healthy"
 msgstr ""
 
-#: apps/mctc/models.py:82
+#: apps/mctc/models/general.py:123
 msgid "Ill"
 msgstr ""
 
-#: apps/mctc/models.py:83
+#: apps/mctc/models/general.py:124
 msgid "MAM"
 msgstr ""
 
-#: apps/mctc/models.py:84
+#: apps/mctc/models/general.py:125
 msgid "SAM"
 msgstr ""
 
-#: apps/mctc/models.py:85
+#: apps/mctc/models/general.py:126
 msgid "SAM+"
 msgstr ""
 
-#: apps/mctc/models.py:86
+#: apps/mctc/models/general.py:127
 msgid "Cured"
 msgstr ""
 
-#: apps/mctc/models.py:87
+#: apps/mctc/models/general.py:128
 msgid "Deceased"
 msgstr ""
 
-#: apps/mctc/models.py:88
+#: apps/mctc/models/general.py:129
 msgid "Defaulted"
 msgstr ""
 
-#: apps/mctc/models.py:89
+#: apps/mctc/models/general.py:130
 msgid "Not Recovered"
 msgstr ""
 
-#: apps/mctc/models.py:90
+#: apps/mctc/models/general.py:131
 msgid "Transferred"
 msgstr ""
 
-#: apps/mctc/models.py:92
+#: apps/mctc/models/general.py:134
 msgid "Case ID #"
 msgstr ""
 
-#: apps/mctc/models.py:96
+#: apps/mctc/models/general.py:138
 msgid "Date of Birth"
 msgstr ""
 
-#: apps/mctc/models.py:200 apps/mctc/models.py:255
+#: apps/mctc/models/reports.py:62 apps/mctc/models/reports.py:97
 msgid "MUAC (mm)"
 msgstr ""
 
-#: apps/mctc/models.py:201 apps/mctc/models.py:256
+#: apps/mctc/models/reports.py:63 apps/mctc/models/reports.py:98
 msgid "Height (cm)"
 msgstr ""
 
-#: apps/mctc/models.py:202 apps/mctc/models.py:257
+#: apps/mctc/models/reports.py:64 apps/mctc/models/reports.py:99
 msgid "Weight (kg)"
 msgstr ""
 

@@ -2,20 +2,15 @@
 {% block title %}Case{% endblock %}
 
 {% block breadcrumbs %}
-<div id="breadcrumbs">
     <a href="/">MCTC</a>
     &raquo; <a href="{{ object.get_absolute_url }}">Case</a>    
-    &raquo; Latest Data
-</div>
+    &raquo; {{ object.ref_id }}
 {% endblock %}
 
 {% block content %}
-<h2>#{{ object.ref_id }}</h2>
+<h2>{{ object.ref_id }}: {{ object.first_name }} {{ object.last_name }}</h2>
 <p><a href="/case/edit/{{ object.id }}/">Edit this case</a></p>
 <table>
-    <tr>
-        <td>Name:</td><td>{{ object.first_name }} {{ object.last_name }}</td>
-    </tr>
     <tr>
         <td>Gender:</td><td>{{ object.gender }}</td>
     </tr>
@@ -47,6 +42,8 @@
 
 <h2>Event log</h2>
 <p class="notice">To come</p>
-<h2>ReportMalnutritions</h2>
-{% include "includes/reports.html" %}
+<h2>Report - malnutritions</h2>
+{% include "includes/reports-malnutrition.html" %}
+<h2>Report - malaria</h2>
+{% include "includes/reports-malaria.html" %}
 {% endblock %}

@@ -4,7 +4,7 @@
 import os
 from django.conf.urls.defaults import patterns
 
-from apps.mctc.models import Case
+from apps.mctc.models.general import Case
 from apps.webui.forms.general import CaseForm
 
 urlpatterns = patterns('',

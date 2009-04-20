@@ -1,0 +1,5 @@
+<td>{{ object.mobile }}</td>
+<td>{{ object.text }}</td>
+<td>{{ object.sent_by }}</td>
+<td><abbr title="On {{ object.created_at|date:"D M Y" }}">{{ object.created_at|date:"P" }}</abbe></td>
+<td>{% if object.was_handled %}{% else %}Not handled yet{% endif %}<td>

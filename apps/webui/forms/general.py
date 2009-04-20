@@ -4,7 +4,7 @@ from django.contrib.auth.models import User, Group
 from django.forms.util import ErrorList
 
 from apps.webui.forms.base import BaseForm, BaseModelForm
-from apps.mctc.models import Provider, Case
+from apps.mctc.models.general import Provider, Case
 
 class MessageForm(BaseForm):
     message = forms.CharField(

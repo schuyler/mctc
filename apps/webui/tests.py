@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.test.client import Client
 
 from apps.webui.graphs.average import create_average_for_case
-from apps.mctc.models import Case
+from apps.mctc.models.general import Case
 
 class dashboard(TestCase):
     fixtures = ["users.json", "overall.json"]

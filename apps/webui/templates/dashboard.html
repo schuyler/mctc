@@ -3,9 +3,10 @@
 {% block content %}
 
 <h2>Active Cases</h2>
-<div id="activecases">
-{% include "includes/activecases.html" %}
-</div>
+{{ case_table }}
+<h2>All Cases</h2>
+{{ allcase_table }}
+
 <h2>Event Log</h2>
 <p class="error">To come</p>
 <h2>Alerts</h2>
@@ -14,23 +15,5 @@
 {% include "includes/casesummary.html" %}
 <h2>Message users</h2>
 {% include "includes/sendmessage.html" %}
-<h2>Search</h2>
-<form method="get" action="/search/">
-    <input type="search" name="q" />
-</form>
-<h2>MUAC Over time</h2>
-{{ averages.muac.javascript_string|safe }}
-
-{% block javascripts-bottom %}
-    <script type="text/javascript">
-        /*
-        function reload() {
-            $('#message-log').load('/ajax/message-log/');  
-            setTimeout(reload, 10000);
-        }                             
-        $(document).ready(reload);
-        */
-    </script>    
-{% endblock %}
 
 {% endblock %}

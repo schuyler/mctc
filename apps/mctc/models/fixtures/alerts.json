@@ -1,0 +1,142 @@
+[
+  {
+    "pk": 1, 
+    "model": "mctc.zone", 
+    "fields": {
+      "category": 3, 
+      "head": 2, 
+      "name": "X-Ray", 
+      "lon": null, 
+      "number": 1, 
+      "lat": null
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "mctc.zone", 
+    "fields": {
+      "category": 2, 
+      "head": 3, 
+      "name": "Whiskey", 
+      "lon": null, 
+      "number": 2, 
+      "lat": null
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "mctc.zone", 
+    "fields": {
+      "category": 1, 
+      "head": null, 
+      "name": "Tango", 
+      "lon": null, 
+      "number": 3, 
+      "lat": null
+    }
+  }, 
+  {
+    "pk": 1, 
+    "model": "mctc.facility", 
+    "fields": {
+      "name": "Alphaville", 
+      "zone": 2, 
+      "lon": null, 
+      "role": 1, 
+      "lat": null, 
+      "codename": "apple"
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "mctc.facility", 
+    "fields": {
+      "name": "Bravo Town", 
+      "zone": 1, 
+      "lon": null, 
+      "role": 1, 
+      "lat": null, 
+      "codename": "banana"
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "mctc.facility", 
+    "fields": {
+      "name": "Charliesburg", 
+      "zone": 2, 
+      "lon": null, 
+      "role": 1, 
+      "lat": null, 
+      "codename": "cherry"
+    }
+  }, 
+  {
+    "pk": 1, 
+    "model": "mctc.provider", 
+    "fields": {
+      "following_clinics": [
+        1
+      ], 
+      "following_users": [], 
+      "mobile": "12345678", 
+      "alerts": true, 
+      "manager": null, 
+      "clinic": 1, 
+      "role": 1, 
+      "user": 1, 
+      "active": true
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "mctc.provider", 
+    "fields": {
+      "following_clinics": [], 
+      "following_users": [], 
+      "mobile": "123456790", 
+      "alerts": true, 
+      "manager": null, 
+      "clinic": 1, 
+      "role": 1, 
+      "user": 2, 
+      "active": true
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "mctc.provider", 
+    "fields": {
+      "following_clinics": [
+        1
+      ], 
+      "following_users": [
+        2
+      ], 
+      "mobile": "045763045673", 
+      "alerts": true, 
+      "manager": null, 
+      "clinic": 2, 
+      "role": 1, 
+      "user": 3, 
+      "active": true
+    }
+  }, 
+  {
+    "pk": 4, 
+    "model": "mctc.provider", 
+    "fields": {
+      "following_clinics": [], 
+      "following_users": [
+        2
+      ], 
+      "mobile": "390487539847", 
+      "alerts": true, 
+      "manager": null, 
+      "clinic": 1, 
+      "role": 1, 
+      "user": 4, 
+      "active": true
+    }
+  }
+]

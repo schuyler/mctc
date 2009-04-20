@@ -6,7 +6,8 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Count, ObjectDoesNotExist, Q, Avg
 from django.db import connection
 
-from apps.mctc.models import MessageLog, Case, Zone, Provider, ReportMalnutrition, ReportMalnutritionCache
+from apps.mctc.models.general import MessageLog, Case, Zone, Provider
+from apps.mctc.models.reports import ReportMalnutrition, ReportCache
 from apps.mctc.app import message_users
 
 from apps.webui.shortcuts import as_html, as_csv, as_pdf, paginate, login_required
@@ -17,6 +18,8 @@ from apps.webui.graphs.average import create_average_for_qs, create_graph
 
 from datetime import datetime, timedelta
 import time
+
+from reusable_tables.table import Table
 
 @login_required
 def ajax_message_log(request):
@@ -68,7 +71,14 @@ def active_cases(request):
 @login_required
 def dashboard(request):
     # i don't expect this to last, just a test and messing, ugh!
-    res = paginate(Case.filter_ill().order_by("-updated_at"), 1, 50)
+    case_table = Table(request, "cases", 
+                          Case.filter_ill().order_by("-updated_at"),
+                          "includes/cases_head.html", "includes/cases_body.html")
+
+    allcase_table = Table(request, "allcases", 
+                            Case.objects.all().order_by("-updated_at"),
+                            "includes/cases_head.html", "includes/cases_body.html")
+
     # get totals, yay for aggregation and turn it into a dict for easy use in templates
     totals = Case.objects.values("status").annotate(Count("status"))
     totals = dict([ [t["status"], t["status__count"] ] for t in totals ])
@@ -88,7 +98,8 @@ def dashboard(request):
         messageform = None
         
     context = {
-        "case_object_list": res,
+        "case_table": case_table(),
+        "allcase_table": allcase_table(),
         "paginate_url": "#",
         "case_totals": totals,
         "message_form": messageform,
@@ -111,10 +122,12 @@ def search_view(request):
 @login_required
 def case_view(request, object_id):
     case = get_object_or_404(Case, id=object_id)
-    res = paginate(case.reportmalnutrition_set.all(), 1)
+    nut_res = paginate(case.reportmalnutrition_set.all(), 1)
+    mar_res = paginate(case.reportmalaria_set.all(), 1)
     context = {
         "object": case,
-        "report_object_list": res
+        "report_malnutrition_object_list": nut_res,
+        "report_malaria_object_list": mar_res        
     }
     return as_html(request, "caseview.html", context)
 
@@ -142,10 +155,12 @@ def provider_list(request):
 @login_required
 def provider_view(request, object_id):
     provider = get_object_or_404(Provider, id=object_id)
+    case_table = Table(request, "cases", 
+                          Case.filter_ill().filter(provider=provider), 
+                          "cases_head.html", "cases_body.html")
     context = {
         "object": provider,
-        "case_object_list": paginate(Case.filter_ill().filter(provider=provider), 1),
-        "message_object_list": paginate(MessageLog.objects.filter(sent_by=provider.user).order_by("-created_at"), 1)
-        
+        "case_table": case_table,
+#        "message_object_list": paginate(MessageLog.objects.filter(sent_by=provider.user).order_by("-created_at"), 1)       
     }
     return as_html(request, "providerview.html", context)

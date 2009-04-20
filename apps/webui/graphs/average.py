@@ -3,7 +3,7 @@ from django.db.models import Count, ObjectDoesNotExist, Q, Avg
 import time
 from datetime import datetime, timedelta
 
-from apps.mctc.models import ReportMalnutritionCache, ReportMalnutrition, Case
+from apps.mctc.models.reports import ReportCache, ReportMalnutrition, Case
 from apps.webui.graphs.flot import FlotGraph
 
 
@@ -11,7 +11,7 @@ def create_average_for_case(case, field, length):
     now = datetime.now()
     start = now - timedelta(days=length)
 
-    last_cache = ReportMalnutritionCache.objects.filter(case=case).order_by("-date")
+    last_cache = ReportCache.objects.filter(case=case).order_by("-date")
     if not last_cache:
         last_cache_date = start
     else:
@@ -21,7 +21,7 @@ def create_average_for_case(case, field, length):
         for fld in ("muac", "weight", "height"):
             reports = {}        
             last = None            
-            for report in ReportMalnutrition.objects.filter(case=case):
+            for report in ReportCache.objects.filter(case=case):
                 reports[report.entered_at.date()] = getattr(report, fld)
     
             # find the first
@@ -34,12 +34,12 @@ def create_average_for_case(case, field, length):
                 if reports.has_key(date):
                     last = reports[date]
                 if last:
-                    obj = ReportMalnutritionCache.objects.get_or_create(case=case, date=date)[0]
+                    obj = ReportCache.objects.get_or_create(case=case, date=date)[0]
                     setattr(obj, fld, last)
                     obj.save()
                 x += 1
 
-    res = ReportMalnutritionCache.objects.filter(case=case).filter(date__gte=start)
+    res = ReportCache.objects.filter(case=case).filter(date__gte=start)
     rows = [ [time.mktime(r.date.timetuple()) * 1000, getattr(r, field) ] for r in res if getattr(r, field) ]
     return rows
 
@@ -55,7 +55,7 @@ def create_average_for_qs(q, field, length):
     rows = []
 
     for x in range(0, (now - start).days + 1):
-        res = ReportMalnutritionCache.objects.filter(q).filter(date=start + timedelta(days=x)).values("date").annotate(Avg(field))
+        res = ReportCache.objects.filter(q).filter(date=start + timedelta(days=x)).values("date").annotate(Avg(field))
         if res:
             rows.append([
                 time.mktime(res[0]["date"].timetuple()) * 1000,

@@ -23,8 +23,43 @@ messages = {
 
 date_format = "%d/%m/%Y"
 time_format = "%H:%M%p"
-
 pagination_size_default = 20
+def paginate(queryset, number, size=pagination_size_default):
+    try:
+        number = int(number)
+    except (TypeError, ValueError):
+        # unknown number
+        number = 1
+        
+    pages = Paginator(queryset, pagination_size_default)
+    result = { "pages": pages, "count": queryset.count, "jump": jump(pages, number) }
+    try:
+        result["page"] = pages.page(number)
+    except InvalidPage:
+        # no page, don't add one in
+        pass
+    return result
+
+def jump(pages, index):
+    res = { "start_ellipsis": False, "end_ellipsis": False }
+    nums = pages.page_range
+    side = 5
+    index -= 1
+    start = index - side
+    if start > 0:
+        res["start_ellipsis"] = True
+        
+    if start < 0:
+        start = 0
+        
+    end = index + side + 1
+    if end > (len(nums) + 1):
+        res["pages_bit"] = nums[start:]        
+    else:
+        res["pages_bit"] = nums[start:end]
+        res["end_ellipsis"] = True
+        
+    return res
 
 def as_html(request, template, context):
     return render_to_response(template, 
@@ -80,23 +115,6 @@ def as_csv(request, objects):
     response['Content-Disposition'] = 'attachment; filename=report.csv'    
     response.write(output.getvalue())
     return response
-
-def paginate(queryset, number, size=pagination_size_default):
-    try:
-        number = int(number)
-    except (TypeError, ValueError):
-        # unknown number
-        number = 1
-        
-    pages = Paginator(queryset, pagination_size_default)
-    result = { "pages": pages, "count": queryset.count, "jump": jump(pages, number) }
-    try:
-        result["page"] = pages.page(number)
-    except InvalidPage:
-        # no page, don't add one in
-        pass
-
-    return result
     
 def login_required(fn):
     """ We need to limit the front end to authenticated staff """
@@ -108,27 +126,4 @@ def login_required(fn):
         
         return HttpResponseRedirect("/accounts/login/")
     return new
-
-
-def jump(pages, index):
-    res = {
-        "start_ellipsis": False,
-        "end_ellipsis": False
-    }
-
-    nums = pages.page_range
-    side = 5
-    index -= 1
-    start = index - side
-    if start > 0:
-        res["start_ellipsis"] = True
-    if start < 0:
-        start = 0
-    end = index + side + 1
-    if end > (len(nums) + 1):
-        res["pages_bit"] = nums[start:]
-    else:
-        res["pages_bit"] = nums[start:end]
-        res["end_ellipsis"] = True
-    return res
     

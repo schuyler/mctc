@@ -74,6 +74,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
+    "django.core.context_processors.request",    
     "rapidsms.webui.contexts.apps",
     "apps.webui.context.general"
 ]
@@ -100,5 +101,6 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'apps.mctc',
-    'apps.webui'
+    'apps.webui',
+    "reusable_tables"
 )
