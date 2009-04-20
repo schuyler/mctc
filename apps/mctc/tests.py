@@ -266,31 +266,40 @@ class TestApp (TestScript):
         7654321 < Report +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
     """
     
-    temp_test_06_Lists = """
+    test_06_Lists = """
         # test of mulitiple recipients and report of a case
         7654322 > join cherry bob smith
         7654322 < 7654322 registered to @sbob (BOB, Smith) at Charliesburg.
         
         7654321 > +26 105 d v f
         7654321 < Report +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
-        7654322 < @jdoe reports +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
+        # 7654322 < @jdoe reports +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
     """
+
+    def test_07_mrdt_00(self):
+        # a bit of setup for the test
+        #import pdb; pdb.set_trace()
+        first = User.objects.get(username="jdoe").provider
+        second = User.objects.get(username="sbob").provider
+        second.following_users.add(first)
+        second.alerts = True
+        second.save()
 
     test_07_mrdt_01 = """
         7654321 > mrdt +26 y n f
-        7654321 < Report +26: Y N, Fever
-        7654322 < MRDT> Child +26, MADISON, Molly, F/4 has MALARIA and danger signs Fever. Refer to clinic immediately after first dose (2 tabs) is given
+        7654321 < MRDT> Child +26, MADISON, Molly, F/4 has MALARIA. Child is 4. Please provide 2 tabs of Coartem (ACT) twice a day for 3 days
+        7654322 < MRDT> Child +26, MADISON, Molly, F/4 (None) has MALARIA. CHW: @jdoe 7654321
         
         7654321 > mrdt +26 n y f e
-        7654321 < Report +26: N Y, Fever, Edema        
-        7654322 < MRDT> Child +26, MADISON, Molly, F/4 (Sally), None. RDT=N, Bednet=Y, (Fever, Edema). Please refer patient IMMEDIATELY for clinical evaluation
+        7654321 < MRDT> Child +26, MADISON, Molly, F/4 (Sally), None. RDT=N, Bednet=Y, (Fever, Edema). Please refer patient IMMEDIATELY for clinical evaluation
+        7654322 < MRDT> Negative MRDT with Fever. +26, MADISON, Molly, F/4 None. Patient requires IMMEDIATE referral. Reported by CHW J DOE @jdoe m:7654321.
         
         7654321 > mrdt +26 n y fe
         7654321 < Unknown observation code: fe
         
         7654321 > mrdt +26 n n
-        7654321 < Report +26: N N     
-        7654322 < MRDT> Child +26, MADISON, Molly, F/4 (Sally), None. RDT=N, Bednet=N. Please refer patient IMMEDIATELY for clinical evaluation
+        7654321 < MRDT> Child +26, MADISON, Molly, F/4 (Sally), None. RDT=N, Bednet=N. Please refer patient IMMEDIATELY for clinical evaluation   
+        7654322 < MRDT> Negative MRDT with Fever. +26, MADISON, Molly, F/4 None. Patient requires IMMEDIATE referral. Reported by CHW J DOE @jdoe m:7654321.
 
         7654321 > mrdt +26 n n q
         7654321 < Unknown observation code: q     

@@ -25,6 +25,7 @@ class Report:
                 if user not in recipients:
                     recipients.append(user)
         
+        
         # find all the users monitoring this user
         for user in provider.following_users.all():
             if user.alerts:

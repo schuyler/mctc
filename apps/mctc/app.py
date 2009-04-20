@@ -461,14 +461,11 @@ class App (rapidsms.app.App):
         #msg = _("+%(ref_id)s: %(result_text)s %(bednet_text)s") % info
         #if observed: msg += ", " + info["observed"]        
         message.respond(msg)
+        # send the message to all the people registered for an alert
+        recipients = report.get_alert_recipients()
+        for recipient in recipients:
+            message.forward(recipient.mobile, alert)
 
-        recipients = [message.sender.provider,]
-        for recipient in Provider.objects.filter(clinic=provider.clinic):
-            if recipient in recipients: continue
-            recipients.append(recipient)
-            #message.forward(recipient.mobile, alert)
-
-    
     def delete_similar(self, set):
         try:
             last_report = set.latest("entered_at")
