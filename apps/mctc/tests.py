@@ -1,8 +1,8 @@
 from rapidsms.tests.scripted import TestScript
 from django.core.management import call_command
 from django.test import TestCase
-from app import App
 
+from app import App
 
 from models.general import Provider, User, MessageLog, Facility
 from models.general import Case, CaseNote, Observation
@@ -29,7 +29,7 @@ def date_boundaries():
         "over 15 years": 5500
     }
     for age, diff in mapping.items():
-        mapping[age] = (now - timedelta(days=diff)).strftime("%Y%m%d")
+        mapping[age] = (now - timedelta(days=diff)).strftime("%d%m%Y")
 
     return mapping
 
@@ -49,7 +49,7 @@ class TestApp (TestScript):
 
         # test registration
         1234567 > join apple smith ken
-        1234567 < 1234567 registered to *1 ksmith (SMITH, Ken) at Alphaville.
+        1234567 < 1234567 registered to @ksmith (SMITH, Ken) at Alphaville.
 
         # test re-registration
         1234567 > join apple smith ken
@@ -63,7 +63,7 @@ class TestApp (TestScript):
         1234567 > join banana smith ken smithk
         1234567 < Phone 1234567 is already registered to SMITH, Ken. Reply with 'CONFIRM smithk'.   
         1234567 > confirm smithk
-        1234567 < 1234567 registered to *2 smithk (SMITH, Ken) at Bravo Town.
+        1234567 < 1234567 registered to @smithk (SMITH, Ken) at Bravo Town.
     """
 
     test_00_MessageLog_1 = """
@@ -79,24 +79,24 @@ class TestApp (TestScript):
 
     test_01_DirectMessage = """
         # test authentication
-        7654321 > *2 can you read this?
+        7654321 > @2 can you read this?
         7654321 < 7654321 is not a registered number.
 
         # test direct messaging
         7654321 > join cherry doe jane
-        7654321 < 7654321 registered to *3 jdoe (DOE, Jane) at Charliesburg.
-        7654321 > *2 can you read this? 
-        1234567 < *jdoe> can you read this?
-        1234567 > *jdoe yes, I can read that
-        7654321 < *smithk> yes, I can read that
-        7654321 > *SMITHK GOOD THANKS
-        1234567 < *jdoe> GOOD THANKS
+        7654321 < 7654321 registered to @jdoe (DOE, Jane) at Charliesburg.
+        7654321 > @2 can you read this? 
+        1234567 < @jdoe> can you read this?
+        1234567 > @jdoe yes, I can read that
+        7654321 < @smithk> yes, I can read that
+        7654321 > @SMITHK GOOD THANKS
+        1234567 < @jdoe> GOOD THANKS
 
         # test direct messaging to a non-existent user
-        7654321 > *14 are you there?
-        7654321 < User *14 is not registered.
-        7654321 > *kdoe are you there?
-        7654321 < User *kdoe is not registered.
+        7654321 > @14 are you there?
+        7654321 < User @14 is not registered.
+        7654321 > @kdoe are you there?
+        7654321 < User @kdoe is not registered.
 
         # FIXME: what happens if you message an inactive provider???
     """
@@ -109,19 +109,19 @@ class TestApp (TestScript):
     
     test_01_NewCase = """
         # test basic case creation
-        7654321 > new madison dolly f 080411
+        7654321 > new madison dolly f 110408
         7654321 < New +18: MADISON, Dolly F/%dm (None) Whiskey
 
         # case with guardian and age in years
-        7654321 > new madison molly f 20050411 sally
+        7654321 > new madison molly f 110405 sally
         7654321 < New +26: MADISON, Molly F/%d (Sally) Whiskey
 
         # case with guardian and phone number
-        7654321 > new madison holly f 090211 sally 230123
+        7654321 > new madison holly f 110209 sally 230123
         7654321 < New +34: MADISON, Holly F/%dm (Sally) Whiskey
 
         # case with phone number but no guardian
-        7654321 > new madison wally m 070615 230123
+        7654321 > new madison wally m 150607 230123
         7654321 < New +42: MADISON, Wally M/%dm (None) Whiskey
 
         # FIXME: unparsable cases???
@@ -151,7 +151,7 @@ class TestApp (TestScript):
         0000000 < 0000000 is not a registered number.
 
         7654321 > list @
-        7654321 < *1 ksmith, *2 smithk, *3 jdoe
+        7654321 < @1 ksmith, @2 smithk, @3 jdoe
     """
     
     test_03_CancelCases = """
@@ -266,14 +266,14 @@ class TestApp (TestScript):
         7654321 < Report +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
     """
     
-    test_06_Lists = """
+    temp_test_06_Lists = """
         # test of mulitiple recipients and report of a case
         7654322 > join cherry bob smith
-        7654322 < 7654322 registered to *4 sbob (BOB, Smith) at Charliesburg.
+        7654322 < 7654322 registered to @sbob (BOB, Smith) at Charliesburg.
         
         7654321 > +26 105 d v f
         7654321 < Report +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
-        7654322 < *jdoe reports +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
+        7654322 < @jdoe reports +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
     """
 
     test_07_mrdt_01 = """
@@ -340,16 +340,16 @@ class TestApp (TestScript):
 
 class TestAlerts(TestCase):
     fixtures = ["users.json", "alerts.json"]
-    
+
     def testCreateReport(self):
         provider = Provider.objects.get(id=2)
         clinic = provider.clinic
-        
+
         report = ReportMalaria()
         report.provider = provider
         recipients = report.get_alert_recipients()
         assert len(recipients) == 3, [ r.id for r in recipients ]
-        
+
         one = Provider.objects.get(id=1)
         one.alerts = False
         one.save()
@@ -375,5 +375,4 @@ class TestAlerts(TestCase):
         one.save()
 
         recipients = report.get_alert_recipients()        
-        assert len(recipients) == 1, [ r.id for r in recipients ]
-                
+        assert len(recipients) == 1, [ r.id for r in recipients ]        

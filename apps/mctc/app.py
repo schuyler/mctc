@@ -6,15 +6,13 @@ def _(txt): return txt
 from django.contrib.auth.models import User, Group
 
 import rapidsms
-
 from rapidsms.parsers.keyworder import Keyworder
 from rapidsms.message import Message
 from rapidsms.connection import Connection
 
-from models.general import Provider, User, MessageLog, Facility
-from models.general import Case, CaseNote, Observation
+from models.general import Provider, User
+from models.general import MessageLog, Facility, Case, CaseNote, Observation
 from models.reports import ReportMalnutrition, ReportMalaria
-
 import re, time, datetime
 
 def authenticated (func):
@@ -127,7 +125,7 @@ class App (rapidsms.app.App):
 
     def respond_to_join(self, message, info):
         message.respond(
-            _("%(mobile)s registered to *%(id)s %(username)s " +
+            _("%(mobile)s registered to @%(username)s " +
               "(%(last_name)s, %(first_name)s) at %(clinic)s.") % info)
 
     @keyword(r'confirm (\w+)')
@@ -155,9 +153,9 @@ class App (rapidsms.app.App):
         return True
 
     def respond_not_registered (self, message, target):
-        raise HandlerFailed(_("User *%s is not registered.") % target)
+        raise HandlerFailed(_("User @%s is not registered.") % target)
 
-    @keyword(r'\*(\w+) (.+)')
+    @keyword(r'\@(\w+) (.+)')
     @authenticated
     def direct_message (self, message, target, text):
         try:
@@ -174,7 +172,7 @@ class App (rapidsms.app.App):
         except:
             self.respond_not_registered(message, target)
         sender = message.sender.username
-        return message.forward(mobile, "*%s> %s" % (sender, text))
+        return message.forward(mobile, "@%s> %s" % (sender, text))
 
     @keyword(r'new (\S+) (\S+) ([MF]) ([\d\-]+)( \D+)?( \d+)?')
     @authenticated
@@ -187,10 +185,10 @@ class App (rapidsms.app.App):
 
         dob = re.sub(r'\D', '', dob)
         try:
-            dob = time.strptime(dob, "%y%m%d")
+            dob = time.strptime(dob, "%d%m%y")
         except ValueError:
             try:
-                dob = time.strptime(dob, "%Y%m%d")
+                dob = time.strptime(dob, "%d%m%Y")
             except ValueError:
                 raise HandlerFailed(_("Couldn't understand date: %s") % dob)
         dob = datetime.date(*dob[:3])
@@ -266,7 +264,7 @@ class App (rapidsms.app.App):
         providers = Provider.objects.all()
         text  = ""
         for provider in providers:
-            item = "*%s %s" % (provider.id, provider.user.username)
+            item = "@%s %s" % (provider.id, provider.user.username)
             if len(text) + len(item) + 2 >= self.MAX_MSG_LEN:
                 message.respond(text)
                 text = ""
@@ -360,14 +358,14 @@ class App (rapidsms.app.App):
         if case.status in (case.MODERATE_STATUS,
                            case.SEVERE_STATUS,
                            case.SEVERE_COMP_STATUS):
-            alert = _("*%(username)s reports %(msg)s") % {"username":provider.user.username, "msg":msg}
+            alert = _("@%(username)s reports %(msg)s") % {"username":provider.user.username, "msg":msg}
             recipients = [provider]
             for query in (Provider.objects.filter(alerts=True),
                           Provider.objects.filter(clinic=provider.clinic)):
                 for recipient in query:
                     if recipient in recipients: continue
                     recipients.append(recipient)
-                    message.forward(recipient.mobile, alert)
+                    #message.forward(recipient.mobile, alert)
 
         return True
 
@@ -395,7 +393,7 @@ class App (rapidsms.app.App):
         for obs in observed:
             report.observed.add(obs)
         report.save()
-        
+
         info = {
             'ref_id': case.ref_id,
             'last_name': case.last_name.upper(),
@@ -409,16 +407,18 @@ class App (rapidsms.app.App):
             'bednet': report.bednet,
             'bednet_text': report.bednet and "Y" or "N",
             'observed': ", ".join([k.name for k in observed]),
+            'provider_mobile': provider.mobile,
+            'provider_user': provider.user,
+            'provider_name': provider.user.first_name[0] + ' ' + provider.user.last_name.upper()
         }
-        
-        msg = _("+%(ref_id)s: %(result_text)s %(bednet_text)s") % info
-
-        if observed: msg += ", " + info["observed"]        
-        message.respond("Report " + msg)
-                
+                        
         if not result:
             if observed: info["observed"] = ", (%s)" % info["observed"]            
-            alert = _("MRDT> Child +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)s (%(guardian)s), %(village)s. RDT=%(result_text)s, Bednet=%(bednet_text)s%(observed)s. Please refer patient IMMEDIATELY for clinical evaluation" % info)
+            msg = _("MRDT> Child +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)s (%(guardian)s), %(village)s. RDT=%(result_text)s, Bednet=%(bednet_text)s%(observed)s. Please refer patient IMMEDIATELY for clinical evaluation" % info)
+
+            # alerts to health team
+            alert = _("MRDT> Negative MRDT with Fever. +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)s %(village)s. Patient requires IMMEDIATE referral. Reported by CHW %(provider_name)s @%(provider_user)s m:%(provider_mobile)s." % info)
+
         else:
             years, months = case.years_months()
             tabs, yage = None, None
@@ -436,14 +436,14 @@ class App (rapidsms.app.App):
             else:
                 tabs, yage = 4, years                        
             
-            dangers = report.observed.filter(uid__in=("vomiting", "fever", "appetite", "breathing", "confusion"))
+            dangers = report.observed.filter(uid__in=("vomiting", "appetite", "breathing", "confusion", "fits"))
             if dangers:
-                info["danger"] = " and danger signs " + ",".join([ u.name for u in dangers ])
+                info["danger"] = " and danger signs (" + ",".join([ u.name for u in dangers ]) + ")"
                 if not tabs:
-                    info["instructions"] = "Child is too young for treatment. Please refer immediately to clinic"
+                    info["instructions"] = "Child is too young for treatment. Please refer IMMEDIATELY to clinic"
                 else:
                     plural = (tabs > 1) and "s" or ""
-                    info["instructions"] = "Refer to clinic immediately after first dose (%s tab%s) is given" % (tabs, plural)
+                    info["instructions"] = "Refer to clinic immediately after %s tab%s of Coartem is given" % (tabs, plural)
             else:
                 info["danger"] = ""
                 if not tabs:
@@ -452,13 +452,21 @@ class App (rapidsms.app.App):
                     plural = (tabs > 1) and "s" or ""
                     info["instructions"] = "Child is %s. Please provide %s tab%s of Coartem (ACT) twice a day for 3 days" % (yage, tabs, plural)
 
-            alert = _("MRDT> Child +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)s has MALARIA%(danger)s. %(instructions)s" % info)
+
+            msg = _("MRDT> Child +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)s has MALARIA%(danger)s. %(instructions)s" % info)
+            
+            alert = _("MRDT> Child +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)s (%(village)s) has MALARIA%(danger)s. CHW: @%(provider_user)s %(provider_mobile)s" % info)
     
+
+        #msg = _("+%(ref_id)s: %(result_text)s %(bednet_text)s") % info
+        #if observed: msg += ", " + info["observed"]        
+        message.respond(msg)
+
         recipients = [message.sender.provider,]
         for recipient in Provider.objects.filter(clinic=provider.clinic):
             if recipient in recipients: continue
             recipients.append(recipient)
-            message.forward(recipient.mobile, alert)
+            #message.forward(recipient.mobile, alert)
 
     
     def delete_similar(self, set):
