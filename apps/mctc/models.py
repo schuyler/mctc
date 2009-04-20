@@ -132,7 +132,11 @@ class Case(models.Model):
             self.ref_id = self._luhn(self.id)
             super(Case, self).save(*args)
     
-    def age (self):
+    def years_months(self):
+        now = datetime.now().date()
+        return (now.year - self.dob.year, now.month - self.dob.month)
+    
+    def age(self):
         delta = datetime.now().date() - self.dob
         years = delta.days / 365.25
         if years > 3:
@@ -150,48 +154,61 @@ class Case(models.Model):
     def filter_active(cls):
         return cls.objects.filter(status__le=cls.CURED_STATUS)
 
-class Report(models.Model):
+class Observation(models.Model):
+    uid = models.CharField(max_length=15)
+    name = models.CharField(max_length=255)
+    letter = models.CharField(max_length=2, unique=True)
+
+    def __unicode__(self):
+        return self.name
+
+class Diagnosis(models.Model):
+    name = models.CharField(max_length=255)
+    numeric_code = models.CharField(max_length=3)    
+
+    def __unicode__(self):
+        return self.numeric_code
+
+    class Meta:
+        verbose_name = "Diagnoses"
+
+class ReportMalaria(models.Model):
+    class Meta:
+        get_latest_by = 'entered_at'
+        ordering = ("-entered_at",)
+    
+    case = models.ForeignKey(Case, db_index=True)
+    provider = models.ForeignKey(Provider, db_index=True)
+    entered_at = models.DateTimeField(db_index=True)
+    diagnosis = models.ManyToManyField(Diagnosis)
+    bednet = models.BooleanField(db_index=True)
+    result = models.BooleanField(db_index=True) 
+    observed = models.ManyToManyField(Observation)       
+
+    def save(self, *args):
+        if not self.id:
+            self.entered_at = datetime.now()
+        super(ReportMalaria, self).save(*args)
+        
+class ReportMalnutrition(models.Model):
     class Meta:
         get_latest_by = 'entered_at'
         ordering = ("-entered_at",)
 
-    EDEMA_OBSERVED         = 1
-    APPETITE_LOSS_OBSERVED = 2
-    DIARRHEA_OBSERVED      = 3
-    VOMITING_OBSERVED      = 4
-    CHRONIC_COUGH_OBSERVED = 5
-    HIGH_FEVER_OBSERVED    = 6
-    UNRESPONSIVE_OBSERVED  = 7
-    OBSERVED_CHOICES = (
-        (EDEMA_OBSERVED,         _("Edema")),
-        (APPETITE_LOSS_OBSERVED, _("Appetite Loss")),
-        (DIARRHEA_OBSERVED,      _("Diarrhea")),
-        (VOMITING_OBSERVED,      _("Vomiting")),
-        (CHRONIC_COUGH_OBSERVED, _("Chronic Cough")),
-        (HIGH_FEVER_OBSERVED,    _("High Fever")),
-        (UNRESPONSIVE_OBSERVED,  _("Unresponsive")),
-    )
     case        = models.ForeignKey(Case, db_index=True)
     provider    = models.ForeignKey(Provider, db_index=True)
     entered_at  = models.DateTimeField(db_index=True)
     muac        = models.IntegerField(_("MUAC (mm)"), null=True, blank=True)
     height      = models.IntegerField(_("Height (cm)"), null=True, blank=True)
     weight      = models.FloatField(_("Weight (kg)"), null=True, blank=True)
-    observed    = SeparatedValuesField(_("Observations"),
-                    choices=OBSERVED_CHOICES, max_length=255,
-                    null=True, blank=True)
-
-    def get_observed_display(self):
-        # can we move this to the field?
-        # not sure what i'm going to get back, lets get some data
-        pass
+    observed    = models.ManyToManyField(Observation)
         
     def __unicode__ (self):
         return "#%d" % self.id
     
     def diagnosis (self):
-        complications = [c for c in self.observed if c != self.EDEMA_OBSERVED]
-        edema = self.EDEMA_OBSERVED in self.observed
+        complications = [c for c in self.observed.all() if c.uid != "edema"]
+        edema = "edema" in [ c.uid for c in self.observed.all() ]
         if edema or self.muac < 110:
             if complications:
                 return Case.SEVERE_COMP_STATUS
@@ -207,7 +224,7 @@ class Report(models.Model):
     def save(self, *args):
         if not self.id:
             self.entered_at = datetime.now()
-        super(Report, self).save(*args)
+        super(ReportMalnutrition, self).save(*args)
 
 
 class CaseNote(models.Model):
@@ -233,7 +250,7 @@ class MessageLog(models.Model):
             self.created_at = datetime.now()
         super(MessageLog, self).save(*args)
 
-class ReportCache(models.Model):
+class ReportMalnutritionCache(models.Model):
     case = models.ForeignKey(Case)
     date = models.DateField(db_index=True)
     muac = models.IntegerField(_("MUAC (mm)"), null=True, blank=True)

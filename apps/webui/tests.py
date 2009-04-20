@@ -1,7 +1,7 @@
 from django.test import TestCase                
 from django.test.client import Client
 
-from apps.webui.views.general import create_average
+from apps.webui.graphs.average import create_average_for_case
 from apps.mctc.models import Case
 
 class dashboard(TestCase):

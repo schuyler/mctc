@@ -2,7 +2,7 @@ from rapidsms.tests.scripted import TestScript
 from django.core.management import call_command
 from app import App
 from models import Case, User, MessageLog
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 def age_in_months (*ymd):
     return int((datetime.now().date() - date(*ymd)).days / 30.4375)    
@@ -10,8 +10,25 @@ def age_in_months (*ymd):
 def age_in_years (*ymd):
     return int((datetime.now().date() - date(*ymd)).days / 365.25)
 
+def date_boundaries():
+    now = datetime.now()
+    mapping = {
+        "under 2 months": 45,
+        "over 2 months": 72,
+        "over 1 year": 380,
+        "over 2 years": 770,
+        "over 3 years": 1110,
+        "over 6 years": 2300,
+        "over 9 years": 3300,
+        "over 15 years": 5500
+    }
+    for age, diff in mapping.items():
+        mapping[age] = (now - timedelta(days=diff)).strftime("%Y%m%d")
+
+    return mapping
+
 class TestApp (TestScript):
-    fixtures = ('test.json',)
+    fixtures = ('test.json', 'observations.json')
     apps = (App,)
 
     def setUp (self):
@@ -87,19 +104,19 @@ class TestApp (TestScript):
     test_01_NewCase = """
         # test basic case creation
         7654321 > new madison dolly f 080411
-        7654321 < New #18: MADISON, Dolly F/%dm (None) Whiskey
+        7654321 < New +18: MADISON, Dolly F/%dm (None) Whiskey
 
         # case with guardian and age in years
         7654321 > new madison molly f 20050411 sally
-        7654321 < New #26: MADISON, Molly F/%d (Sally) Whiskey
+        7654321 < New +26: MADISON, Molly F/%d (Sally) Whiskey
 
         # case with guardian and phone number
         7654321 > new madison holly f 090211 sally 230123
-        7654321 < New #34: MADISON, Holly F/%dm (Sally) Whiskey
+        7654321 < New +34: MADISON, Holly F/%dm (Sally) Whiskey
 
         # case with phone number but no guardian
         7654321 > new madison wally m 070615 230123
-        7654321 < New #42: MADISON, Wally M/%dm (None) Whiskey
+        7654321 < New +42: MADISON, Wally M/%dm (None) Whiskey
 
         # FIXME: unparsable cases???
     """ % caseAges
@@ -120,122 +137,127 @@ class TestApp (TestScript):
         0000000 < 0000000 is not a registered number.
 
         7654321 > list
-        7654321 < #18 MADISON D. F/%dm, #26 MADISON M. F/%d, #34 MADISON H. F/%dm, #42 MADISON W. M/%dm
+        7654321 < +18 MADISON D. F/%dm, +26 MADISON M. F/%d, +34 MADISON H. F/%dm, +42 MADISON W. M/%dm
     """ % caseAges
 
     test_02_ListProviders = """
-        0000000 > list *
+        0000000 > list @
         0000000 < 0000000 is not a registered number.
 
-        7654321 > list *
+        7654321 > list @
         7654321 < *1 ksmith, *2 smithk, *3 jdoe
     """
     
     test_03_CancelCases = """
-        0000000 > cancel #34
+        0000000 > cancel +34
         0000000 < 0000000 is not a registered number.
         
-        7654321 > cancel #34
-        7654321 < Case #34 cancelled.
+        7654321 > cancel +34
+        7654321 < Case +34 cancelled.
         7654321 > cancel 42
-        7654321 < Case #42 cancelled. 
+        7654321 < Case +42 cancelled. 
         7654321 > cancel 42
-        7654321 < Case #42 not found. 
+        7654321 < Case +42 not found. 
     """ 
 
     test_03_ReportCase = """
         # authenticated
-        0000000 > #26 7.5 e
+        0000000 > +26 7.5 e
         0000000 < 0000000 is not a registered number.
         
         # basic test
-        7654321 > #26 75 n
-        7654321 < Report #26: SAM, MUAC 75 mm
+        7654321 > +26 75 n
+        7654321 < Report +26: SAM, MUAC 75 mm
 
         # cm get converted to mm, g to kg, m to cm
-        7654321 > #26 7.5 2150 1.4 n
-        7654321 < Report #26: SAM, MUAC 75 mm, 2.1 kg, 140 cm
+        7654321 > +26 7.5 2150 1.4 n
+        7654321 < Report +26: SAM, MUAC 75 mm, 2.1 kg, 140 cm
 
         # complications list
-        7654321 > #26 75 21 e a d
-        7654321 < Report #26: SAM+, MUAC 75 mm, 21.0 kg, Edema, Appetite Loss, Diarrhea
+        7654321 > +26 75 21 e a d
+        7654321 < Report +26: SAM+, MUAC 75 mm, 21.0 kg, Edema, Appetite Loss, Diarrhea
 
         # complications list - weight is optional
-        7654321 > #26 75 e a d
-        7654321 < Report #26: SAM+, MUAC 75 mm, Edema, Appetite Loss, Diarrhea
+        7654321 > +26 75 e a d
+        7654321 < Report +26: SAM+, MUAC 75 mm, Edema, Appetite Loss, Diarrhea
 
         # complications list - case insensitive
-        7654321 > #26 75 21 N A D
-        7654321 < Report #26: SAM+, MUAC 75 mm, 21.0 kg, Appetite Loss, Diarrhea
+        7654321 > +26 75 21 N A D
+        7654321 < Report +26: SAM+, MUAC 75 mm, 21.0 kg, Appetite Loss, Diarrhea
 
         # more complications, formatted differently
-        7654321 > #26 75 n hcv
-        7654321 < Report #26: SAM+, MUAC 75 mm, Vomiting, Chronic Cough, High Fever
+        7654321 > +26 75 n fcv
+        7654321 < Unknown observation code: fcv
+
+        # more complications, formatted differently
+        7654321 > +26 75 n f cg v
+        7654321 < Report +26: SAM+, MUAC 75 mm, Fever, Coughing, Vomiting
 
         # one last complication test
-        7654321 > #26 75 21 n u
-        7654321 < Report #26: SAM+, MUAC 75 mm, 21.0 kg, Unresponsive
+        7654321 > +26 75 21 n u
+        7654321 < Report +26: SAM+, MUAC 75 mm, 21.0 kg, Unresponsive
 
         # MAM logic test
-        7654321 > #26 120 n
-        7654321 < Report #26: MAM, MUAC 120 mm
+        7654321 > +26 120 n
+        7654321 < Report +26: MAM, MUAC 120 mm
 
         # Healthy logic test
-        7654321 > #26 125 n
-        7654321 < Report #26: Healthy, MUAC 125 mm
+        7654321 > +26 125 n
+        7654321 < Report +26: Healthy, MUAC 125 mm
 
         # MUAC fail
-        7654321 > #26 45.5.5 83.1 e foo
+        7654321 > +26 45.5.5 83.1 e foo
         7654321 < Can't understand MUAC (mm): 45.5.5
 
         # weight fail
-        7654321 > #26 45 83.1.1 e foo
+        7654321 > +26 45 83.1.1 e foo
         7654321 < Can't understand weight (kg): 83.1.1
 
         # height fail
-        7654321 > #26 45 83.1 122.1.1 e foo
+        7654321 > +26 45 83.1 122.1.1 e foo
         7654321 < Can't understand height (cm): 122.1.1
 
         # complication fail
-        7654321 > #26 800 N MUST RECEIVE HELP
-        7654321 < Unknown observation code: m
+        7654321 > +26 800 N MUST RECEIVE HELP
+        7654321 < Unknown observation code: must
     """
 
     def test_03_ReportOverwrite (self):
-        reports = Case.objects.get(ref_id=26).report_set.count()
+        reports = Case.objects.get(ref_id=26).reportmalnutrition_set.count()
+
         self.assertEquals(reports, 1,
             "only have one report; all others today were overwritten")
 
     test_03_ShowCase = """
-        7654321 > show #26
-        7654321 < #26 Healthy MADISON, Molly F/4 (Sally) Whiskey
+        7654321 > show +26
+        7654321 < +26 Healthy MADISON, Molly F/4 (Sally) Whiskey
     """
     
     test_04_NoteCase_1 = """
         # authenticated
-        0000000 > n #26 how are you gentleman! all your base are belong to us
+        0000000 > n +26 how are you gentleman! all your base are belong to us
         0000000 < 0000000 is not a registered number.
         
         # add a case note
-        7654321 > n #26 child seems to be recovering.
-        7654321 < Note added to case #26.
+        7654321 > n +26 child seems to be recovering.
+        7654321 < Note added to case +26.
 
         # this syntax works too
-        7654321 > note #26 will check back tomorrow
-        7654321 < Note added to case #26.
+        7654321 > note +26 will check back tomorrow
+        7654321 < Note added to case +26.
     """
 
     def test_04_NoteCase_2 (self):
         notes = Case.objects.get(ref_id=26).notes.count()
-        self.assertEqual(notes, 2, "have %d notes about #26" % notes)
+        self.assertEqual(notes, 2, "have %d notes about +26" % notes)
 
     def test_zzz_queue_is_empty (self):
         self.assertFalse(self.backend.message_waiting)
 
     test_05_Fever = """
         # requested change to make f be fever, not h
-        7654321 > #26 105 d v f
-        7654321 < Report #26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, High Fever
+        7654321 > +26 105 d v f
+        7654321 < Report +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
     """
     
     test_06_Lists = """
@@ -243,8 +265,71 @@ class TestApp (TestScript):
         7654322 > join cherry bob smith
         7654322 < 7654322 registered to *4 sbob (BOB, Smith) at Charliesburg.
         
-        7654321 > #26 105 d v f
-        7654321 < Report #26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, High Fever
-        7654322 < *jdoe reports #26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, High Fever
+        7654321 > +26 105 d v f
+        7654321 < Report +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
+        7654322 < *jdoe reports +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
     """
 
+    test_07_mrdt_01 = """
+        7654321 > mrdt +26 y n f
+        7654321 < Report +26: Y N, Fever
+        7654322 < MRDT> Child +26, MADISON, Molly, F/4 has MALARIA and danger signs Fever. Refer to clinic immediately after first dose (2 tabs) is given
+        
+        7654321 > mrdt +26 n y f e
+        7654321 < Report +26: N Y, Fever, Edema        
+        7654322 < MRDT> Child +26, MADISON, Molly, F/4 (Sally), None. RDT=N, Bednet=Y, (Fever, Edema). Please refer patient IMMEDIATELY for clinical evaluation
+        
+        7654321 > mrdt +26 n y fe
+        7654321 < Unknown observation code: fe
+        
+        7654321 > mrdt +26 n n
+        7654321 < Report +26: N N     
+        7654322 < MRDT> Child +26, MADISON, Molly, F/4 (Sally), None. RDT=N, Bednet=N. Please refer patient IMMEDIATELY for clinical evaluation
+
+        7654321 > mrdt +26 n n q
+        7654321 < Unknown observation code: q     
+        
+        7654321 > new madison molly f %s emily
+        7654321 < New +59: MADISON, Molly F/12m (Emily) Whiskey
+
+        7654321 > mrdt +59 y n f
+        7654321 < Report +59: Y N, Fever
+        7654322 < MRDT> Child +59, MADISON, Molly, F/12m has MALARIA and danger signs Fever. Refer to clinic immediately after first dose (1 tab) is given
+
+        7654321 > mrdt +59 y n
+        7654321 < Report +59: Y N
+        7654322 < MRDT> Child +59, MADISON, Molly, F/12m has MALARIA. Child is less than 3. Please provide 1 tab of Coartem (ACT) twice a day for 3 days
+
+        7654321 > new madison foo f %s emily
+        7654321 < New +67: MADISON, Foo F/3 (Emily) Whiskey
+
+        7654321 > mrdt +67 y n cf e
+        7654321 < Report +67: Y N, Confusion, Edema
+        7654322 < MRDT> Child +67, MADISON, Foo, F/3 has MALARIA and danger signs Confusion. Refer to clinic immediately after first dose (2 tabs) is given
+        
+        7654321 > mrdt +67 y n e
+        7654321 < Report +67: Y N, Edema
+        7654322 < MRDT> Child +67, MADISON, Foo, F/3 has MALARIA. Child is 3. Please provide 2 tabs of Coartem (ACT) twice a day for 3 days
+
+        7654321 > new madison sam f %s samantha
+        7654321 < New +75: MADISON, Sam F/2m (Samantha) Whiskey
+
+        7654321 > mrdt +75 y n cf e
+        7654321 < Report +75: Y N, Confusion, Edema
+        7654322 < MRDT> Child +75, MADISON, Sam, F/2m has MALARIA and danger signs Confusion. Refer to clinic immediately after first dose (1 tab) is given
+
+        7654321 > mrdt +75 n n cf e
+        7654321 < Report +75: N N, Confusion, Edema
+        7654322 < MRDT> Child +75, MADISON, Sam, F/2m (Samantha), None. RDT=N, Bednet=N, (Confusion, Edema). Please refer patient IMMEDIATELY for clinical evaluation
+        
+    """ % (date_boundaries()["over 1 year"], date_boundaries()["over 3 years"], date_boundaries()["over 2 months"])
+        
+
+    def test_07_mrdt_02(self):
+        # like malnutrition, this nukes any other report on the same day
+        # in the previous test, 3 reports were sent in
+        reports = Case.objects.get(ref_id=26).reportmalaria_set.all()
+        assert len(reports) == 1
+        assert not len(reports[0].observed.all())
+
+        

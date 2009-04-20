@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Count, ObjectDoesNotExist, Q, Avg
 from django.db import connection
 
-from apps.mctc.models import MessageLog, Case, Zone, Provider, Report, ReportCache
+from apps.mctc.models import MessageLog, Case, Zone, Provider, ReportMalnutrition, ReportMalnutritionCache
 from apps.mctc.app import message_users
 
 from apps.webui.shortcuts import as_html, as_csv, as_pdf, paginate, login_required

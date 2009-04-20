@@ -14,8 +14,6 @@ try:
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Table
 except ImportError:
     has_reportlab = False
-    
-from tempfile import mkstemp
 
 messages = {
     "login_failed": _("Username or password did not match"),

@@ -8,13 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-04-19 05:41-0400\n"
+"POT-Creation-Date: 2009-04-19 09:19-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"ReportMalnutrition-Msgid-Bugs-To: \n"
 
 #: apps/mctc/admin.py:15
 msgid "Personal info"
@@ -28,108 +29,106 @@ msgstr ""
 msgid "Groups"
 msgstr ""
 
-#: apps/mctc/app.py:19
+#: apps/mctc/app.py:20
 #, python-format
 msgid "%s is not a registered number."
 msgstr ""
 
-#: apps/mctc/app.py:64
+#: apps/mctc/app.py:65
 msgid "An error occurred. Please call 999-9999."
 msgstr ""
 
-#: apps/mctc/app.py:74
+#: apps/mctc/app.py:75
 msgid "The given password is not recognized."
 msgstr ""
 
-#: apps/mctc/app.py:84
+#: apps/mctc/app.py:85
 #, python-format
 msgid "Username '%s' is already in use. "
 msgstr ""
 
-#: apps/mctc/app.py:110
+#: apps/mctc/app.py:111
 #, python-format
 msgid "Phone %(mobile)s is already registered to %(last_name)s, "
 msgstr ""
 
-#: apps/mctc/app.py:124
+#: apps/mctc/app.py:125
 #, python-format
 msgid "%(mobile)s registered to *%(id)s %(username)s "
 msgstr ""
 
-#: apps/mctc/app.py:152
+#: apps/mctc/app.py:153
 #, python-format
 msgid "User *%s is not registered."
 msgstr ""
 
-#: apps/mctc/app.py:189
+#: apps/mctc/app.py:190
 #, python-format
 msgid "Couldn't understand date: %s"
 msgstr ""
 
-#: apps/mctc/app.py:217
+#: apps/mctc/app.py:218
 #, python-format
-msgid "New #%(id)s: %(last_name)s, %(first_name)s %(gender)s/%(age)s "
+msgid "New +%(id)s: %(last_name)s, %(first_name)s %(gender)s/%(age)s "
 msgstr ""
 
-#: apps/mctc/app.py:225
+#: apps/mctc/app.py:226
 #, python-format
-msgid "Case #%s not found."
+msgid "Case +%s not found."
 msgstr ""
 
-#: apps/mctc/app.py:233
+#: apps/mctc/app.py:234
 #, python-format
-msgid "Cannot cancel #%s: case has diagnosis reports."
+msgid "Cannot cancel +%s: case has diagnosis reports."
 msgstr ""
 
-#: apps/mctc/app.py:235
+#: apps/mctc/app.py:236
 #, python-format
-msgid "Case #%s cancelled."
+msgid "Case +%s cancelled."
 msgstr ""
 
-#: apps/mctc/app.py:287
+#: apps/mctc/app.py:289
 #, python-format
 msgid ""
-"#%(id)s %(status)s %(last_name)s, %(first_name)s %(gender)s/%(age)s %"
+"+%(id)s %(status)s %(last_name)s, %(first_name)s %(gender)s/%(age)s %"
 "(guardian)s%(zone)s"
 msgstr ""
 
-#: apps/mctc/app.py:303
+#: apps/mctc/app.py:305
 #, python-format
 msgid "Can't understand MUAC (mm): %s"
 msgstr ""
 
-#: apps/mctc/app.py:312
+#: apps/mctc/app.py:347
 #, python-format
-msgid "Can't understand weight (kg): %s"
+msgid "+%(ref_id)s: %(diagnosis)s, MUAC %(muac)s"
 msgstr ""
 
-#: apps/mctc/app.py:322
-#, python-format
-msgid "Can't understand height (cm): %s"
-msgstr ""
-
-#: apps/mctc/app.py:338
-#, python-format
-msgid "Unknown observation code: %s"
-msgstr ""
-
-#: apps/mctc/app.py:369
-#, python-format
-msgid "#%(ref_id)s: %(diagnosis)s, MUAC %(muac)s"
-msgstr ""
-
-#: apps/mctc/app.py:373
+#: apps/mctc/app.py:351 apps/mctc/app.py:411
 msgid "observed"
 msgstr ""
 
-#: apps/mctc/app.py:379
+#: apps/mctc/app.py:358
 #, python-format
 msgid "*%(username)s reports %(msg)s"
 msgstr ""
 
-#: apps/mctc/app.py:395
+#: apps/mctc/app.py:374
 #, python-format
-msgid "Note added to case #%s."
+msgid "Note added to case +%s."
+msgstr ""
+
+#: apps/mctc/app.py:409
+#, python-format
+msgid "+%(ref_id)s: %(result_text)s %(bednet_text)s"
+msgstr ""
+
+#: apps/mctc/app.py:416
+#, python-format
+msgid ""
+"MRDT> Child +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)"
+"sM (%(guardian)s), %(village)s. RDT=%(result_text)s, Bednet=%(bednet_text)s%"
+"(observed)s. Please refer patient IMMEDIATELY for clinical evaluation."
 msgstr ""
 
 #: apps/mctc/models.py:25
@@ -212,59 +211,27 @@ msgstr ""
 msgid "Date of Birth"
 msgstr ""
 
-#: apps/mctc/models.py:166
-msgid "Edema"
-msgstr ""
-
-#: apps/mctc/models.py:167
-msgid "Appetite Loss"
-msgstr ""
-
-#: apps/mctc/models.py:168
-msgid "Diarrhea"
-msgstr ""
-
-#: apps/mctc/models.py:169
-msgid "Vomiting"
-msgstr ""
-
-#: apps/mctc/models.py:170
-msgid "Chronic Cough"
-msgstr ""
-
-#: apps/mctc/models.py:171
-msgid "High Fever"
-msgstr ""
-
-#: apps/mctc/models.py:172
-msgid "Unresponsive"
-msgstr ""
-
-#: apps/mctc/models.py:177 apps/mctc/models.py:239
+#: apps/mctc/models.py:200 apps/mctc/models.py:255
 msgid "MUAC (mm)"
 msgstr ""
 
-#: apps/mctc/models.py:178 apps/mctc/models.py:240
+#: apps/mctc/models.py:201 apps/mctc/models.py:256
 msgid "Height (cm)"
 msgstr ""
 
-#: apps/mctc/models.py:179 apps/mctc/models.py:241
+#: apps/mctc/models.py:202 apps/mctc/models.py:257
 msgid "Weight (kg)"
 msgstr ""
 
-#: apps/mctc/models.py:180
-msgid "Observations"
-msgstr ""
-
-#: apps/webui/shortcuts.py:21
+#: apps/webui/shortcuts.py:19
 msgid "Username or password did not match"
 msgstr ""
 
-#: apps/webui/shortcuts.py:22
+#: apps/webui/shortcuts.py:20
 msgid "You have been logged out"
 msgstr ""
 
-#: apps/webui/shortcuts.py:23
+#: apps/webui/shortcuts.py:21
 msgid "Your message has been sent"
 msgstr ""
 

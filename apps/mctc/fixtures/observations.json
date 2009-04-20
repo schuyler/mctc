@@ -5,7 +5,6 @@
     "fields": {
       "letter": "e", 
       "uid": "edema", 
-      "report_type": "", 
       "name": "Edema"
     }
   }, 
@@ -15,7 +14,6 @@
     "fields": {
       "letter": "a", 
       "uid": "appetite", 
-      "report_type": "a", 
       "name": "Appetite Loss"
     }
   }, 
@@ -25,7 +23,6 @@
     "fields": {
       "letter": "d", 
       "uid": "diarrhea", 
-      "report_type": "", 
       "name": "Diarrhea"
     }
   }, 
@@ -35,7 +32,6 @@
     "fields": {
       "letter": "v", 
       "uid": "vomiting", 
-      "report_type": "", 
       "name": "Vomiting"
     }
   }, 
@@ -45,7 +41,6 @@
     "fields": {
       "letter": "u", 
       "uid": "unresponsive", 
-      "report_type": "", 
       "name": "Unresponsive"
     }
   }, 
@@ -55,7 +50,6 @@
     "fields": {
       "letter": "f", 
       "uid": "fever", 
-      "report_type": "", 
       "name": "Fever"
     }
   }, 
@@ -65,7 +59,6 @@
     "fields": {
       "letter": "b", 
       "uid": "breathing", 
-      "report_type": "", 
       "name": "Breathing Difficulty"
     }
   }, 
@@ -75,7 +68,6 @@
     "fields": {
       "letter": "cg", 
       "uid": "cough", 
-      "report_type": "", 
       "name": "Coughing"
     }
   }, 
@@ -85,7 +77,6 @@
     "fields": {
       "letter": "cf", 
       "uid": "confusion", 
-      "report_type": "", 
       "name": "Confusion"
     }
   }, 
@@ -95,7 +86,6 @@
     "fields": {
       "letter": "nr", 
       "uid": "responsive", 
-      "report_type": "", 
       "name": "Non Responsive"
     }
   }, 
@@ -105,7 +95,6 @@
     "fields": {
       "letter": "cv", 
       "uid": "fits", 
-      "report_type": "", 
       "name": "Fits/Convulsions"
     }
   }

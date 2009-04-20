@@ -27,6 +27,12 @@ Starting with a stock Debian/Ubuntu system:
     $ cd mctc
     $ python manage.py syncdb
 
+# If you would like to generate PDF's you will need reportlab. 
+# This is an optional step, you just won't be able to create PDF's
+# On Ubuntu that can be:
+
+    $ apt-get install python-reportlab
+
 # Edit the rapidsms.ini file. Make sure it contains the following:
 
     [rapidsms]
@@ -46,4 +52,3 @@ Starting with a stock Debian/Ubuntu system:
     
     $ cd ~/mcrc
     $ python manage.py runserver
-

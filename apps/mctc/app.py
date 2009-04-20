@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.translation import ugettext
-from django.utils.translation import ugettext_lazy as _
+
+def _(txt): return txt
+
 from django.contrib.auth.models import User, Group
 
 import rapidsms
@@ -8,7 +10,8 @@ from rapidsms.parsers.keyworder import Keyworder
 from rapidsms.message import Message
 from rapidsms.connection import Connection
 
-from models import Provider, User, Report, MessageLog, Facility, Case, CaseNote
+from models import Provider, User, MessageLog, Facility, Case, CaseNote, Observation
+from models import ReportMalnutrition, ReportMalaria
 import re, time, datetime
 
 def authenticated (func):
@@ -214,7 +217,7 @@ class App (rapidsms.app.App):
         if zone:
             info["zone"] = zone.name
         message.respond(_(
-            "New #%(id)s: %(last_name)s, %(first_name)s %(gender)s/%(age)s " +
+            "New +%(id)s: %(last_name)s, %(first_name)s %(gender)s/%(age)s " +
             "(%(guardian)s) %(zone)s") % info)
         return True
 
@@ -222,27 +225,28 @@ class App (rapidsms.app.App):
         try:
             return Case.objects.get(ref_id=int(ref_id))
         except Case.DoesNotExist:
-            raise HandlerFailed(_("Case #%s not found.") % ref_id)
+            raise HandlerFailed(_("Case +%s not found.") % ref_id)
  
-    @keyword(r'cancel #?(\d+)')
+    @keyword(r'cancel \+?(\d+)')
     @authenticated
     def cancel_case (self, message, ref_id):
         case = self.find_case(ref_id)
-        if case.report_set.count():
+        if case.reportmalnutrition_set.count():
             raise HandlerFailed(_(
-                "Cannot cancel #%s: case has diagnosis reports.") % ref_id)
+                "Cannot cancel +%s: case has diagnosis reports.") % ref_id)
         case.delete()
-        message.respond(_("Case #%s cancelled.") % ref_id)
+        message.respond(_("Case +%s cancelled.") % ref_id)
         return True
 
-    @keyword(r'list(?: #)?')
+    @keyword(r'list(?: \+)?')
     @authenticated
     def list_cases (self, message):
         # FIXME: should only return active cases here
-        cases = Case.objects.filter(provider=message.sender.provider)
+        # needs order by to cope with what unit tests expect
+        cases = Case.objects.filter(provider=message.sender.provider).order_by("ref_id")
         text  = ""
         for case in cases:
-            item = "#%s %s %s. %s/%s" % (case.ref_id, case.last_name.upper(),
+            item = "+%s %s %s. %s/%s" % (case.ref_id, case.last_name.upper(),
                 case.first_name[0].upper(), case.gender, case.age())
             if len(text) + len(item) + 2 >= self.MAX_MSG_LEN:
                 message.respond(text)
@@ -253,7 +257,7 @@ class App (rapidsms.app.App):
             message.respond(text)
         return True
 
-    @keyword(r'list\s*\*')
+    @keyword(r'list\s@')
     @authenticated
     def list_providers (self, message):
         providers = Provider.objects.all()
@@ -269,7 +273,7 @@ class App (rapidsms.app.App):
             message.respond(text)
         return True
 
-    @keyword(r's(?:how)? #?(\d+)')
+    @keyword(r's(?:how)? \+?(\d+)')
     @authenticated
     def show_case (self, message, ref_id):
         case = self.find_case(ref_id)
@@ -284,11 +288,11 @@ class App (rapidsms.app.App):
         if case.guardian: info["guardian"] = "(%s) " % case.guardian
         if case.zone: info["zone"] = case.zone.name
         message.respond(_(
-            "#%(id)s %(status)s %(last_name)s, %(first_name)s "
+            "+%(id)s %(status)s %(last_name)s, %(first_name)s "
             "%(gender)s/%(age)s %(guardian)s%(zone)s") % info)
         return True
 
-    @keyword(r'#(\d+) ([\d\.]+)( [\d\.]+)?( [\d\.]+)?( (?:[a-z]\s*)+)')
+    @keyword(r'\+(\d+) ([\d\.]+)( [\d\.]+)?( [\d\.]+)?( (?:[a-z]\s*)+)')
     @authenticated
     def report_case (self, message, ref_id, muac,
                      weight, height, complications):
@@ -308,8 +312,7 @@ class App (rapidsms.app.App):
                 if weight > 100: # weight is in g?
                     weight /= 1000.0
             except ValueError:
-                raise HandlerFailed(
-                    _("Can't understand weight (kg): %s") % weight)
+                raise HandlerFailed("Can't understand weight (kg): %s" % weight)
 
         if height is not None:
             try:
@@ -318,40 +321,17 @@ class App (rapidsms.app.App):
                     height *= 100
                 height = int(height)
             except ValueError:
-                raise HandlerFailed(
-                    _("Can't understand height (cm): %s") % height)
+                raise HandlerFailed("Can't understand height (cm): %s" % height)
 
-        choices  = Report.OBSERVED_CHOICES 
-        observed = []
-        if complications:
-            comp_list = dict([ (v[0].lower(), k) for k,v in choices ])
-            complications = re.sub(r'\W+', '', complications)
-            for observation in complications.lower():
-                # request for f to point to High Fever (h)
-                if observation == "f":
-                    observed.append(comp_list["h"])
-                    continue
-                if observation == "n": # no edema
-                    continue
-                if observation not in comp_list:
-                    raise HandlerFailed(_(
-                        "Unknown observation code: %s" % observation))
-                observed.append(comp_list[observation])
-
-        # make the observed list unique, and sort it
-        observed = sorted(list(set(observed)))
-                
-        try:
-            last_report = case.report_set.latest()
-            if (datetime.datetime.now() - last_report.entered_at).days == 0:
-                # last report was today. so delete it before filing another.
-                last_report.delete()
-        except models.ObjectDoesNotExist:
-            pass
+        observed, choices = self.get_observations(complications)
+        self.delete_similar(case.reportmalnutrition_set)
 
         provider = message.sender.provider
-        report = Report(case=case, provider=provider, muac=muac,
-                        weight=weight, height=height, observed=observed)
+        report = ReportMalnutrition(case=case, provider=provider, muac=muac,
+                        weight=weight, height=height)
+        report.save()
+        for obs in observed:
+            report.observed.add(obs)
         report.save()
 
         case.status = report.diagnosis()
@@ -363,14 +343,15 @@ class App (rapidsms.app.App):
             'last'      : case.last_name.upper(),
             'first'     : case.first_name[0],
             'muac'      : "%d mm" % muac,
-            'observed'  : ", ".join([ugettext(choice_term[k]) for k in observed]),
+            'observed'  : ", ".join([k.name for k in observed]),
             'diagnosis' : case.get_status_display(),
         }
-        msg = _("#%(ref_id)s: %(diagnosis)s, MUAC %(muac)s") % info
+        msg = _("+%(ref_id)s: %(diagnosis)s, MUAC %(muac)s") % info
 
         if weight: msg += ", %.1f kg" % weight
         if height: msg += ", %.1d cm" % height
-        if observed: msg += ", " + ugettext(info["observed"])
+        if observed: msg += ", " + info["observed"]
+
         message.respond("Report " + msg)
 
         if case.status in (case.MODERATE_STATUS,
@@ -387,14 +368,125 @@ class App (rapidsms.app.App):
 
         return True
 
-    @keyword(r'n(?:ote)? #(\d+) (.+)')
+    @keyword(r'n(?:ote)? \+(\d+) (.+)')
     @authenticated
     def note_case (self, message, ref_id, note):
         case = self.find_case(ref_id)
         CaseNote(case=case, created_by=message.sender, text=note).save()
-        message.respond(_("Note added to case #%s.") % ref_id)
+        message.respond(_("Note added to case +%s.") % ref_id)
         return True
 
+    @keyword(r'mrdt \+(\d+) ([yn]) ([yn])?(.*)')
+    @authenticated
+    def report_malaria(self, message, ref_id, result, bednet, observed):
+        case = self.find_case(ref_id)
+        observed, choices = self.get_observations(observed)
+        self.delete_similar(case.reportmalaria_set)        
+        provider = message.sender.provider
+        
+        result = result.lower() == "y"
+        bednet = bednet.lower() == "y"
+
+        report = ReportMalaria(case=case, provider=provider, result=result, bednet=bednet)
+        report.save()
+        for obs in observed:
+            report.observed.add(obs)
+        report.save()
+        
+        info = {
+            'ref_id': case.ref_id,
+            'last_name': case.last_name.upper(),
+            'first_name': case.first_name,
+            'gender': case.gender.upper()[0],
+            'months': case.age(),
+            'guardian': case.guardian,
+            'village': case.village,
+            'result': report.result,
+            'result_text': report.result and "Y" or "N",
+            'bednet': report.bednet,
+            'bednet_text': report.bednet and "Y" or "N",
+            'observed': ", ".join([k.name for k in observed]),
+        }
+        
+        msg = _("+%(ref_id)s: %(result_text)s %(bednet_text)s") % info
+
+        if observed: msg += ", " + info["observed"]        
+        message.respond("Report " + msg)
+                
+        if not result:
+            if observed: info["observed"] = ", (%s)" % info["observed"]            
+            alert = _("MRDT> Child +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)s (%(guardian)s), %(village)s. RDT=%(result_text)s, Bednet=%(bednet_text)s%(observed)s. Please refer patient IMMEDIATELY for clinical evaluation" % info)
+        else:
+            years, months = case.years_months()
+            tabs, yage = None, None
+            if years < 1:
+                if months < 2:
+                    tabs, yage = None, None
+                else:
+                    tabs, yage = 1, "less than 3"
+            elif years < 3:
+                tabs, yage = 1, "less than 3"                    
+            elif years < 9:
+                tabs, yage = 2, years                        
+            elif years < 15:
+                tabs, yage = 3, years                        
+            else:
+                tabs, yage = 4, years                        
+            
+            dangers = report.observed.filter(uid__in=("vomiting", "fever", "appetite", "breathing", "confusion"))
+            if dangers:
+                info["danger"] = " and danger signs " + ",".join([ u.name for u in dangers ])
+                if not tabs:
+                    info["instructions"] = "Child is too young for treatment. Please refer immediately to clinic"
+                else:
+                    plural = (tabs > 1) and "s" or ""
+                    info["instructions"] = "Refer to clinic immediately after first dose (%s tab%s) is given" % (tabs, plural)
+            else:
+                info["danger"] = ""
+                if not tabs:
+                    info["instructions"] = "Child is too young for treatment. Please refer immediately to clinic"
+                else:
+                    plural = (tabs > 1) and "s" or ""
+                    info["instructions"] = "Child is %s. Please provide %s tab%s of Coartem (ACT) twice a day for 3 days" % (yage, tabs, plural)
+
+            alert = _("MRDT> Child +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)s has MALARIA%(danger)s. %(instructions)s" % info)
+    
+        recipients = [message.sender.provider,]
+        for recipient in Provider.objects.filter(clinic=provider.clinic):
+            if recipient in recipients: continue
+            recipients.append(recipient)
+            message.forward(recipient.mobile, alert)
+
+    
+    def delete_similar(self, set):
+        try:
+            last_report = set.latest()
+            if (datetime.datetime.now() - last_report.entered_at).days == 0:
+                # last report was today. so delete it before filing another.
+                last_report.delete()
+        except models.ObjectDoesNotExist:
+            pass
+
+    def get_observations(self, text):    
+        choices  = dict( [ (o.letter, o) for o in Observation.objects.all() ] )
+        observed = []
+        if text:
+            text = re.sub(r'\W+', ' ', text).lower()
+            for observation in text.split(' '):
+                obj = choices.get(observation, None)
+                if not obj:
+                    if observation != 'n':
+                        raise HandlerFailed("Unknown observation code: %s" % observation)
+                else:
+                    observed.append(obj)
+        return observed, choices
+            
+            
+            
+            
+            
+            
+            
 def message_users(mobile, message=None, groups=None, users=None):
     """ Matt wants to send a message from the web front end to the users """
     recipients = []

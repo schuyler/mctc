@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from models import Zone, Facility, Case, MessageLog, Provider, User, Report
+from models import Zone, Facility, Case, MessageLog, Provider, User, ReportMalnutrition, Diagnosis, Observation
 from django.utils.translation import ugettext_lazy as _
 
 class ProviderInline (admin.TabularInline):
@@ -31,12 +31,13 @@ class CaseAdmin(admin.ModelAdmin):
 admin.site.register(Case, CaseAdmin)
 
 admin.site.register(Zone)
+admin.site.register(Diagnosis)
 admin.site.register(Facility)
 
-class ReportAdmin(admin.ModelAdmin):
+class ReportMalnutritionAdmin(admin.ModelAdmin):
     list_display = ("case", "muac", "height", "weight", "entered_at")
 
-admin.site.register(Report, ReportAdmin)
+admin.site.register(ReportMalnutrition, ReportMalnutritionAdmin)
 
 class MessageLogAdmin(admin.ModelAdmin):
     list_display = ("mobile", "sent_by", "text", "created_at", "was_handled")
