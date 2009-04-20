@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 
-from apps.mctc.models.general import Case, Provider, Diagnosis, Observation
+from apps.mctc.models.general import Case, Provider, Observation
 
 from datetime import datetime
 import md5
@@ -43,7 +43,7 @@ class ReportMalaria(Report, models.Model):
     case = models.ForeignKey(Case, db_index=True)
     provider = models.ForeignKey(Provider, db_index=True)
     entered_at = models.DateTimeField(db_index=True)
-    diagnosis = models.ManyToManyField(Diagnosis)
+    diagnosis = models.ManyToManyField("Diagnosis")
     bednet = models.BooleanField(db_index=True)
     result = models.BooleanField(db_index=True) 
     observed = models.ManyToManyField(Observation)       
@@ -58,6 +58,17 @@ class ReportMalnutrition(Report, models.Model):
         get_latest_by = 'entered_at'
         ordering = ("-entered_at",)
 
+    MODERATE_STATUS         = 1
+    SEVERE_STATUS           = 2
+    SEVERE_COMP_STATUS      = 3
+    HEALTHY_STATUS = 4
+    STATUS_CHOICES = (
+        (MODERATE_STATUS,       _('MAM')),
+        (SEVERE_STATUS,         _('SAM')),
+        (SEVERE_COMP_STATUS,    _('SAM+')),
+        (HEALTHY_STATUS, _("Healthy")),
+    )
+
     case        = models.ForeignKey(Case, db_index=True)
     provider    = models.ForeignKey(Provider, db_index=True)
     entered_at  = models.DateTimeField(db_index=True)
@@ -65,24 +76,22 @@ class ReportMalnutrition(Report, models.Model):
     height      = models.IntegerField(_("Height (cm)"), null=True, blank=True)
     weight      = models.FloatField(_("Weight (kg)"), null=True, blank=True)
     observed    = models.ManyToManyField(Observation)
-        
+    status      = models.IntegerField(choices=STATUS_CHOICES, db_index=True, blank=True, null=True)
+                               
     def __unicode__ (self):
         return "#%d" % self.id
     
-    def diagnosis (self):
+    def diagnose (self):
         complications = [c for c in self.observed.all() if c.uid != "edema"]
         edema = "edema" in [ c.uid for c in self.observed.all() ]
+        self.status = ReportMalnutrition.HEALTHY_STATUS
         if edema or self.muac < 110:
             if complications:
-                return Case.SEVERE_COMP_STATUS
+                self.status = ReportMalnutrition.SEVERE_COMP_STATUS
             else:
-                return Case.SEVERE_STATUS
+                self.status =  ReportMalnutrition.SEVERE_STATUS
         elif self.muac < 125:
-            return Case.MODERATE_STATUS
-        elif complications:
-            return Case.ILL_STATUS
-        else: 
-            return Case.HEALTHY_STATUS
+            self.status =  ReportMalnutrition.MODERATE_STATUS
 
     def save(self, *args):
         if not self.id:
@@ -93,6 +102,39 @@ class ReportMalnutrition(Report, models.Model):
         app_label = "mctc"
 
 
+
+class DiagnosisCategory(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        app_label = "mctc"
+
+class Diagnosis(models.Model):
+    name = models.CharField(max_length=255)
+    short_code = models.CharField(max_length=1)
+    category = models.ForeignKey(DiagnosisCategory)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        app_label = "mctc"
+        
+class ReportDiagnosis(Report, models.Model):
+    name = models.CharField(max_length=255)
+    diagnosis = models.CharField(max_length=1)
+
+    def __unicode__(self):
+        return self.numeric_code
+
+    class Meta:
+        verbose_name = "Diagnoses"
+        app_label = "mctc"
+
+# this needs to die
 class ReportCache(models.Model):
     case = models.ForeignKey(Case)
     date = models.DateField(db_index=True)

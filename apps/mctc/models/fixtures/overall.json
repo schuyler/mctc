@@ -1238,7 +1238,6 @@
     "pk": 1, 
     "model": "mctc.case", 
     "fields": {
-      "status": 3, 
       "first_name": "John", 
       "last_name": "Ochieng", 
       "district": null, 
@@ -1258,7 +1257,6 @@
     "pk": 2, 
     "model": "mctc.case", 
     "fields": {
-      "status": 6, 
       "first_name": "James", 
       "last_name": "Otieno", 
       "district": null, 
@@ -1278,7 +1276,6 @@
     "pk": 3, 
     "model": "mctc.case", 
     "fields": {
-      "status": 3, 
       "first_name": "Eury", 
       "last_name": "Obida", 
       "district": null, 
@@ -1298,7 +1295,6 @@
     "pk": 4, 
     "model": "mctc.case", 
     "fields": {
-      "status": 6, 
       "first_name": "John", 
       "last_name": "Omondi", 
       "district": null, 
@@ -1318,7 +1314,6 @@
     "pk": 5, 
     "model": "mctc.case", 
     "fields": {
-      "status": 6, 
       "first_name": "Rose", 
       "last_name": "Akiny", 
       "district": null, 
@@ -1338,7 +1333,6 @@
     "pk": 6, 
     "model": "mctc.case", 
     "fields": {
-      "status": 2, 
       "first_name": "Judy", 
       "last_name": "Achieng", 
       "district": null, 
@@ -1358,7 +1352,6 @@
     "pk": 7, 
     "model": "mctc.case", 
     "fields": {
-      "status": 6, 
       "first_name": "Mary", 
       "last_name": "Atieno", 
       "district": null, 
@@ -1378,7 +1371,6 @@
     "pk": 8, 
     "model": "mctc.case", 
     "fields": {
-      "status": 3, 
       "first_name": "Judy", 
       "last_name": "Amondi", 
       "district": null, 
@@ -1398,7 +1390,6 @@
     "pk": 9, 
     "model": "mctc.case", 
     "fields": {
-      "status": 6, 
       "first_name": "Samwel", 
       "last_name": "Owino", 
       "district": null, 
@@ -1418,7 +1409,6 @@
     "pk": 10, 
     "model": "mctc.case", 
     "fields": {
-      "status": 2, 
       "first_name": "Susan", 
       "last_name": "Otieno", 
       "district": null, 
@@ -1438,7 +1428,6 @@
     "pk": 11, 
     "model": "mctc.case", 
     "fields": {
-      "status": 2, 
       "first_name": "Josina", 
       "last_name": "Atieno", 
       "district": null, 
@@ -1458,7 +1447,6 @@
     "pk": 12, 
     "model": "mctc.case", 
     "fields": {
-      "status": 3, 
       "first_name": "Josphine", 
       "last_name": "Achieng", 
       "district": null, 
@@ -1478,7 +1466,6 @@
     "pk": 13, 
     "model": "mctc.case", 
     "fields": {
-      "status": 2, 
       "first_name": "Margret", 
       "last_name": "Adhiambo", 
       "district": null, 
@@ -1498,7 +1485,6 @@
     "pk": 14, 
     "model": "mctc.case", 
     "fields": {
-      "status": 2, 
       "first_name": "Mercelline", 
       "last_name": "Anyango", 
       "district": null, 
@@ -1518,7 +1504,6 @@
     "pk": 15, 
     "model": "mctc.case", 
     "fields": {
-      "status": 2, 
       "first_name": "Jane", 
       "last_name": "Awino", 
       "district": null, 
@@ -1538,7 +1523,6 @@
     "pk": 16, 
     "model": "mctc.case", 
     "fields": {
-      "status": 6, 
       "first_name": "Felix", 
       "last_name": "Ochieng", 
       "district": null, 
@@ -1558,7 +1542,6 @@
     "pk": 17, 
     "model": "mctc.case", 
     "fields": {
-      "status": 2, 
       "first_name": "Mecelline", 
       "last_name": "Anyango", 
       "district": null, 
@@ -1578,7 +1561,6 @@
     "pk": 18, 
     "model": "mctc.case", 
     "fields": {
-      "status": 6, 
       "first_name": "Everlyne", 
       "last_name": "Adhiambo", 
       "district": null, 
@@ -1598,7 +1580,6 @@
     "pk": 19, 
     "model": "mctc.case", 
     "fields": {
-      "status": 2, 
       "first_name": "Margret", 
       "last_name": "Adhiambo", 
       "district": null, 
@@ -1618,7 +1599,6 @@
     "pk": 20, 
     "model": "mctc.case", 
     "fields": {
-      "status": 2, 
       "first_name": "Mecelline", 
       "last_name": "Anyango", 
       "district": null, 
@@ -1638,7 +1618,6 @@
     "pk": 21, 
     "model": "mctc.case", 
     "fields": {
-      "status": 5, 
       "first_name": "Lydia", 
       "last_name": "Awuor", 
       "district": null, 

@@ -72,7 +72,7 @@ def active_cases(request):
 def dashboard(request):
     # i don't expect this to last, just a test and messing, ugh!
     case_table = Table(request, "cases", 
-                          Case.filter_ill().order_by("-updated_at"),
+                          Case.objects.all().order_by("-updated_at"),
                           "includes/cases_head.html", "includes/cases_body.html")
 
     allcase_table = Table(request, "allcases", 
@@ -80,8 +80,8 @@ def dashboard(request):
                             "includes/cases_head.html", "includes/cases_body.html")
 
     # get totals, yay for aggregation and turn it into a dict for easy use in templates
-    totals = Case.objects.values("status").annotate(Count("status"))
-    totals = dict([ [t["status"], t["status__count"] ] for t in totals ])
+#    totals = Case.objects.values("status").annotate(Count("status"))
+#    totals = dict([ [t["status"], t["status__count"] ] for t in totals ])
      
     has_provider = True
     try:
@@ -101,7 +101,7 @@ def dashboard(request):
         "case_table": case_table(),
         "allcase_table": allcase_table(),
         "paginate_url": "#",
-        "case_totals": totals,
+ #       "case_totals": totals,
         "message_form": messageform,
         "has_provider": has_provider
     }
@@ -139,7 +139,7 @@ def district_view(request):
     }
     if district:
         zone = get_object_or_404(Zone, id=district)
-        res = paginate(Case.filter_ill().filter(zone=zone), 1)
+        res = paginate(Case.objects.all().filter(zone=zone), 1)
         context["case_object_list"] = res
 
     return as_html(request, "districtview.html", context)
@@ -156,7 +156,7 @@ def provider_list(request):
 def provider_view(request, object_id):
     provider = get_object_or_404(Provider, id=object_id)
     case_table = Table(request, "cases", 
-                          Case.filter_ill().filter(provider=provider), 
+                          Case.objects.all().filter(provider=provider), 
                           "cases_head.html", "cases_body.html")
     context = {
         "object": provider,

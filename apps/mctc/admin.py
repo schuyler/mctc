@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from models.general import Zone, Facility, Case, MessageLog, Provider, User 
-from models.general import Diagnosis, Observation
+from models.general import Observation
 from models.reports import ReportMalnutrition
 from django.utils.translation import ugettext_lazy as _
 
@@ -33,7 +33,6 @@ class CaseAdmin(admin.ModelAdmin):
 admin.site.register(Case, CaseAdmin)
 admin.site.register(Provider)
 admin.site.register(Zone)
-admin.site.register(Diagnosis)
 admin.site.register(Facility)
 
 class ReportMalnutritionAdmin(admin.ModelAdmin):

@@ -106,31 +106,6 @@ class Case(models.Model):
         ('F', _('Female')), 
     )
     
-    UNKNOWN_STATUS          = 1
-    HEALTHY_STATUS          = 2
-    ILL_STATUS              = 3
-    MODERATE_STATUS         = 4
-    SEVERE_STATUS           = 5
-    SEVERE_COMP_STATUS      = 6
-    CURED_STATUS            = 7
-    DECEASED_STATUS         = 8
-    DEFAULTED_STATUS        = 9
-    NOT_RECOVERED_STATUS    = 10
-    TRANSFERRED_STATUS      = 11
-    STATUS_CHOICES = (
-        (UNKNOWN_STATUS,        _('Unknown')),
-        (HEALTHY_STATUS,        _('Healthy')),
-        (ILL_STATUS,            _('Ill')),
-        (MODERATE_STATUS,       _('MAM')),
-        (SEVERE_STATUS,         _('SAM')),
-        (SEVERE_COMP_STATUS,    _('SAM+')),
-        (CURED_STATUS,          _('Cured')),
-        (DECEASED_STATUS,       _('Deceased')),
-        (DEFAULTED_STATUS,      _('Defaulted')),
-        (NOT_RECOVERED_STATUS,  _('Not Recovered')),
-        (TRANSFERRED_STATUS,    _('Transferred')),
-    )
-    
     ref_id      = models.IntegerField(_('Case ID #'), null=True, db_index=True)
     first_name  = models.CharField(max_length=255, db_index=True)
     last_name   = models.CharField(max_length=255, db_index=True)
@@ -138,8 +113,6 @@ class Case(models.Model):
     dob         = models.DateField(_('Date of Birth'))
     guardian    = models.CharField(max_length=255, null=True, blank=True)
     mobile      = models.CharField(max_length=16, null=True, blank=True)
-    status      = models.IntegerField(choices=STATUS_CHOICES,
-                               default=HEALTHY_STATUS, db_index=True)
     provider    = models.ForeignKey(Provider, db_index=True)
     zone        = models.ForeignKey(Zone, null=True, db_index=True)
     village     = models.CharField(max_length=255, null=True, blank=True)
@@ -187,15 +160,6 @@ class Case(models.Model):
             # FIXME: i18n
             return str(int(delta.days/30.4375))+"m"
 
-    @classmethod
-    def filter_ill(cls):
-        # as per requirements from Matt, to show MAM, SAM and SAM+
-        return cls.objects.filter(status__in=[cls.MODERATE_STATUS, cls.SEVERE_STATUS, cls.SEVERE_COMP_STATUS])
-
-    @classmethod
-    def filter_active(cls):
-        return cls.objects.filter(status__le=cls.CURED_STATUS)
-
 class Observation(models.Model):
     uid = models.CharField(max_length=15)
     name = models.CharField(max_length=255)
@@ -206,17 +170,6 @@ class Observation(models.Model):
 
     def __unicode__(self):
         return self.name
-
-class Diagnosis(models.Model):
-    name = models.CharField(max_length=255)
-    numeric_code = models.CharField(max_length=3)    
-
-    def __unicode__(self):
-        return self.numeric_code
-
-    class Meta:
-        verbose_name = "Diagnoses"
-        app_label = "mctc"
 
 class CaseNote(models.Model):
     case        = models.ForeignKey(Case, related_name="notes", db_index=True)

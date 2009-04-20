@@ -284,7 +284,7 @@ class App (rapidsms.app.App):
             "first_name"    : case.first_name,
             "gender"        : case.gender,
             "age"           : case.age(),
-            "status"        : case.get_status_display(),
+            "status"        : case.reportmalnutrition_set.latest("entered_at").get_status_display(),
         }
         if case.guardian: info["guardian"] = "(%s) " % case.guardian
         if case.zone: info["zone"] = case.zone.name
@@ -333,10 +333,8 @@ class App (rapidsms.app.App):
         report.save()
         for obs in observed:
             report.observed.add(obs)
+        report.diagnose()
         report.save()
-
-        case.status = report.diagnosis()
-        case.save()
 
         choice_term = dict(choices)
         info = {
@@ -345,7 +343,7 @@ class App (rapidsms.app.App):
             'first'     : case.first_name[0],
             'muac'      : "%d mm" % muac,
             'observed'  : ", ".join([k.name for k in observed]),
-            'diagnosis' : case.get_status_display(),
+            'diagnosis' : report.get_status_display(),
         }
         msg = _("+%(ref_id)s: %(diagnosis)s, MUAC %(muac)s") % info
 
@@ -355,9 +353,9 @@ class App (rapidsms.app.App):
 
         message.respond("Report " + msg)
 
-        if case.status in (case.MODERATE_STATUS,
-                           case.SEVERE_STATUS,
-                           case.SEVERE_COMP_STATUS):
+        if report.status in (report.MODERATE_STATUS,
+                           report.SEVERE_STATUS,
+                           report.SEVERE_COMP_STATUS):
             alert = _("@%(username)s reports %(msg)s") % {"username":provider.user.username, "msg":msg}
             recipients = [provider]
             for query in (Provider.objects.filter(alerts=True),

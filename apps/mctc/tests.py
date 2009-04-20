@@ -308,35 +308,36 @@ class TestApp (TestScript):
         7654321 < New +34: MADISON, Molly F/12m (Emily) Whiskey
 
         7654321 > mrdt +34 y n f
-        7654321 < Report +34: Y N, Fever
-        7654322 < MRDT> Child +34, MADISON, Molly, F/12m has MALARIA and danger signs Fever. Refer to clinic immediately after first dose (1 tab) is given
+        7654321 < MRDT> Child +34, MADISON, Molly, F/12m has MALARIA. Child is less than 3. Please provide 1 tab of Coartem (ACT) twice a day for 3 days
+        7654322 < MRDT> Child +34, MADISON, Molly, F/12m (None) has MALARIA. CHW: @jdoe 7654321
 
         7654321 > mrdt +34 y n
-        7654321 < Report +34: Y N
-        7654322 < MRDT> Child +34, MADISON, Molly, F/12m has MALARIA. Child is less than 3. Please provide 1 tab of Coartem (ACT) twice a day for 3 days
+        7654321 < MRDT> Child +34, MADISON, Molly, F/12m has MALARIA. Child is less than 3. Please provide 1 tab of Coartem (ACT) twice a day for 3 days
+        7654322 < MRDT> Child +34, MADISON, Molly, F/12m (None) has MALARIA. CHW: @jdoe 7654321
 
         7654321 > new madison foo f %s emily
         7654321 < New +42: MADISON, Foo F/3 (Emily) Whiskey
 
         7654321 > mrdt +42 y n cf e
-        7654321 < Report +42: Y N, Confusion, Edema
-        7654322 < MRDT> Child +42, MADISON, Foo, F/3 has MALARIA and danger signs Confusion. Refer to clinic immediately after first dose (2 tabs) is given
+        7654321 < MRDT> Child +42, MADISON, Foo, F/3 has MALARIA and danger signs (Confusion). Refer to clinic immediately after 2 tabs of Coartem is given
+        7654322 < MRDT> Child +42, MADISON, Foo, F/3 (None) has MALARIA and danger signs (Confusion). CHW: @jdoe 7654321
+        
         
         7654321 > mrdt +42 y n e
-        7654321 < Report +42: Y N, Edema
-        7654322 < MRDT> Child +42, MADISON, Foo, F/3 has MALARIA. Child is 3. Please provide 2 tabs of Coartem (ACT) twice a day for 3 days
+        7654321 < MRDT> Child +42, MADISON, Foo, F/3 has MALARIA. Child is 3. Please provide 2 tabs of Coartem (ACT) twice a day for 3 days
+        7654322 < MRDT> Child +42, MADISON, Foo, F/3 (None) has MALARIA. CHW: @jdoe 7654321
 
         7654321 > new madison sam f %s samantha
         7654321 < New +59: MADISON, Sam F/2m (Samantha) Whiskey
 
         7654321 > mrdt +59 y n cf e
-        7654321 < Report +59: Y N, Confusion, Edema
-        7654322 < MRDT> Child +59, MADISON, Sam, F/2m has MALARIA and danger signs Confusion. Refer to clinic immediately after first dose (1 tab) is given
+        7654321 < MRDT> Child +59, MADISON, Sam, F/2m has MALARIA and danger signs (Confusion). Refer to clinic immediately after 1 tab of Coartem is given
+        7654322 < MRDT> Child +59, MADISON, Sam, F/2m (None) has MALARIA and danger signs (Confusion). CHW: @jdoe 7654321
+        
 
         7654321 > mrdt +59 n n cf e
-        7654321 < Report +59: N N, Confusion, Edema
-        7654322 < MRDT> Child +59, MADISON, Sam, F/2m (Samantha), None. RDT=N, Bednet=N, (Confusion, Edema). Please refer patient IMMEDIATELY for clinical evaluation
-        
+        7654321 < MRDT> Child +59, MADISON, Sam, F/2m (Samantha), None. RDT=N, Bednet=N, (Confusion, Edema). Please refer patient IMMEDIATELY for clinical evaluation
+        7654322 < MRDT> Negative MRDT with Fever. +59, MADISON, Sam, F/2m None. Patient requires IMMEDIATE referral. Reported by CHW J DOE @jdoe m:7654321.
     """ % (date_boundaries()["over 1 year"], date_boundaries()["over 3 years"], date_boundaries()["over 2 months"])
         
 
