@@ -48,6 +48,15 @@ class ReportMalaria(Report, models.Model):
     result = models.BooleanField(db_index=True) 
     observed = models.ManyToManyField(Observation)       
 
+    def get_dictionary(self):
+        return {
+            'result': self.result,
+            'result_text': self.result and "Y" or "N",
+            'bednet': self.bednet,
+            'bednet_text': self.bednet and "Y" or "N",
+            'observed': ", ".join([k.name for k in self.observed.all()]),            
+        }
+        
     def save(self, *args):
         if not self.id:
             self.entered_at = datetime.now()
@@ -77,6 +86,14 @@ class ReportMalnutrition(Report, models.Model):
     weight      = models.FloatField(_("Weight (kg)"), null=True, blank=True)
     observed    = models.ManyToManyField(Observation)
     status      = models.IntegerField(choices=STATUS_CHOICES, db_index=True, blank=True, null=True)
+
+    def get_dictionary(self):
+        return {
+            'muac'      : "%d mm" % self.muac,
+            'observed'  : ", ".join([k.name for k in self.observed.all()]),
+            'diagnosis' : self.get_status_display(),
+            'diagnosis_msg' : self.diagnosis_msg(),
+        }
                                
     def __unicode__ (self):
         return "#%d" % self.id
@@ -136,15 +153,22 @@ class Diagnosis(models.Model):
         app_label = "mctc"
         
 class ReportDiagnosis(Report, models.Model):
-    name = models.CharField(max_length=255)
-    diagnosis = models.CharField(max_length=1)
+    case = models.ForeignKey(Case, db_index=True)
+    provider = models.ForeignKey(Provider, db_index=True)
+    diagnosis = models.ManyToManyField(Diagnosis)
+    text = models.TextField()
 
     def __unicode__(self):
-        return self.numeric_code
+        return self.case
 
     class Meta:
         verbose_name = "Diagnoses"
         app_label = "mctc"
+
+    def save(self, *args):
+        if not self.id:
+            self.entered_at = datetime.now()
+        super(ReportDiagnosis, self).save(*args)
 
 # this needs to die
 class ReportCache(models.Model):

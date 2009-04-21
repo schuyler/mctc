@@ -90,6 +90,13 @@ class Provider(models.Model):
     def get_absolute_url(self):
         return "/provider/view/%s/" % self.id
 
+    def get_dictionary(self):
+        return {
+            'provider_mobile': self.mobile,
+            'provider_user': self.user,
+            'provider_name': self.user.first_name[0] + ' ' + self.user.last_name.upper()
+        }
+
     @classmethod
     def by_mobile (cls, mobile):
         try:
@@ -147,6 +154,18 @@ class Case(models.Model):
             self.ref_id = self._luhn(self.id)
             super(Case, self).save(*args)
     
+    def get_dictionary(self):
+        return {
+            'ref_id': self.ref_id,
+            'last_name': self.last_name.upper(),
+            'first_name': self.first_name,
+            'first_name_short': self.first_name.upper()[0],
+            'gender': self.gender.upper()[0],
+            'months': self.age(),
+            'guardian': self.guardian,
+            'village': self.village,    
+        }
+        
     def years_months(self):
         now = datetime.now().date()
         return (now.year - self.dob.year, now.month - self.dob.month)
@@ -167,6 +186,7 @@ class Observation(models.Model):
 
     class Meta:
         app_label = "mctc"
+        ordering = ("name",)
 
     def __unicode__(self):
         return self.name
@@ -188,7 +208,7 @@ class CaseNote(models.Model):
 class MessageLog(models.Model):
     mobile      = models.CharField(max_length=255, db_index=True)
     sent_by     = models.ForeignKey(User, null=True)
-    text        = models.CharField(max_length=255)
+    text        = models.TextField(max_length=255)
     was_handled = models.BooleanField(default=False, db_index=True)
     created_at  = models.DateTimeField(db_index=True)
 

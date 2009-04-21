@@ -12,8 +12,11 @@ from rapidsms.connection import Connection
 
 from models.general import Provider, User
 from models.general import MessageLog, Facility, Case, CaseNote, Observation
-from models.reports import ReportMalnutrition, ReportMalaria
+from models.reports import ReportMalnutrition, ReportMalaria, ReportDiagnosis, Diagnosis
+
 import re, time, datetime
+
+find_diagnostic_re = re.compile('( -[\d\.]+)' ,re.I)
 
 def authenticated (func):
     def wrapper (self, message, *args):
@@ -342,22 +345,11 @@ class App (rapidsms.app.App):
         report.save()
 
         choice_term = dict(choices)
-        info = {
-            'ref_id'    : case.ref_id,
-            'last'      : case.last_name.upper(),
-            'first'     : case.first_name[0],
-            'gender': case.gender.upper()[0],
-            'months': case.age(),
-            'guardian': case.guardian,
-            'village': case.village,
-            'muac'      : "%d mm" % muac,
-            'observed'  : ", ".join([k.name for k in observed]),
-            'diagnosis' : report.get_status_display(),
-            'diagnosis_msg' : report.diagnosis_msg(),
 
-        }
+        info = case.get_dictionary()
+        info.update(report.get_dictionary())
 
-        msg = _("%(diagnosis_msg)s. +%(ref_id)s %(last)s, %(first)s, %(gender)s/%(months)s (%(guardian)s). MUAC %(muac)s") % info
+        msg = _("%(diagnosis_msg)s. +%(ref_id)s %(last_name)s, %(first_name_short)s, %(gender)s/%(months)s (%(guardian)s). MUAC %(muac)s") % info
 
         if weight: msg += ", %.1f kg" % weight
         if height: msg += ", %.1d cm" % height
@@ -387,10 +379,30 @@ class App (rapidsms.app.App):
         message.respond(_("Note added to case +%s.") % ref_id)
         return True
 
+    @keyword(r'wtf \+(\d+)?(.*)')
+    @authenticated
+    def diagnosis(self, message, ref_id, text):
+        case = self.find_case(ref_id)
+        hits = find_diagnostic_re.findall(text)
+        provider = message.sender.provider        
+        diags = []
+        for hit in hits:
+            code = hit[1:]
+            try:
+                diags.append(Diagnostic.objects.get(code=code))
+            except Diagnostic.DoesNotExist:
+                raise HandlerFailed("Unknown diagnostic code: %s" % code)
+        
+        report = ReportDiagnosis(case=case, provider=provider, text=message.text)
+        report.save()
+        for diag in diags:
+            report.diagnosis.add(diag)
+        report.save()
+        message.respond(_("Yo dude, diagnosis added +%s") % ref_id)
+        
     @keyword(r'mrdt \+(\d+) ([yn]) ([yn])?(.*)')
     @authenticated
     def report_malaria(self, message, ref_id, result, bednet, observed):
-  
         case = self.find_case(ref_id)
         observed, choices = self.get_observations(observed)
         self.delete_similar(case.reportmalaria_set)        
@@ -405,23 +417,10 @@ class App (rapidsms.app.App):
             report.observed.add(obs)
         report.save()
 
-        info = {
-            'ref_id': case.ref_id,
-            'last_name': case.last_name.upper(),
-            'first_name': case.first_name,
-            'gender': case.gender.upper()[0],
-            'months': case.age(),
-            'guardian': case.guardian,
-            'village': case.village,
-            'result': report.result,
-            'result_text': report.result and "Y" or "N",
-            'bednet': report.bednet,
-            'bednet_text': report.bednet and "Y" or "N",
-            'observed': ", ".join([k.name for k in observed]),
-            'provider_mobile': provider.mobile,
-            'provider_user': provider.user,
-            'provider_name': provider.user.first_name[0] + ' ' + provider.user.last_name.upper()
-        }
+        # build up an information dictionary
+        info = case.get_dictionary()
+        info.update(report.get_dictionary())
+        info.update(provider.get_dictionary())
                         
         if not result:
             if observed: info["observed"] = ", (%s)" % info["observed"]            
@@ -505,33 +504,31 @@ class App (rapidsms.app.App):
             
             
             
-            
-def message_users(mobile, message=None, groups=None, users=None):
-    """ Matt wants to send a message from the web front end to the users """
-    recipients = []
-    # get all the users
-    user_objects = [ User.objects.get(id=user) for user in users ]
-    for user in user_objects:
-        try:
-            if user.provider not in recipients:
-                recipients.append(user.provider)
-        except models.ObjectDoesNotExist:
-            pass
-
-    # get all the users for the groups
-    group_objects = [ Group.objects.get(id=group) for group in groups ]
-    for group in group_objects:
-        for user in group.user_set.all():
-            try:
-                if user.provider not in recipients:
-                    recipients.append(user.provider)
-            except models.ObjectDoesNotExist:
-                pass
-    
-    # not sure what's going on tbh, I think this needs reviewing
-    from rapidsms.backends import spomc
-    
-    connection = Connection(spomc.Backend, mobile)
-    smsmessage = Message(connection, message)
-    for recipient in recipients:
-        smsmessage.forward(recipient.mobile)
+# def message_users(mobile, message=None, groups=None, users=None):
+#     recipients = []
+#     # get all the users
+#     user_objects = [ User.objects.get(id=user) for user in users ]
+#     for user in user_objects:
+#         try:
+#             if user.provider not in recipients:
+#                 recipients.append(user.provider)
+#         except models.ObjectDoesNotExist:
+#             pass
+# 
+#     # get all the users for the groups
+#     group_objects = [ Group.objects.get(id=group) for group in groups ]
+#     for group in group_objects:
+#         for user in group.user_set.all():
+#             try:
+#                 if user.provider not in recipients:
+#                     recipients.append(user.provider)
+#             except models.ObjectDoesNotExist:
+#                 pass
+#     
+#     # not sure what's going on tbh, I think this needs reviewing
+#     from rapidsms.backends import spomc
+# 
+#     connection = Connection(spomc.Backend, mobile)
+#     smsmessage = Message(connection, message)
+#     for recipient in recipients:
+#         smsmessage.forward(recipient.mobile)

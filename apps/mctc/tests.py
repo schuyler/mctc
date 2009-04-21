@@ -181,11 +181,11 @@ class TestApp (TestScript):
 
         # complications list
         7654321 > +26 75 21 e a d
-        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, 21.0 kg, Edema, Appetite Loss, Diarrhea
+        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, 21.0 kg, Appetite Loss, Diarrhea, Edema
 
         # complications list - weight is optional
         7654321 > +26 75 e a d
-        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, Edema, Appetite Loss, Diarrhea
+        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, Appetite Loss, Diarrhea, Edema
 
         # complications list - case insensitive
         7654321 > +26 75 21 N A D
@@ -197,7 +197,7 @@ class TestApp (TestScript):
 
         # more complications, formatted differently
         7654321 > +26 75 n f cg v
-        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, Fever, Coughing, Vomiting
+        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, Coughing, Fever, Vomiting
 
 
         # one last complication test
@@ -264,7 +264,7 @@ class TestApp (TestScript):
     test_05_Fever = """
         # requested change to make f be fever, not h
         7654321 > +26 105 d v f
-        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 105 mm, Diarrhea, Vomiting, Fever
+        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 105 mm, Diarrhea, Fever, Vomiting
     """
     
     test_06_Lists = """
@@ -273,8 +273,8 @@ class TestApp (TestScript):
         7654322 < 7654322 registered to @sbob (BOB, Smith) at Charliesburg.
         
         7654321 > +26 105 d v f
-        7654321 <  MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 105 mm, Diarrhea, Vomiting, Fever
-        # 7654322 < @jdoe reports +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
+        7654321 <  MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 105 mm, Diarrhea, Fever, Vomiting
+        # 7654322 < @jdoe reports +26: SAM+, MUAC 105 mm, Diarrhea, Fever, Vomiting
     """
 
     def test_07_mrdt_00(self):
@@ -293,7 +293,7 @@ class TestApp (TestScript):
         7654322 < MRDT> Child +26, MADISON, Molly, F/4 (None) has MALARIA. CHW: @jdoe 7654321
         
         7654321 > mrdt +26 n y f e
-        7654321 < MRDT> Child +26, MADISON, Molly, F/4 (Sally), None. RDT=N, Bednet=Y, (Fever, Edema). Please refer patient IMMEDIATELY for clinical evaluation
+        7654321 < MRDT> Child +26, MADISON, Molly, F/4 (Sally), None. RDT=N, Bednet=Y, (Edema, Fever). Please refer patient IMMEDIATELY for clinical evaluation
         7654322 < MRDT> Negative MRDT with Fever. +26, MADISON, Molly, F/4 None. Patient requires IMMEDIATE referral. Reported by CHW J DOE @jdoe m:7654321.
         
         7654321 > mrdt +26 n y fe
@@ -349,6 +349,11 @@ class TestApp (TestScript):
         reports = Case.objects.get(ref_id=26).reportmalaria_set.all()
         assert len(reports) == 1
         assert not len(reports[0].observed.all())
+
+    test_08_diagnosis = """ 
+        7654321 > wtf +59 -000.00
+        7654321 < Yo dude, diagnosis added +59
+    """
 
 class TestAlerts(TestCase):
     fixtures = ["users.json", "alerts.json"]
