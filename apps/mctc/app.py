@@ -393,7 +393,7 @@ class App (rapidsms.app.App):
         for hit in hits:
             code = hit[2:]
             try:
-                diags.append(Diagnosis.objects.get(code=code))
+                diags.append(Diagnosis.objects.get(code=code.lower()))
             except Diagnosis.DoesNotExist:
                 raise HandlerFailed("Unknown diagnostic code: %s" % code)
 
@@ -402,7 +402,7 @@ class App (rapidsms.app.App):
             code, sign, number = hit
             try:
                 # the code starts with /
-                labs.append([Lab.objects.get(code=code[1:]), sign, number])
+                labs.append([Lab.objects.get(code=code[1:].lower()), sign, number])
             except Lab.DoesNotExist:
                 raise HandlerFailed("Unknown diagnostic code: %s" % code)
 
