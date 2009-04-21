@@ -31,6 +31,7 @@ from django.db.models.signals import post_save, post_syncdb
 post_syncdb.disconnect(create_superuser, sender=auth_app, dispatch_uid = "django.contrib.auth.management.create_superuser")
 call_command("syncdb")
 call_command("loaddata", "observations.json")
+call_command("loaddata", "overall.json")
 os.system('python utils/csv_to_db.py')
 
 print "Database reset."
