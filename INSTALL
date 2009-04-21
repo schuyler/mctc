@@ -7,6 +7,12 @@ Starting with a stock Debian/Ubuntu system:
 
     $ sudo apt-get install python-django rubygems libserialport-ruby git-core
 
+# If you would like to generate PDF's you will need reportlab. 
+# This is an optional step, you just won't be able to create PDF's
+# On Ubuntu that can be:
+
+    $ apt-get install python-reportlab
+
 # Install rubygsm and spomskyd from github gems
 
     $ sudo gem sources -a http://gems.github.com
@@ -26,12 +32,6 @@ Starting with a stock Debian/Ubuntu system:
     $ git clone git://github.com/schuyler/mctc.git
     $ cd mctc
     $ python manage.py syncdb
-
-# If you would like to generate PDF's you will need reportlab. 
-# This is an optional step, you just won't be able to create PDF's
-# On Ubuntu that can be:
-
-    $ apt-get install python-reportlab
 
 # Edit the rapidsms.ini file. Make sure it contains the following:
 
