@@ -287,7 +287,9 @@ class TestApp (TestScript):
         second.save()
 
     test_07_mrdt_01 = """
-
+        7654321 > mrdt +234 n y a
+        7654321 < Case +234 not found.
+        
         7654321 > mrdt +26 y n f
         7654321 < MRDT> Child +26, MADISON, Molly, F/4 has MALARIA. Child is 4. Please provide 2 tabs of Coartem (ACT) twice a day for 3 days
         7654322 < MRDT> Child +26, MADISON, Molly, F/4 (None) has MALARIA. CHW: @jdoe 7654321
@@ -351,6 +353,9 @@ class TestApp (TestScript):
         assert not len(reports[0].observed.all())
 
     test_08_diagnosis = """ 
+        7654321 > D +234 Hey ho!
+        7654321 < Case +234 not found.
+    
         7654321 > D +59 -000.00
         7654321 < Unknown diagnostic code: 000.00
 

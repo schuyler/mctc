@@ -8,7 +8,7 @@ from django.db import connection
 
 from apps.mctc.models.general import MessageLog, Case, Zone, Provider
 from apps.mctc.models.reports import ReportMalnutrition, ReportCache
-from apps.mctc.app import message_users
+#from apps.mctc.app import message_users
 
 from apps.webui.shortcuts import as_html, as_csv, as_pdf, paginate, login_required
 from apps.webui.forms.general import MessageForm
