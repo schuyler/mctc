@@ -355,22 +355,22 @@ class TestApp (TestScript):
         7654321 < Case +234 not found.
     
         7654321 > D +59 -000.00
-        7654321 < Unknown diagnostic code: 000.00
+        7654321 < Unknown diagnosis code: 000.00
 
-        7654321 > D +59 -84.9
+        7654321 > D +59 -084.9
         7654321 < D> +59 S.MADISON C. Malaria
 
-        7654321 > D +59 -84.9 -480
-        7654321 < D> +59 S.MADISON Viral Pneumonia, C. Malaria
+        7654321 > D +59 -084.9 -480
+        7654321 < D> +59 S.MADISON C. Malaria, Viral Pneumonia
 
         7654321 > D +59 /foo+
-        7654321 < Unknown diagnostic code: /foo
+        7654321 < Unknown lab code: /foo
 
-        7654321 > D +59 /ELISA+ /RDT- /BS+45
+        7654321 > D +59 /ElISA+ /rdt- /BS+45
         7654321 < D> +59 S.MADISON Labs: ELISA+, RDT-, BS 45
 
-        7654321 > D +59 Looked ill /HB+10 had -84.9 and -480 and so on /ELISA-
-        7654321 < D> +59 S.MADISON Viral Pneumonia, C. Malaria Labs: HB 10, ELISA-
+        7654321 > D +59 Looked ill /HB+10 had -084.9 and -480 and so on /ELISA-
+        7654321 < D> +59 S.MADISON C. Malaria, Viral Pneumonia Labs: HB 10, ELISA-
     """
 
 class TestAlerts(TestCase):

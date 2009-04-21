@@ -393,18 +393,18 @@ class App (rapidsms.app.App):
         for hit in hits:
             code = hit[2:]
             try:
-                diags.append(Diagnosis.objects.get(code=code.lower()))
+                diags.append(Diagnosis.objects.get(code__iexact=code))
             except Diagnosis.DoesNotExist:
-                raise HandlerFailed("Unknown diagnostic code: %s" % code)
+                raise HandlerFailed("Unknown diagnosis code: %s" % code)
 
         hits = find_lab_re.findall(text)
         for hit in hits:
             code, sign, number = hit
             try:
                 # the code starts with /
-                labs.append([Lab.objects.get(code=code[1:].lower()), sign, number])
+                labs.append([Lab.objects.get(code__iexact=code[1:]), sign, number])
             except Lab.DoesNotExist:
-                raise HandlerFailed("Unknown diagnostic code: %s" % code)
+                raise HandlerFailed("Unknown lab code: %s" % code)
 
         report = ReportDiagnosis(case=case, provider=provider, text=message.text)
         report.save()
