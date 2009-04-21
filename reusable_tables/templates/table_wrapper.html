@@ -1,7 +1,14 @@
+<div class="span-22">
 <table>
     <thead>
         <tr>
-            {{ head }}
+            {% for row in columns %}
+                {% if row.column %}
+                    <th><a href="?sort_{{ table_key }}_{{ row.column }}={% if row.asc %}desc{% else %}asc{% endif %}">{{ row.name }}</a></th>
+                {% else %}
+                    <th>{{ row.name }}</th>
+                {% endif %}
+            {% endfor %}
         </tr>
     </thead>
     <tbody>
@@ -12,21 +19,31 @@
         {% endfor %}
     </tbody>
 </table>
-<p>Last updated at {% now "h:m:s a" %}</p>
-{% if object_list.page.has_previous %}
-    <a class="next" href="{{ paginate_url }}?{{ paginate_key }}={{ object_list.page.previous_page_number }}">Previous</a>
+</div>
+{% if object_list.paginated %}
+    <div class="span-10 pagination">
+    {% if object_list.page.has_previous %}
+        <a class="next" href="{{ paginate_url }}?page_{{ table_key }}={{ object_list.page.previous_page_number }}">&larr; Previous</a>
+    {% endif %}
+
+    {% for page in object_list.jump.pages_bit %}
+        {% if object_list.jump.start_ellipsis and forloop.first %}<span>...</span>{% endif %}
+        {% ifequal page object_list.page.number %}
+            <span>{{ page }}</span>
+        {% else %}
+            <span><a href="{{ paginate_url }}?page_{{ table_key }}={{ page }}" class="page">{{ page }}</a></span>
+        {% endifequal %}
+        {% if object_list.jump.end_ellipsis and forloop.last %}<span>...</span>{% endif %}
+    {% endfor %}
+
+    {% if object_list.page.has_next %}
+        <a class="next" href="{{ paginate_url }}?page_{{ table_key }}={{ object_list.page.next_page_number }}">Next &rarr;</a>
+    {% endif %}
+    </div>
 {% endif %}
 
-{% for page in object_list.jump.pages_bit %}
-    {% if object_list.jump.start_ellipsis and forloop.first %}...{% endif %}
-    {% ifequal page object_list.page.number %}
-        {{ page }}
-    {% else %}
-        <a href="{{ paginate_url }}?{{ paginate_key }}={{ page }}" class="page">{{ page }}</a>
-    {% endifequal %}
-    {% if object_list.jump.end_ellipsis and forloop.last %}...{% endif %}
-{% endfor %}
-
-{% if object_list.page.has_next %}
-    <a class="next" href="{{ paginate_url }}?{{ paginate_key }}={{ object_list.page.next_page_number }}">Next</a>
-{% endif %}
+<div class="{% if object_list.paginated %}{% else %}span-22{% endif %} last" style="text-align:right">
+    {% for format in formats %} <a href="?format_{{ table_key }}={{ format }}">{{ format }}</a> - {% endfor %}
+    Last updated at {% now "h:m:s a" %}
+</div>
+<div class="span-22" />

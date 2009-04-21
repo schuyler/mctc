@@ -19,7 +19,7 @@ from apps.webui.graphs.average import create_average_for_qs, create_graph
 from datetime import datetime, timedelta
 import time
 
-from reusable_tables.table import Table
+from reusable_tables.table import get
 
 @login_required
 def ajax_message_log(request):
@@ -71,13 +71,10 @@ def active_cases(request):
 @login_required
 def dashboard(request):
     # i don't expect this to last, just a test and messing, ugh!
-    case_table = Table(request, "cases", 
-                          Case.objects.all().order_by("-updated_at"),
-                          "includes/cases_head.html", "includes/cases_body.html")
-
-    allcase_table = Table(request, "allcases", 
-                            Case.objects.all().order_by("-updated_at"),
-                            "includes/cases_head.html", "includes/cases_body.html")
+    cases = Case.objects.all().order_by("-updated_at")
+    table = get("case_default")
+    format, case_table = table(request, "cases", cases)
+    if format != "html": return case_table
 
     # get totals, yay for aggregation and turn it into a dict for easy use in templates
 #    totals = Case.objects.values("status").annotate(Count("status"))
@@ -98,8 +95,8 @@ def dashboard(request):
         messageform = None
         
     context = {
-        "case_table": case_table(),
-        "allcase_table": allcase_table(),
+        "case_table": case_table,
+#        "allcase_table": allcase_table(),
         "paginate_url": "#",
  #       "case_totals": totals,
         "message_form": messageform,

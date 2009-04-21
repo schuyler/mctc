@@ -24,6 +24,7 @@ messages = {
 date_format = "%d/%m/%Y"
 time_format = "%H:%M%p"
 pagination_size_default = 20
+
 def paginate(queryset, number, size=pagination_size_default):
     try:
         number = int(number)

@@ -93,6 +93,18 @@ class ReportMalnutrition(Report, models.Model):
         elif self.muac < 125:
             self.status =  ReportMalnutrition.MODERATE_STATUS
 
+    def diagnosis_msg(self):
+        if self.status == 1:
+            msg = "MAM Child requires supplemental feeding."
+        elif self.status == 2:
+            msg = "SAM Patient requires OTP care"
+        elif self.status == 3:
+            msg = "SAM+ Patient requires IMMEDIATE inpatient care"
+        else:
+            msg = "Child is not malnourished"
+
+        return msg
+
     def save(self, *args):
         if not self.id:
             self.entered_at = datetime.now()
@@ -100,7 +112,6 @@ class ReportMalnutrition(Report, models.Model):
 
     class Meta:
         app_label = "mctc"
-
 
 
 class DiagnosisCategory(models.Model):

@@ -114,3 +114,11 @@ h2 {
 #tabs li a:hover {
     background-image: url("/static/webui/images/tab-bg-hover.png"); 
 }
+
+.pagination {
+    font-weight: bold;
+}
+
+.pagination span {
+    padding: 0.4em;
+}

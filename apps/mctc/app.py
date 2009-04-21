@@ -174,6 +174,9 @@ class App (rapidsms.app.App):
         sender = message.sender.username
         return message.forward(mobile, "@%s> %s" % (sender, text))
 
+
+    # Register a new patient
+
     @keyword(r'new (\S+) (\S+) ([MF]) ([\d\-]+)( \D+)?( \d+)?')
     @authenticated
     def new_case (self, message, last, first, gender, dob,
@@ -293,6 +296,8 @@ class App (rapidsms.app.App):
             "%(gender)s/%(age)s %(guardian)s%(zone)s") % info)
         return True
 
+    #CMAM Reports
+
     @keyword(r'\+(\d+) ([\d\.]+)( [\d\.]+)?( [\d\.]+)?( (?:[a-z]\s*)+)')
     @authenticated
     def report_case (self, message, ref_id, muac,
@@ -341,17 +346,24 @@ class App (rapidsms.app.App):
             'ref_id'    : case.ref_id,
             'last'      : case.last_name.upper(),
             'first'     : case.first_name[0],
+            'gender': case.gender.upper()[0],
+            'months': case.age(),
+            'guardian': case.guardian,
+            'village': case.village,
             'muac'      : "%d mm" % muac,
             'observed'  : ", ".join([k.name for k in observed]),
             'diagnosis' : report.get_status_display(),
+            'diagnosis_msg' : report.diagnosis_msg(),
+
         }
-        msg = _("+%(ref_id)s: %(diagnosis)s, MUAC %(muac)s") % info
+
+        msg = _("%(diagnosis_msg)s. +%(ref_id)s %(last)s, %(first)s, %(gender)s/%(months)s (%(guardian)s). MUAC %(muac)s") % info
 
         if weight: msg += ", %.1f kg" % weight
         if height: msg += ", %.1d cm" % height
         if observed: msg += ", " + info["observed"]
 
-        message.respond("Report " + msg)
+        message.respond("MUAC> " + msg)
 
         if report.status in (report.MODERATE_STATUS,
                            report.SEVERE_STATUS,
@@ -378,6 +390,7 @@ class App (rapidsms.app.App):
     @keyword(r'mrdt \+(\d+) ([yn]) ([yn])?(.*)')
     @authenticated
     def report_malaria(self, message, ref_id, result, bednet, observed):
+  
         case = self.find_case(ref_id)
         observed, choices = self.get_observations(observed)
         self.delete_similar(case.reportmalaria_set)        

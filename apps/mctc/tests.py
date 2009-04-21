@@ -173,23 +173,23 @@ class TestApp (TestScript):
         
         # basic test
         7654321 > +26 75 n
-        7654321 < Report +26: SAM, MUAC 75 mm
+        7654321 < MUAC> SAM Patient requires OTP care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm
 
         # cm get converted to mm, g to kg, m to cm
         7654321 > +26 7.5 2150 1.4 n
-        7654321 < Report +26: SAM, MUAC 75 mm, 2.1 kg, 140 cm
+        7654321 < MUAC> SAM Patient requires OTP care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, 2.1 kg, 140 cm
 
         # complications list
         7654321 > +26 75 21 e a d
-        7654321 < Report +26: SAM+, MUAC 75 mm, 21.0 kg, Edema, Appetite Loss, Diarrhea
+        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, 21.0 kg, Edema, Appetite Loss, Diarrhea
 
         # complications list - weight is optional
         7654321 > +26 75 e a d
-        7654321 < Report +26: SAM+, MUAC 75 mm, Edema, Appetite Loss, Diarrhea
+        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, Edema, Appetite Loss, Diarrhea
 
         # complications list - case insensitive
         7654321 > +26 75 21 N A D
-        7654321 < Report +26: SAM+, MUAC 75 mm, 21.0 kg, Appetite Loss, Diarrhea
+        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, 21.0 kg, Appetite Loss, Diarrhea
 
         # more complications, formatted differently
         7654321 > +26 75 n fcv
@@ -197,19 +197,20 @@ class TestApp (TestScript):
 
         # more complications, formatted differently
         7654321 > +26 75 n f cg v
-        7654321 < Report +26: SAM+, MUAC 75 mm, Fever, Coughing, Vomiting
+        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, Fever, Coughing, Vomiting
+
 
         # one last complication test
         7654321 > +26 75 21 n u
-        7654321 < Report +26: SAM+, MUAC 75 mm, 21.0 kg, Unresponsive
+        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, 21.0 kg, Unresponsive
 
         # MAM logic test
         7654321 > +26 120 n
-        7654321 < Report +26: MAM, MUAC 120 mm
+        7654321 <  MUAC> MAM Child requires supplemental feeding.. +26 MADISON, M, F/4 (Sally). MUAC 120 mm
 
         # Healthy logic test
         7654321 > +26 125 n
-        7654321 < Report +26: Healthy, MUAC 125 mm
+        7654321 <  MUAC> Child is not malnourished. +26 MADISON, M, F/4 (Sally). MUAC 125 mm
 
         # MUAC fail
         7654321 > +26 45.5.5 83.1 e foo
@@ -234,7 +235,7 @@ class TestApp (TestScript):
         self.assertEquals(reports, 1,
             "only have one report; all others today were overwritten")
 
-    test_03_ShowCase = """
+    _test_03_ShowCase = """
         7654321 > show +26
         7654321 < +26 Healthy MADISON, Molly F/4 (Sally) Whiskey
     """
@@ -263,7 +264,7 @@ class TestApp (TestScript):
     test_05_Fever = """
         # requested change to make f be fever, not h
         7654321 > +26 105 d v f
-        7654321 < Report +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
+        7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 105 mm, Diarrhea, Vomiting, Fever
     """
     
     test_06_Lists = """
@@ -272,7 +273,7 @@ class TestApp (TestScript):
         7654322 < 7654322 registered to @sbob (BOB, Smith) at Charliesburg.
         
         7654321 > +26 105 d v f
-        7654321 < Report +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
+        7654321 <  MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 105 mm, Diarrhea, Vomiting, Fever
         # 7654322 < @jdoe reports +26: SAM+, MUAC 105 mm, Diarrhea, Vomiting, Fever
     """
 
@@ -286,6 +287,7 @@ class TestApp (TestScript):
         second.save()
 
     test_07_mrdt_01 = """
+
         7654321 > mrdt +26 y n f
         7654321 < MRDT> Child +26, MADISON, Molly, F/4 has MALARIA. Child is 4. Please provide 2 tabs of Coartem (ACT) twice a day for 3 days
         7654322 < MRDT> Child +26, MADISON, Molly, F/4 (None) has MALARIA. CHW: @jdoe 7654321
