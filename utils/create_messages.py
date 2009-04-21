@@ -1,3 +1,4 @@
+# a simple way to pump messages into the system in bulk
 # note this requires the settings hack
 import sys
 import os

@@ -125,8 +125,9 @@ class DiagnosisCategory(models.Model):
 
 class Diagnosis(models.Model):
     name = models.CharField(max_length=255)
-    short_code = models.CharField(max_length=1)
+    code = models.CharField(max_length=1)
     category = models.ForeignKey(DiagnosisCategory)
+    mvp_code = models.CharField(max_length=255)
 
     def __unicode__(self):
         return self.name

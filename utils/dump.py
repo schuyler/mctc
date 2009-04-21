@@ -1,3 +1,4 @@
+#
 # note this requires the settings hack
 import sys
 import os
