@@ -278,8 +278,6 @@ class TestApp (TestScript):
     """
 
     def test_07_mrdt_00(self):
-        # a bit of setup for the test
-        #import pdb; pdb.set_trace()
         first = User.objects.get(username="jdoe").provider
         second = User.objects.get(username="sbob").provider
         second.following_users.add(first)

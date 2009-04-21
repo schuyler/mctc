@@ -8,11 +8,11 @@
     }
   }, 
   {
-    "pk": 2, 
+    "pk": 5, 
     "model": "mctc.lab", 
     "fields": {
-      "code": "RDT", 
-      "name": "Rapid Diagnostic Test"
+      "code": "ELISA", 
+      "name": "Rapid ELISA"
     }
   }, 
   {
@@ -32,11 +32,11 @@
     }
   }, 
   {
-    "pk": 5, 
+    "pk": 2, 
     "model": "mctc.lab", 
     "fields": {
-      "code": "ELISA", 
-      "name": "Rapid ELISA"
+      "code": "RDT", 
+      "name": "Rapid Diagnostic Test"
     }
   }, 
   {

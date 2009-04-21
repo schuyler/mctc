@@ -1,51 +1,23 @@
 [
   {
-    "pk": 1, 
-    "model": "mctc.diagnosiscategory", 
-    "fields": {
-      "name": "Malaria"
-    }
-  }, 
-  {
-    "pk": 2, 
-    "model": "mctc.diagnosiscategory", 
-    "fields": {
-      "name": "Intestinal Infectious Diseases (excludes helminthiasis) (001-009)"
-    }
-  }, 
-  {
-    "pk": 3, 
-    "model": "mctc.diagnosiscategory", 
-    "fields": {
-      "name": "Pulmonary Tuberculosis"
-    }
-  }, 
-  {
-    "pk": 4, 
-    "model": "mctc.diagnosiscategory", 
-    "fields": {
-      "name": "Pneumonia (480-488)"
-    }
-  }, 
-  {
-    "pk": 5, 
-    "model": "mctc.diagnosiscategory", 
-    "fields": {
-      "name": "Influenza"
-    }
-  }, 
-  {
-    "pk": 6, 
-    "model": "mctc.diagnosiscategory", 
-    "fields": {
-      "name": "Streptococcal Pharyngitis"
-    }
-  }, 
-  {
     "pk": 7, 
     "model": "mctc.diagnosiscategory", 
     "fields": {
       "name": "Acute Respiratory Infections (460-466)"
+    }
+  }, 
+  {
+    "pk": 9, 
+    "model": "mctc.diagnosiscategory", 
+    "fields": {
+      "name": "Asthma"
+    }
+  }, 
+  {
+    "pk": 15, 
+    "model": "mctc.diagnosiscategory", 
+    "fields": {
+      "name": "Dehydration**  "
     }
   }, 
   {
@@ -56,10 +28,38 @@
     }
   }, 
   {
-    "pk": 9, 
+    "pk": 20, 
     "model": "mctc.diagnosiscategory", 
     "fields": {
-      "name": "Asthma"
+      "name": "Helminths (otherwise unspecified)"
+    }
+  }, 
+  {
+    "pk": 5, 
+    "model": "mctc.diagnosiscategory", 
+    "fields": {
+      "name": "Influenza"
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "mctc.diagnosiscategory", 
+    "fields": {
+      "name": "Intestinal Infectious Diseases (excludes helminthiasis) (001-009)"
+    }
+  }, 
+  {
+    "pk": 1, 
+    "model": "mctc.diagnosiscategory", 
+    "fields": {
+      "name": "Malaria"
+    }
+  }, 
+  {
+    "pk": 12, 
+    "model": "mctc.diagnosiscategory", 
+    "fields": {
+      "name": "Malnutrition"
     }
   }, 
   {
@@ -77,31 +77,10 @@
     }
   }, 
   {
-    "pk": 12, 
+    "pk": 17, 
     "model": "mctc.diagnosiscategory", 
     "fields": {
-      "name": "Malnutrition"
-    }
-  }, 
-  {
-    "pk": 13, 
-    "model": "mctc.diagnosiscategory", 
-    "fields": {
-      "name": "Trauma"
-    }
-  }, 
-  {
-    "pk": 14, 
-    "model": "mctc.diagnosiscategory", 
-    "fields": {
-      "name": "Sepsis"
-    }
-  }, 
-  {
-    "pk": 15, 
-    "model": "mctc.diagnosiscategory", 
-    "fields": {
-      "name": "Dehydration**  "
+      "name": "Otitis Externa"
     }
   }, 
   {
@@ -112,17 +91,31 @@
     }
   }, 
   {
-    "pk": 17, 
+    "pk": 4, 
     "model": "mctc.diagnosiscategory", 
     "fields": {
-      "name": "Otitis Externa"
+      "name": "Pneumonia (480-488)"
     }
   }, 
   {
-    "pk": 18, 
+    "pk": 3, 
     "model": "mctc.diagnosiscategory", 
     "fields": {
-      "name": "Urinary Tract Infection"
+      "name": "Pulmonary Tuberculosis"
+    }
+  }, 
+  {
+    "pk": 21, 
+    "model": "mctc.diagnosiscategory", 
+    "fields": {
+      "name": "Schistosomiasis "
+    }
+  }, 
+  {
+    "pk": 14, 
+    "model": "mctc.diagnosiscategory", 
+    "fields": {
+      "name": "Sepsis"
     }
   }, 
   {
@@ -133,17 +126,24 @@
     }
   }, 
   {
-    "pk": 20, 
+    "pk": 6, 
     "model": "mctc.diagnosiscategory", 
     "fields": {
-      "name": "Helminths (otherwise unspecified)"
+      "name": "Streptococcal Pharyngitis"
     }
   }, 
   {
-    "pk": 21, 
+    "pk": 13, 
     "model": "mctc.diagnosiscategory", 
     "fields": {
-      "name": "Schistosomiasis "
+      "name": "Trauma"
+    }
+  }, 
+  {
+    "pk": 18, 
+    "model": "mctc.diagnosiscategory", 
+    "fields": {
+      "name": "Urinary Tract Infection"
     }
   }
 ]
