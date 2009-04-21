@@ -10,8 +10,11 @@ from rapidsms.parsers.keyworder import Keyworder
 from rapidsms.message import Message
 from rapidsms.connection import Connection
 
+from models.logs import MessageLog, log
+
 from models.general import Provider, User
-from models.general import MessageLog, Facility, Case, CaseNote, Observation
+from models.general import Facility, Case, CaseNote, Observation, Zone
+
 from models.reports import ReportMalnutrition, ReportMalaria
 from models.reports import ReportDiagnosis, Diagnosis, Lab, LabDiagnosis
 
@@ -61,6 +64,8 @@ class App (rapidsms.app.App):
             func, captures = self.keyword.match(self, message.text)
         except TypeError:
             # didn't find a matching function
+            # make sure we tell them that we got a problem
+            message.respond(_("Unknown or incorrectly formed command: %(msg)s... Please call 999-9999") % {"msg":message.text[:10]})
             return False
         try:
             handled = func(self, message, *captures)
@@ -93,12 +98,13 @@ class App (rapidsms.app.App):
                 "Username '%s' is already in use. " +
                 "Reply with: JOIN <last> <first> <username>") % username)
 
+        # todo: use the more generic get_description if possible
         info = {
             "username"   : username,
-            "first_name" : first_name.title(),
-            "last_name"  : last_name.title()
+            "user_first_name" : first_name.title(),
+            "user_last_name"  : last_name.title()
         }
-        user = User(**info)
+        user = User(username=username, first_name=first_name.title(), last_name=last_name.title())
         user.save()
 
         mobile = message.peer
@@ -109,29 +115,30 @@ class App (rapidsms.app.App):
 
         if in_use:
             info.update({
-                "last_name"  : in_use.user.last_name.upper(),
-                "first_name" : in_use.user.first_name,
+                "user_last_name"  : in_use.user.last_name.upper(),
+                "user_first_name" : in_use.user.first_name,
                 "other"      : in_use.user.username,
                 "mobile"     : mobile,
                 "clinic"     : provider.clinic.name,
             })
             message.respond(_(
-                "Phone %(mobile)s is already registered to %(last_name)s, " +
-                "%(first_name)s. Reply with 'CONFIRM %(username)s'.") % info)
+                "Phone %(mobile)s is already registered to %(user_last_name)s, " +
+                "%(user_first_name)s. Reply with 'CONFIRM %(username)s'.") % info)
         else:
             info.update({
                 "id"        : provider.id,
                 "mobile"    : mobile,
                 "clinic"    : provider.clinic.name,
-                "last_name" : last_name.upper()
+                "user_last_name" : last_name.upper()
             })
             self.respond_to_join(message, info)
+        log(provider, "provider_registered")            
         return True
 
     def respond_to_join(self, message, info):
         message.respond(
             _("%(mobile)s registered to @%(username)s " +
-              "(%(last_name)s, %(first_name)s) at %(clinic)s.") % info)
+              "(%(user_last_name)s, %(user_first_name)s) at %(clinic)s.") % info)
 
     @keyword(r'confirm (\w+)')
     def confirm_join (self, message, username):
@@ -146,15 +153,9 @@ class App (rapidsms.app.App):
             else:
                 provider.active = False
             provider.save()
-        info = {
-            "first_name"    : user.first_name,
-            "last_name"     : user.last_name.upper(),
-            "id"            : provider.id,
-            "mobile"        : mobile,
-            "clinic"        : provider.clinic.name,
-            "username"      : username
-        }
+        info = provider.get_dictionary()
         self.respond_to_join(message, info)
+        log(provider, "confirmed_join")
         return True
 
     def respond_not_registered (self, message, target):
@@ -181,15 +182,16 @@ class App (rapidsms.app.App):
 
 
     # Register a new patient
-
-    @keyword(r'new (\S+) (\S+) ([MF]) ([\d\-]+)( \D+)?( \d+)?')
+    @keyword(r'new (\S+) (\S+) ([MF]) ([\d\-]+)( \D+)?( \d+)?( z\d+)?')
     @authenticated
     def new_case (self, message, last, first, gender, dob,
-                  guardian="", contact=""):
+                  guardian="", contact="", zone=None):
         provider = message.sender.provider
-        zone     = None
-        if provider.clinic:
-            zone = provider.clinic.zone
+        if not zone:
+            if provider.clinic:
+                zone = provider.clinic.zone
+        else:
+            zone = Zone.objects.get(number=zone[1:])
 
         dob = re.sub(r'\D', '', dob)
         try:
@@ -202,6 +204,7 @@ class App (rapidsms.app.App):
         dob = datetime.date(*dob[:3])
         if guardian:
             guardian = guardian.title()
+        # todo: move this to a more generic get_description
         info = {
             "first_name" : first.title(),
             "last_name"  : last.title(),
@@ -228,6 +231,7 @@ class App (rapidsms.app.App):
         message.respond(_(
             "New +%(id)s: %(last_name)s, %(first_name)s %(gender)s/%(age)s " +
             "(%(guardian)s) %(zone)s") % info)
+        log(case, "patient_created")
         return True
 
     def find_case (self, ref_id):
@@ -242,9 +246,19 @@ class App (rapidsms.app.App):
         case = self.find_case(ref_id)
         if case.reportmalnutrition_set.count():
             raise HandlerFailed(_(
+                "Cannot cancel +%s: case has malnutrition reports.") % ref_id)
+                
+        if case.reportmalaria_set.count():
+            raise HandlerFailed(_(
+                "Cannot cancel +%s: case has malaria reports.") % ref_id)
+                
+        if case.reportdiagnosis_set.count():
+            raise HandlerFailed(_(
                 "Cannot cancel +%s: case has diagnosis reports.") % ref_id)
+
         case.delete()
         message.respond(_("Case +%s cancelled.") % ref_id)
+        log(message.sender.provider, "case_cancelled")        
         return True
 
     @keyword(r'list(?: \+)?')
@@ -286,14 +300,8 @@ class App (rapidsms.app.App):
     @authenticated
     def show_case (self, message, ref_id):
         case = self.find_case(ref_id)
-        info = {
-            "id"            : case.ref_id,
-            "last_name"     : case.last_name.upper(),
-            "first_name"    : case.first_name,
-            "gender"        : case.gender,
-            "age"           : case.age(),
-            "status"        : case.reportmalnutrition_set.latest("entered_at").get_status_display(),
-        }
+        info = case.get_description()
+
         if case.guardian: info["guardian"] = "(%s) " % case.guardian
         if case.zone: info["zone"] = case.zone.name
         message.respond(_(
@@ -370,7 +378,7 @@ class App (rapidsms.app.App):
                     if recipient in recipients: continue
                     recipients.append(recipient)
                     #message.forward(recipient.mobile, alert)
-
+        log(case, "muac_taken")
         return True
 
     @keyword(r'n(?:ote)? \+(\d+) (.+)')
@@ -379,6 +387,7 @@ class App (rapidsms.app.App):
         case = self.find_case(ref_id)
         CaseNote(case=case, created_by=message.sender, text=note).save()
         message.respond(_("Note added to case +%s.") % ref_id)
+        log(case, "note_added")        
         return True
 
     @keyword(r'd \+(\d+ )(.*)')
@@ -406,6 +415,7 @@ class App (rapidsms.app.App):
             except Lab.DoesNotExist:
                 raise HandlerFailed("Unknown lab code: %s" % code)
 
+        self.delete_similar(case.reportdiagnosis_set)
         report = ReportDiagnosis(case=case, provider=provider, text=message.text)
         report.save()
         for diag in diags:
@@ -426,6 +436,8 @@ class App (rapidsms.app.App):
             info["labs_text"] = "%sLabs: %s" % (info["diagnosis"] and " " or "", info["labs_text"])
 
         message.respond(_("D> +%(ref_id)s %(first_name_short)s.%(last_name)s %(diagnosis)s%(labs_text)s") % info)
+        log(case, "diagnosis_taken")        
+        return True        
 
     @keyword(r'mrdt \+(\d+) ([yn]) ([yn])?(.*)')
     @authenticated
@@ -506,6 +518,9 @@ class App (rapidsms.app.App):
         recipients = report.get_alert_recipients()
         for recipient in recipients:
             message.forward(recipient.mobile, alert)
+
+        log(case, "mrdt_taken")        
+        return True
 
     def delete_similar(self, set):
         try:

@@ -91,11 +91,18 @@ class Provider(models.Model):
         return "/provider/view/%s/" % self.id
 
     def get_dictionary(self):
+        # first step to being a little bit more generic
         return {
-            'provider_mobile': self.mobile,
-            'provider_user': self.user,
-            'provider_name': self.user.first_name[0] + ' ' + self.user.last_name.upper()
-        }
+                "user_first_name": self.user.first_name,
+                "user_last_name": self.user.last_name.upper(),
+                "id": self.id,
+                "mobile": self.mobile,
+                "provider_mobile": self.mobile,
+                "provider_user": self.user,
+                "provider_name": self.user.first_name[0] + ' ' + self.user.last_name.upper(),
+                "clinic": self.clinic.name,
+                "username": self.user.username
+            }
 
     @classmethod
     def by_mobile (cls, mobile):
@@ -204,18 +211,3 @@ class CaseNote(models.Model):
 
     class Meta:
         app_label = "mctc"
-
-class MessageLog(models.Model):
-    mobile      = models.CharField(max_length=255, db_index=True)
-    sent_by     = models.ForeignKey(User, null=True)
-    text        = models.TextField(max_length=255)
-    was_handled = models.BooleanField(default=False, db_index=True)
-    created_at  = models.DateTimeField(db_index=True)
-
-    class Meta:
-        app_label = "mctc"
-
-    def save(self, *args):
-        if not self.id:
-            self.created_at = datetime.now()
-        super(MessageLog, self).save(*args)

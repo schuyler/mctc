@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from models.general import Zone, Facility, Case, MessageLog, Provider, User 
+from models.general import Zone, Facility, Case, Provider, User 
+from models.logs import MessageLog, EventLog
 from models.general import Observation
 from models.reports import ReportMalnutrition
 from django.utils.translation import ugettext_lazy as _
@@ -45,3 +46,4 @@ class MessageLogAdmin(admin.ModelAdmin):
     list_filter = ("was_handled",)
     
 admin.site.register(MessageLog, MessageLogAdmin)
+admin.site.register(EventLog)

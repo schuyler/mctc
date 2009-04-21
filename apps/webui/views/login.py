@@ -3,6 +3,7 @@ from django.contrib import auth
 
 from apps.webui.forms.login import LoginForm
 from apps.webui.shortcuts import as_html, login_required
+from apps.mctc.models.logs import log
 
 def login(request):
     if request.method == "POST" and not request.user.is_authenticated():
@@ -14,6 +15,7 @@ def login(request):
             if user:
                 if user.is_active and user.is_staff:
                     auth.login(request, user)
+                    log(user, "user_logged_in")
                     return HttpResponseRedirect("/")
             return HttpResponseRedirect("/accounts/login/?msg=login_failed")
     else:

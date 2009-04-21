@@ -182,7 +182,8 @@ class ReportDiagnosis(Report, models.Model):
     diagnosis = models.ManyToManyField(Diagnosis)
     lab = models.ManyToManyField(Lab, through=LabDiagnosis)
     text = models.TextField()
-
+    entered_at  = models.DateTimeField(db_index=True)
+    
     def __unicode__(self):
         return self.case
 

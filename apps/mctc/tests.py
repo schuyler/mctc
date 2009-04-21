@@ -4,7 +4,8 @@ from django.test import TestCase
 
 from app import App
 
-from models.general import Provider, User, MessageLog, Facility
+from models.logs import MessageLog, EventLog
+from models.general import Provider, User, Facility
 from models.general import Case, CaseNote, Observation
 from models.reports import ReportMalnutrition, ReportMalaria
 
@@ -372,6 +373,44 @@ class TestApp (TestScript):
         7654321 > D +59 Looked ill /HB+10 had -084.9 and -480 and so on /ELISA-
         7654321 < D> +59 S.MADISON C. Malaria, Viral Pneumonia Labs: HB 10, ELISA-
     """
+
+    # lets test some nice error cases re handled
+    test_09_errors = """
+        7654321 > foo!
+        7654321 < Unknown or incorrectly formed command: foo!... Please call 999-9999
+    """
+    
+    test_10_zones = """
+        7654321 > new madison wally m 150607 230123
+        7654321 < New +67: MADISON, Wally M/%dm (None) Whiskey
+
+        7654321 > new madison wally m 150607 230123 z1
+        7654321 < New +75: MADISON, Wally M/%dm (None) X-Ray
+
+        7654321 > new madison wally m 150607 z1
+        7654321 < New +83: MADISON, Wally M/%dm (None) X-Ray
+    """ % (caseAges[-1], caseAges[-1], caseAges[-1])
+    
+    test_11_cancel_fails = """
+        7654321 > new JAMES Davey m 150607 230123
+        7654321 < New +91: JAMES, Davey M/%dm (None) Whiskey
+        
+        7654321 > D +91 -084.9
+        7654321 < D> +91 D.JAMES C. Malaria
+        
+        7654321 > cancel +91
+        7654321 < Cannot cancel +91: case has diagnosis reports.
+
+        7654321 > new james billy m 150607 230123
+        7654321 < New +108: JAMES, Billy M/%dm (None) Whiskey
+        
+        7654321 > mrdt +108 y n f
+        7654321 < MRDT> Child +108, JAMES, Billy, M/22m has MALARIA. Child is less than 3. Please provide 1 tab of Coartem (ACT) twice a day for 3 days
+        7654322 < MRDT> Child +108, JAMES, Billy, M/22m (None) has MALARIA. CHW: @jdoe 7654321
+        
+        7654321 > cancel +108
+        7654321 < Cannot cancel +108: case has malaria reports.        
+    """ % (caseAges[-1], caseAges[-1])
 
 class TestAlerts(TestCase):
     fixtures = ["users.json", "alerts.json"]
