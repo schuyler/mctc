@@ -18,8 +18,8 @@ from tempfile import mkstemp
 backup = mkstemp(".db")[1]
 print "Database backed up to %s, just in case." % backup
 os.system('mv mctc.db %s' % backup)
-os.system('django-admin.py makemessages -l en --pythonpath=. --settings=settings')
-os.system('django-admin.py compilemessages --pythonpath=. --settings=settings')
+#os.system('django-admin.py makemessages -l en --pythonpath=. --settings=settings')
+#os.system('django-admin.py compilemessages --pythonpath=. --settings=settings')
 
 from django.contrib.auth import models as auth_app
 from django.contrib.auth.management import create_superuser 
