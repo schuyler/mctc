@@ -12,7 +12,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 file = os.path.join(path, "apps", "mctc", "models", "fixtures", "diagnostic_code_categories.csv")
 
-from apps.mctc.models.reports import DiagnosisCategory, Diagnosis
+from apps.mctc.models.reports import DiagnosisCategory, Diagnosis, Lab
 
 if "--force" not in sys.argv and Diagnosis.objects.count():
     print """Warning: there are already diagnosis in the db, this will add more. 
@@ -52,5 +52,20 @@ for row in reader:
     count += 1
 
 print "Added %s to diagnosis" % count
+
+file = os.path.join(path, "apps", "mctc", "models", "fixtures", "lab_codes.csv")
+
+count = 0
+reader = csv.reader(open(file))
+for row in reader:        
+    d = Lab()
+    d.id = row[0]
+    d.code = row[1]
+    d.name = row[2]
+    d.save()
+    count += 1
+
+print "Added %s to lab codes" % count
+
 
     

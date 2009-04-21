@@ -12,11 +12,13 @@ from rapidsms.connection import Connection
 
 from models.general import Provider, User
 from models.general import MessageLog, Facility, Case, CaseNote, Observation
-from models.reports import ReportMalnutrition, ReportMalaria, ReportDiagnosis, Diagnosis
+from models.reports import ReportMalnutrition, ReportMalaria
+from models.reports import ReportDiagnosis, Diagnosis, Lab, LabDiagnosis
 
 import re, time, datetime
 
 find_diagnostic_re = re.compile('( -[\d\.]+)' ,re.I)
+find_lab_re =  re.compile('(/[A-Z]+)([\+-])(\d*:?)', re.I)
 
 def authenticated (func):
     def wrapper (self, message, *args):
@@ -379,26 +381,51 @@ class App (rapidsms.app.App):
         message.respond(_("Note added to case +%s.") % ref_id)
         return True
 
-    @keyword(r'wtf \+(\d+)?(.*)')
+    @keyword(r'd \+(\d+ )(.*)')
     @authenticated
     def diagnosis(self, message, ref_id, text):
         case = self.find_case(ref_id)
-        hits = find_diagnostic_re.findall(text)
         provider = message.sender.provider        
         diags = []
+        labs = []
+
+        hits = find_diagnostic_re.findall(message.text)
         for hit in hits:
-            code = hit[1:]
+            code = hit[2:]
             try:
-                diags.append(Diagnostic.objects.get(code=code))
-            except Diagnostic.DoesNotExist:
+                diags.append(Diagnosis.objects.get(code=code))
+            except Diagnosis.DoesNotExist:
+                raise HandlerFailed("Unknown diagnostic code: %s" % code)
+
+        hits = find_lab_re.findall(text)
+        for hit in hits:
+            code, sign, number = hit
+            try:
+                # the code starts with /
+                labs.append([Lab.objects.get(code=code[1:]), sign, number])
+            except Lab.DoesNotExist:
                 raise HandlerFailed("Unknown diagnostic code: %s" % code)
         
         report = ReportDiagnosis(case=case, provider=provider, text=message.text)
         report.save()
         for diag in diags:
             report.diagnosis.add(diag)
+        for lab, sign, number in labs:
+            ld = LabDiagnosis()
+            ld.lab = lab            
+            ld.result = int(sign == "+")
+            if number:
+                ld.amount = number
+            ld.diagnosis = report
+            ld.save()
         report.save()
-        message.respond(_("Yo dude, diagnosis added +%s") % ref_id)
+        
+        info = case.get_dictionary()
+        info.update(report.get_dictionary())
+        if info["labs_text"]:
+            info["labs_text"] = "%sLabs: %s" % (info["diagnosis"] and " " or "", info["labs_text"])
+            
+        message.respond(_("D> +%(ref_id)s %(first_name_short)s.%(last_name)s %(diagnosis)s%(labs_text)s") % info)
         
     @keyword(r'mrdt \+(\d+) ([yn]) ([yn])?(.*)')
     @authenticated

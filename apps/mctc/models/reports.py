@@ -130,6 +130,28 @@ class ReportMalnutrition(Report, models.Model):
     class Meta:
         app_label = "mctc"
 
+class Lab(models.Model):
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=10)
+    
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        app_label = "mctc"
+        ordering = ("code",)        
+
+class LabDiagnosis(models.Model):
+    lab = models.ForeignKey(Lab)
+    diagnosis = models.ForeignKey("ReportDiagnosis")
+    amount = models.IntegerField(blank=True, null=True)
+    result = models.BooleanField(blank=True)
+
+    def __unicode__(self):
+        return "%s, %s - %s" % (self.lab, self.diagnosis, self.amount)
+
+    class Meta:
+        app_label = "mctc"
 
 class DiagnosisCategory(models.Model):
     name = models.CharField(max_length=255)
@@ -139,23 +161,26 @@ class DiagnosisCategory(models.Model):
 
     class Meta:
         app_label = "mctc"
-
+        ordering = ("name",)
+        
 class Diagnosis(models.Model):
     name = models.CharField(max_length=255)
-    code = models.CharField(max_length=1)
+    code = models.CharField(max_length=10)
     category = models.ForeignKey(DiagnosisCategory)
     mvp_code = models.CharField(max_length=255)
 
     def __unicode__(self):
-        return self.name
+        return self.mvp_code
 
     class Meta:
         app_label = "mctc"
+        ordering = ("code",)
         
 class ReportDiagnosis(Report, models.Model):
     case = models.ForeignKey(Case, db_index=True)
     provider = models.ForeignKey(Provider, db_index=True)
     diagnosis = models.ManyToManyField(Diagnosis)
+    lab = models.ManyToManyField(Lab, through=LabDiagnosis)
     text = models.TextField()
 
     def __unicode__(self):
@@ -169,6 +194,20 @@ class ReportDiagnosis(Report, models.Model):
         if not self.id:
             self.entered_at = datetime.now()
         super(ReportDiagnosis, self).save(*args)
+
+    def get_dictionary(self):
+        extra = []
+        for ld in LabDiagnosis.objects.filter(diagnosis=self):
+            if ld.amount:
+                extra.append("%s %s" % (ld.lab.code, ld.amount))
+            else:
+                extra.append("%s%s" % (ld.lab.code, ld.result and "+" or "-"))
+                
+        return {
+            "diagnosis": ", ".join([str(d) for d in self.diagnosis.all()]),
+            "labs": ", ".join([str(d) for d in self.lab.all()]),
+            "labs_text": ", ".join(extra)
+        }
 
 # this needs to die
 class ReportCache(models.Model):

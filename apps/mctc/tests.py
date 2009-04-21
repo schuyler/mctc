@@ -34,7 +34,7 @@ def date_boundaries():
     return mapping
 
 class TestApp (TestScript):
-    fixtures = ('test.json', 'observations.json')
+    fixtures = ('test.json', 'observations.json', 'lab_codes.json', 'diagnoses.json', 'diagnoses_categories.json')
     apps = (App,)
 
     def setUp (self):
@@ -351,8 +351,23 @@ class TestApp (TestScript):
         assert not len(reports[0].observed.all())
 
     test_08_diagnosis = """ 
-        7654321 > wtf +59 -000.00
-        7654321 < Yo dude, diagnosis added +59
+        7654321 > D +59 -000.00
+        7654321 < Unknown diagnostic code: 000.00
+
+        7654321 > D +59 -84.9
+        7654321 < D> +59 S.MADISON C. Malaria
+
+        7654321 > D +59 -84.9 -480
+        7654321 < D> +59 S.MADISON Viral Pneumonia, C. Malaria
+
+        7654321 > D +59 /foo+
+        7654321 < Unknown diagnostic code: /foo
+
+        7654321 > D +59 /ELISA+ /RDT- /BS+45
+        7654321 < D> +59 S.MADISON Labs: ELISA+, RDT-, BS 45
+
+        7654321 > D +59 Looked ill /HB+10 had -84.9 and -480 and so on /ELISA-
+        7654321 < D> +59 S.MADISON Viral Pneumonia, C. Malaria Labs: HB 10, ELISA-
     """
 
 class TestAlerts(TestCase):

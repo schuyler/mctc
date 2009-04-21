@@ -32,7 +32,9 @@ post_syncdb.disconnect(create_superuser, sender=auth_app, dispatch_uid = "django
 call_command("syncdb")
 call_command("loaddata", "observations.json")
 call_command("loaddata", "overall.json")
-os.system('python utils/csv_to_db.py')
+call_command("loaddata", "lab_codes.json")
+call_command("loaddata", "diagnoses.json")
+call_command("loaddata", "diagnoses_categories.json")
 
 print "Database reset."
 

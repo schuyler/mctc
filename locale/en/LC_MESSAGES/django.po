@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-04-21 02:15-0400\n"
+"POT-Creation-Date: 2009-04-21 03:21-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,99 +29,101 @@ msgstr ""
 msgid "Groups"
 msgstr ""
 
-#: apps/mctc/app.py:26
+#: apps/mctc/app.py:28
 #, python-format
 msgid "%s is not a registered number."
 msgstr ""
 
-#: apps/mctc/app.py:71
+#: apps/mctc/app.py:73
 msgid "An error occurred. Please call 999-9999."
 msgstr ""
 
-#: apps/mctc/app.py:81
+#: apps/mctc/app.py:83
 msgid "The given password is not recognized."
 msgstr ""
 
-#: apps/mctc/app.py:91
+#: apps/mctc/app.py:93
 #, python-format
 msgid "Username '%s' is already in use. "
 msgstr ""
 
-#: apps/mctc/app.py:117
+#: apps/mctc/app.py:119
 #, python-format
 msgid "Phone %(mobile)s is already registered to %(last_name)s, "
 msgstr ""
 
-#: apps/mctc/app.py:131
+#: apps/mctc/app.py:133
 #, python-format
 msgid "%(mobile)s registered to @%(username)s "
 msgstr ""
 
-#: apps/mctc/app.py:159
+#: apps/mctc/app.py:161
 #, python-format
 msgid "User @%s is not registered."
 msgstr ""
 
-#: apps/mctc/app.py:199
+#: apps/mctc/app.py:201
 #, python-format
 msgid "Couldn't understand date: %s"
 msgstr ""
 
-#: apps/mctc/app.py:227
+#: apps/mctc/app.py:229
 #, python-format
 msgid "New +%(id)s: %(last_name)s, %(first_name)s %(gender)s/%(age)s "
 msgstr ""
 
-#: apps/mctc/app.py:235
+#: apps/mctc/app.py:237
 #, python-format
 msgid "Case +%s not found."
 msgstr ""
 
-#: apps/mctc/app.py:243
+#: apps/mctc/app.py:245
 #, python-format
 msgid "Cannot cancel +%s: case has diagnosis reports."
 msgstr ""
 
-#: apps/mctc/app.py:245
+#: apps/mctc/app.py:247
 #, python-format
 msgid "Case +%s cancelled."
 msgstr ""
 
-#: apps/mctc/app.py:298
+#: apps/mctc/app.py:300
 #, python-format
 msgid ""
 "+%(id)s %(status)s %(last_name)s, %(first_name)s %(gender)s/%(age)s %"
 "(guardian)s%(zone)s"
 msgstr ""
 
-#: apps/mctc/app.py:316
+#: apps/mctc/app.py:318
 #, python-format
 msgid "Can't understand MUAC (mm): %s"
 msgstr ""
 
-#: apps/mctc/app.py:352
+#: apps/mctc/app.py:354
 #, python-format
 msgid ""
 "%(diagnosis_msg)s. +%(ref_id)s %(last_name)s, %(first_name_short)s, %(gender)"
 "s/%(months)s (%(guardian)s). MUAC %(muac)s"
 msgstr ""
 
-#: apps/mctc/app.py:363
+#: apps/mctc/app.py:365
 #, python-format
 msgid "@%(username)s reports %(msg)s"
 msgstr ""
 
-#: apps/mctc/app.py:379
+#: apps/mctc/app.py:381
 #, python-format
 msgid "Note added to case +%s."
 msgstr ""
 
-#: apps/mctc/app.py:401
+#: apps/mctc/app.py:427
 #, python-format
-msgid "Yo dude, diagnosis added +%s"
+msgid ""
+"D> +%(ref_id)s %(first_name_short)s.%(last_name)s %(diagnosis)s Labs: %(labs)"
+"s"
 msgstr ""
 
-#: apps/mctc/app.py:427
+#: apps/mctc/app.py:453
 #, python-format
 msgid ""
 "MRDT> Child +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)"
@@ -129,7 +131,7 @@ msgid ""
 "(observed)s. Please refer patient IMMEDIATELY for clinical evaluation"
 msgstr ""
 
-#: apps/mctc/app.py:430
+#: apps/mctc/app.py:456
 #, python-format
 msgid ""
 "MRDT> Negative MRDT with Fever. +%(ref_id)s, %(last_name)s, %(first_name)s, %"
@@ -137,14 +139,14 @@ msgid ""
 "Reported by CHW %(provider_name)s @%(provider_user)s m:%(provider_mobile)s."
 msgstr ""
 
-#: apps/mctc/app.py:466
+#: apps/mctc/app.py:492
 #, python-format
 msgid ""
 "MRDT> Child +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)"
 "s has MALARIA%(danger)s. %(instructions)s"
 msgstr ""
 
-#: apps/mctc/app.py:468
+#: apps/mctc/app.py:494
 #, python-format
 msgid ""
 "MRDT> Child +%(ref_id)s, %(last_name)s, %(first_name)s, %(gender)s/%(months)"
@@ -236,15 +238,15 @@ msgstr ""
 msgid "Healthy"
 msgstr ""
 
-#: apps/mctc/models/reports.py:84 apps/mctc/models/reports.py:177
+#: apps/mctc/models/reports.py:84 apps/mctc/models/reports.py:205
 msgid "MUAC (mm)"
 msgstr ""
 
-#: apps/mctc/models/reports.py:85 apps/mctc/models/reports.py:178
+#: apps/mctc/models/reports.py:85 apps/mctc/models/reports.py:206
 msgid "Height (cm)"
 msgstr ""
 
-#: apps/mctc/models/reports.py:86 apps/mctc/models/reports.py:179
+#: apps/mctc/models/reports.py:86 apps/mctc/models/reports.py:207
 msgid "Weight (kg)"
 msgstr ""
 

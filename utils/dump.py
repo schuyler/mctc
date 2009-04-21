@@ -7,5 +7,11 @@ sys.path.append(path)
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
-os.system('python "%s/django-manage.py" dumpdata mctc.observation --indent=2 > "%s/apps/mctc/fixtures/observations.json"' % (path, path))
-os.system('python "%s/django-manage.py" dumpdata mctc.diagnosis --indent=2 > "%s/apps/mctc/fixtures/diagnoses.json"' % (path, path))
+for model, file in (
+    ["mctc.observation", "observations.json"],
+    ["mctc.diagnosis", "diagnoses.json"],
+    ["mctc.diagnosiscategory", "diagnoses_categories.json"],    
+    ["mctc.lab", "lab_codes.json"],        
+    ):
+    cmd = 'python "%s/django-manage.py" dumpdata %s  --indent=2 > "%s/apps/mctc/models/fixtures/%s"'
+    os.system(cmd % (path, model, path, file))

@@ -1,101 +1,101 @@
 [
   {
-    "pk": 1, 
-    "model": "mctc.observation", 
-    "fields": {
-      "letter": "e", 
-      "uid": "edema", 
-      "name": "Edema"
-    }
-  }, 
-  {
     "pk": 2, 
     "model": "mctc.observation", 
     "fields": {
-      "letter": "a", 
       "uid": "appetite", 
+      "letter": "a", 
       "name": "Appetite Loss"
-    }
-  }, 
-  {
-    "pk": 3, 
-    "model": "mctc.observation", 
-    "fields": {
-      "letter": "d", 
-      "uid": "diarrhea", 
-      "name": "Diarrhea"
-    }
-  }, 
-  {
-    "pk": 4, 
-    "model": "mctc.observation", 
-    "fields": {
-      "letter": "v", 
-      "uid": "vomiting", 
-      "name": "Vomiting"
-    }
-  }, 
-  {
-    "pk": 7, 
-    "model": "mctc.observation", 
-    "fields": {
-      "letter": "u", 
-      "uid": "unresponsive", 
-      "name": "Unresponsive"
-    }
-  }, 
-  {
-    "pk": 6, 
-    "model": "mctc.observation", 
-    "fields": {
-      "letter": "f", 
-      "uid": "fever", 
-      "name": "Fever"
     }
   }, 
   {
     "pk": 8, 
     "model": "mctc.observation", 
     "fields": {
-      "letter": "b", 
       "uid": "breathing", 
+      "letter": "b", 
       "name": "Breathing Difficulty"
-    }
-  }, 
-  {
-    "pk": 5, 
-    "model": "mctc.observation", 
-    "fields": {
-      "letter": "cg", 
-      "uid": "cough", 
-      "name": "Coughing"
     }
   }, 
   {
     "pk": 9, 
     "model": "mctc.observation", 
     "fields": {
-      "letter": "cf", 
       "uid": "confusion", 
+      "letter": "cf", 
       "name": "Confusion"
     }
   }, 
   {
-    "pk": 10, 
+    "pk": 5, 
     "model": "mctc.observation", 
     "fields": {
-      "letter": "nr", 
-      "uid": "responsive", 
-      "name": "Non Responsive"
+      "uid": "cough", 
+      "letter": "cg", 
+      "name": "Coughing"
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "mctc.observation", 
+    "fields": {
+      "uid": "diarrhea", 
+      "letter": "d", 
+      "name": "Diarrhea"
+    }
+  }, 
+  {
+    "pk": 1, 
+    "model": "mctc.observation", 
+    "fields": {
+      "uid": "edema", 
+      "letter": "e", 
+      "name": "Edema"
+    }
+  }, 
+  {
+    "pk": 6, 
+    "model": "mctc.observation", 
+    "fields": {
+      "uid": "fever", 
+      "letter": "f", 
+      "name": "Fever"
     }
   }, 
   {
     "pk": 11, 
     "model": "mctc.observation", 
     "fields": {
-      "letter": "cv", 
       "uid": "fits", 
+      "letter": "cv", 
       "name": "Fits/Convulsions"
+    }
+  }, 
+  {
+    "pk": 10, 
+    "model": "mctc.observation", 
+    "fields": {
+      "uid": "responsive", 
+      "letter": "nr", 
+      "name": "Non Responsive"
+    }
+  }, 
+  {
+    "pk": 7, 
+    "model": "mctc.observation", 
+    "fields": {
+      "uid": "unresponsive", 
+      "letter": "u", 
+      "name": "Unresponsive"
+    }
+  }, 
+  {
+    "pk": 4, 
+    "model": "mctc.observation", 
+    "fields": {
+      "uid": "vomiting", 
+      "letter": "v", 
+      "name": "Vomiting"
     }
   }
 ]
