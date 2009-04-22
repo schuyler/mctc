@@ -118,19 +118,19 @@ class ReportMalnutrition(Report, models.Model):
             if complications:
                 self.status = ReportMalnutrition.SEVERE_COMP_STATUS
             else:
-                self.status =  ReportMalnutrition.SEVERE_STATUS
+                self.status = ReportMalnutrition.SEVERE_STATUS
         elif self.muac < 125:
             self.status =  ReportMalnutrition.MODERATE_STATUS
 
     def diagnosis_msg(self):
-        if self.status == 1:
-            msg = "MAM Child requires supplemental feeding."
-        elif self.status == 2:
-            msg = "SAM Patient requires OTP care"
-        elif self.status == 3:
-            msg = "SAM+ Patient requires IMMEDIATE inpatient care"
+        if self.status == ReportMalnutrition.MODERATE_STATUS:
+            msg = _("MAM Child requires supplemental feeding.")
+        elif self.status == ReportMalnutrition.SEVERE_STATUS:
+            msg = _("SAM Patient requires OTP care")
+        elif self.status == ReportMalnutrition.SEVERE_COMP_STATUS:
+            msg = _("SAM+ Patient requires IMMEDIATE inpatient care")
         else:
-            msg = "Child is not malnourished"
+            msg = _("Child is not malnourished")
 
         return msg
 
