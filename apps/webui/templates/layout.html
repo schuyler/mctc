@@ -38,7 +38,7 @@
              </div>             
         </div>                 
         <div class="span-24 last clear">   
-            <div id="breadcrumbs" class="prepend-1">
+            <div id="breadcrumbs" class="prepend-1 append-1">
                 <form method="get" action="/search/" id="search">
                     <input type="search" name="q" value="{{ request.GET.q }}" title="Search this site"/>
                 </form>
@@ -47,19 +47,25 @@
                 &raquo; Latest Data
             {% endblock %}
             </div>
-            <div class="span-22 prepend-1 append-1">
+            <div class="span-23 prepend-1">
                 {% if msg %}
                 <p class="notice">{{ msg }}</p>
                 {% endif %}
-                {% block content %}{% endblock %}
-            </div>
-            <div id="footer" class="span-24 prepend-top">
-                <p>
-                    Copyright &copy; 2009 <a href="http://unicefinnovation.org">UNICEF</a> et al.<br />
-                    <a href="http://github.com/unicefinnovation/rapidsms">RapidSMS</a> is free software,
-                    available under the <a href="http://www.fsf.org/licensing/licenses/lgpl-3.0.html">LGPL</a>.
-                </p>
+                <div class="span-15">
+                    {% block content %}{% endblock %}
+                </div>
+                <div class="span-7 last">
+                    {% block bar %}{% endblock %}
+                </div>
             </div>
         </div>
+        <div id="footer" class="span-22 prepend-1">
+            <p>
+                Copyright &copy; 2009 <a href="http://unicefinnovation.org">UNICEF</a> et al.<br />
+                <a href="http://github.com/unicefinnovation/rapidsms">RapidSMS</a> is free software,
+                available under the <a href="http://www.fsf.org/licensing/licenses/lgpl-3.0.html">LGPL</a>.
+            </p>
+        </div>
+        
     </body>
 </html>

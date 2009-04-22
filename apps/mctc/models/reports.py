@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 
-from apps.mctc.models.general import Case, Provider, Observation
+from apps.mctc.models.general import Case, Provider
 
 from datetime import datetime
 import md5
@@ -33,6 +33,18 @@ class Report:
                     recipients.append(user)
 
         return recipients
+
+class Observation(models.Model):
+    uid = models.CharField(max_length=15)
+    name = models.CharField(max_length=255)
+    letter = models.CharField(max_length=2, unique=True)
+
+    class Meta:
+        app_label = "mctc"
+        ordering = ("name",)
+
+    def __unicode__(self):
+        return self.name
         
 class ReportMalaria(Report, models.Model):
     class Meta:

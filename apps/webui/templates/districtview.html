@@ -2,10 +2,8 @@
 {% block title %}District{% endblock %}
 
 {% block breadcrumbs %}
-<div id="breadcrumbs">
     <a href="/">MCTC</a>   
     &raquo; District
-</div>
 {% endblock %}
 
 {% block content %}
@@ -15,11 +13,10 @@
     <li><a href="/district/?d={{ district.id }}">{{ district.name }}</a></li>
     {% endfor %}
 </ul>
-
-{% if case_object_list %}
-    {% include "includes/activecases.html" %}
+{% if cases %}
+<h2>Cases per District</h2>
+{{ cases }}
 {% else %}
-    <p class="notice">Select a district</p>
+<p class="notice">Please select a district</p>
 {% endif %}
-
 {% endblock %}

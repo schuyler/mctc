@@ -20,18 +20,13 @@
     <tr><td>Manager:</td><td>{{ object.manager }}</td></tr>                    
 </table>
 
-<h2>Active Cases</h2>
-{{ case_table }}
+<h2>Cases</h2>
+{{ cases }}
 
 <h2>Message Log</h2>
-{% include "includes/messagelog.html" %}
-
-<h2>Inactive Cases</h2>
-<p>To do figure out redefine variables in template</p>
+{{ messages }}
 
 <h2>Event log</h2>
-<p class="notice">To come</p>
+{{ event }}
 
-<h2>Counter</h2>
-<p class="notice">To come</p>
 {% endblock %}

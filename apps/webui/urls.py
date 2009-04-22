@@ -9,8 +9,6 @@ from apps.webui.forms.general import CaseForm
 
 urlpatterns = patterns('',
     (r'^$', "apps.webui.views.general.dashboard"),
-    (r'^ajax/message-log/$', "apps.webui.views.general.ajax_message_log"),
-    (r'^message-log/$', "apps.webui.views.general.message_log"),
 
     (r'^search/$', "apps.webui.views.general.search_view"),
     (r'^district/$', "apps.webui.views.general.district_view"),    
@@ -21,7 +19,7 @@ urlpatterns = patterns('',
     
     (r'^case/edit/(?P<object_id>\d+)/$', "django.views.generic.create_update.update_object", {
         "template_name": "caseedit.html",
-        "form_class": CaseForm 
+        "form_class": CaseForm
     }),
     
     # since we can't change settings, we have to do this as accounts/login

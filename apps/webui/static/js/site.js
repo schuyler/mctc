@@ -6,5 +6,10 @@ $(document).ready(function() {
         };
     return false;
     });   
+    $('.expander').bind("click", function() {
+        console.log($(this).parent());
+        $($(this).parent()[0]).hide();
+        $(this).parent().parent().find(".hidden").show()
+    })
     $("#search input").labelify();
 });

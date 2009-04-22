@@ -13,9 +13,9 @@ from rapidsms.connection import Connection
 from models.logs import MessageLog, log
 
 from models.general import Provider, User
-from models.general import Facility, Case, CaseNote, Observation, Zone
+from models.general import Facility, Case, CaseNote, Zone
 
-from models.reports import ReportMalnutrition, ReportMalaria
+from models.reports import ReportMalnutrition, ReportMalaria, Observation
 from models.reports import ReportDiagnosis, Diagnosis, Lab, LabDiagnosis
 
 import re, time, datetime
@@ -544,37 +544,3 @@ class App (rapidsms.app.App):
                 else:
                     observed.append(obj)
         return observed, choices
-
-
-
-
-
-
-# def message_users(mobile, message=None, groups=None, users=None):
-#     recipients = []
-#     # get all the users
-#     user_objects = [ User.objects.get(id=user) for user in users ]
-#     for user in user_objects:
-#         try:
-#             if user.provider not in recipients:
-#                 recipients.append(user.provider)
-#         except models.ObjectDoesNotExist:
-#             pass
-#
-#     # get all the users for the groups
-#     group_objects = [ Group.objects.get(id=group) for group in groups ]
-#     for group in group_objects:
-#         for user in group.user_set.all():
-#             try:
-#                 if user.provider not in recipients:
-#                     recipients.append(user.provider)
-#             except models.ObjectDoesNotExist:
-#                 pass
-#
-#     # not sure what's going on tbh, I think this needs reviewing
-#     from rapidsms.backends import spomc
-#
-#     connection = Connection(spomc.Backend, mobile)
-#     smsmessage = Message(connection, message)
-#     for recipient in recipients:
-#         smsmessage.forward(recipient.mobile)

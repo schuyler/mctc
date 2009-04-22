@@ -5,7 +5,8 @@ body {
 .container {
     background: white;
     border-left: 1px solid grey;
-    border-right: 1px solid grey;    
+    border-right: 1px solid grey;
+    border-bottom: 1px solid grey;        
 }
 
 #header {
@@ -24,7 +25,6 @@ body {
 }
 
 h1 { 
-    padding-top: 1em;
     font-size: 2em; 
 }
 
@@ -74,11 +74,8 @@ h2 {
 
 #footer {
     margin-top: 3em;
-    border-top: 1px solid grey;
-    border-bottom: 1px solid grey;    
     text-align: right;
     color: grey;
-    background-color: whitesmoke;
 }
 
 #footer a {
@@ -121,4 +118,22 @@ h2 {
 
 .pagination span {
     padding: 0.4em;
+}
+
+fieldset div {
+    padding-top: 0.4em;
+}
+
+.field-error {
+    font-weight: bold;
+    color: #8a1f11;
+}
+
+.hidden {
+    display: none;
+}
+
+h2 {
+    font-size: 1.5em;
+    border-bottom: 1px solid black;
 }
