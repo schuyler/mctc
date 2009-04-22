@@ -10,7 +10,7 @@ from datetime import datetime
 # on a strict one to one basis, lets just define them here,
 # pushing the full text or setting up another model would work too
 messages = {
-    "provider_registered": _("Provider registered, waiting confirmation"),
+    "provider_registered": _("Provider registered, awaiting confirmation"),
     "patient_created": _("Patient created"),
     "muac_taken": _("MUAC taken for the patient"),
     "mrdt_taken": _("MRDT taken for the patient"),
