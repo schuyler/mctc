@@ -436,6 +436,22 @@ class App (rapidsms.app.App):
             info["labs_text"] = "%sLabs: %s" % (info["diagnosis"] and " " or "", info["labs_text"])
 
         message.respond(_("D> +%(ref_id)s %(first_name_short)s.%(last_name)s %(diagnosis)s%(labs_text)s") % info)
+
+        # add in the forward of instructions to the case provider
+        # if that it is not the reporter of the issue        
+
+        
+        instructions = []       
+        for diagnosis in report.diagnosis.all():
+            if diagnosis.instructions:
+                instructions.append(diagnosis.instructions)
+
+        if instructions:
+            if provider != case.provider:
+                # there's a different provider
+                info = {"ref_id":ref_id, "instructions":(", ".join(instructions))}
+                message.forward(case.provider.mobile, "D> +%(ref_id)s %(instructions)s" % info)
+                
         log(case, "diagnosis_taken")        
         return True        
 

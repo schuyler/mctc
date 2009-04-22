@@ -180,7 +180,8 @@ class Diagnosis(models.Model):
     code = models.CharField(max_length=10)
     category = models.ForeignKey(DiagnosisCategory)
     mvp_code = models.CharField(max_length=255)
-
+    instructions = models.TextField(blank=True)
+    
     def __unicode__(self):
         return self.mvp_code
 
@@ -221,14 +222,3 @@ class ReportDiagnosis(Report, models.Model):
             "labs": ", ".join([str(d) for d in self.lab.all()]),
             "labs_text": ", ".join(extra)
         }
-
-# this needs to die
-class ReportCache(models.Model):
-    case = models.ForeignKey(Case)
-    date = models.DateField(db_index=True)
-    muac = models.IntegerField(_("MUAC (mm)"), null=True, blank=True)
-    height = models.IntegerField(_("Height (cm)"), null=True, blank=True)
-    weight = models.FloatField(_("Weight (kg)"), null=True, blank=True)
-
-    class Meta:
-        app_label = "mctc"
