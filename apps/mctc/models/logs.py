@@ -24,12 +24,17 @@ messages = {
 class EventLog(models.Model):
     """ This is a much more refined log, giving you nicer messages """
     object_id = models.PositiveIntegerField()
+    content_type = models.ForeignKey(ContentType)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
-    message = models.CharField(max_length=25)
+    message = models.CharField(max_length=25, choices=tuple(messages.items()))
     created_at  = models.DateTimeField(db_index=True)
 
     class Meta:
         app_label = "mctc"
+        ordering = ("-created_at",)
+
+    def get_absolute_url(self):
+        return self.content_object.get_absolute_url()
 
 def log(source, message):
     if not messages.has_key(message):

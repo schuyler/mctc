@@ -8,7 +8,7 @@ from django.db import connection
 
 from apps.mctc.models.logs import MessageLog, EventLog
 from apps.mctc.models.general import Case, Zone, Provider
-from apps.mctc.models.reports import ReportMalnutrition, ReportCache
+from apps.mctc.models.reports import ReportMalnutrition, ReportMalaria, ReportDiagnosis
 #from apps.mctc.app import message_users
 
 from apps.webui.shortcuts import as_html, as_csv, as_pdf, paginate, login_required
@@ -20,7 +20,7 @@ from apps.webui.graphs.average import create_average_for_qs, create_graph
 from datetime import datetime, timedelta
 import time
 
-from reusable_tables.table import get
+from apps.reusable_tables.table import get
 
 @login_required
 def ajax_message_log(request):
@@ -71,16 +71,13 @@ def active_cases(request):
     
 @login_required
 def dashboard(request):
-    # i don't expect this to last, just a test and messing, ugh!
-    cases = Case.objects.all().order_by("-updated_at")
-    table = get("case_default")
-    format, case_table = table(request, "cases", cases)
-    if format != "html": return case_table
-
-    # get totals, yay for aggregation and turn it into a dict for easy use in templates
-#    totals = Case.objects.values("status").annotate(Count("status"))
-#    totals = dict([ [t["status"], t["status__count"] ] for t in totals ])
-     
+    nonhtml, tables = get(request, [
+        ["case", Q()],
+        ["event", Q()],
+    ])
+    if nonhtml:
+        return nonhtml
+             
     has_provider = True
     try:
         mobile = request.user.provider.mobile
@@ -96,10 +93,8 @@ def dashboard(request):
         messageform = None
         
     context = {
-        "case_table": case_table,
-#        "allcase_table": allcase_table(),
-        "paginate_url": "#",
- #       "case_totals": totals,
+        "case_table": tables[0],
+        "event_table": tables[1],
         "message_form": messageform,
         "has_provider": has_provider
     }
@@ -108,24 +103,35 @@ def dashboard(request):
 @login_required
 def search_view(request):
     term = request.GET.get("q")
-    # need to make this case insensitive
-    query = Q(id__contains=term) | Q(first_name__contains=term) | Q(last_name__contains=term)
-    queryset = Case.objects.filter(query)
-    res = paginate(queryset, 1)
-    context = {
-        "case_object_list": res,
-    }
-    return as_html(request, "searchview.html", context)
+    query = Q(id__icontains=term) | \
+            Q(first_name__icontains=term) | \
+            Q(last_name__icontains=term)
+
+    cases = Case.objects.filter(query).order_by("-updated_at")
+    format, case_table = get("case_default")(request, "cases", cases)
+    if format != "html": return case_table
+    
+    return as_html(request, "searchview.html", { "case_table": case_table, })
     
 @login_required
 def case_view(request, object_id):
     case = get_object_or_404(Case, id=object_id)
-    nut_res = paginate(case.reportmalnutrition_set.all(), 1)
-    mar_res = paginate(case.reportmalaria_set.all(), 1)
-    context = {
+    nonhtml, tables = get(request, [
+        ["malnutrition", Q(case=case)],
+        ["diagnosis", Q(case=case)],
+        ["malaria", Q(case=case)],
+        ["event", Q(content_type="case", object_id=object_id)],
+        ])
+        
+    if nonhtml:
+        return nonhtml
+    
+    context = { 
         "object": case,
-        "report_malnutrition_object_list": nut_res,
-        "report_malaria_object_list": mar_res        
+        "malnutrition": tables[0],
+        "diagnosis": tables[1],
+        "malaria": tables[2],
+        "event": tables[3],
     }
     return as_html(request, "caseview.html", context)
 
@@ -136,9 +142,11 @@ def district_view(request):
         "districts": Zone.objects.all(),
     }
     if district:
-        zone = get_object_or_404(Zone, id=district)
-        res = paginate(Case.objects.all().filter(zone=zone), 1)
-        context["case_object_list"] = res
+        nonhtml, tables = get(request, ["case", Q(zone=zone)])
+        if nonhtml: 
+            return nonhtml
+        else:
+            context["cases"] = tables[0]
 
     return as_html(request, "districtview.html", context)
 

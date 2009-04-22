@@ -16,10 +16,10 @@
     {% endfor %}
 </ul>
 
-{% if case_object_list %}
-    {% include "includes/activecases.html" %}
+{% if request.GET.d %}
+<h2>Cases per District</h>
+{{ cases }}
 {% else %}
-    <p class="notice">Select a district</p>
+<p class="notice">Please select a district</p>
 {% endif %}
-
 {% endblock %}

@@ -1,5 +1,4 @@
 {% extends "layout.html" %}
-{% block title %}Dashboard{% endblock %}
 
 {% block breadcrumbs %}
     <a href="/">MCTC</a>
@@ -7,11 +6,8 @@
 {% endblock %}
 
 {% block content %}
-{% if case_object_list.page.object_list %}
-    <h2>Search results</h2>
-    {% include "includes/activecases.html" %}
-{% else %}
-    <p class="notice">No results found</p>
-{% endif %}
+
+<h2>Search results</h2>
+{{ case_table }}
 
 {% endblock %}

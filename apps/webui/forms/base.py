@@ -9,11 +9,11 @@ from django import forms
 
 def as_blue_print(self):
     return self._html_output(u"""
-    <div style="padding-top: 1em">
+    <div>
         %(errors)s
-        <div style="padding-bottom: 0.5em">%(label)s</div>
+        <div>%(label)s</div>
         <div>%(field)s</div>
-        <div style="color: grey; clear: both">%(help_text)s</div>
+        <div class="help">%(help_text)s</div>
     </div>
     """, u'%s', '', u'%s', False)
 

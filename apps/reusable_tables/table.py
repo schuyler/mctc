@@ -20,6 +20,8 @@ import os
 import csv
 import StringIO
 
+path = os.path.join(os.path.dirname(__file__), "templates")
+
 def paginate(queryset, number, size=pagination_size_default):
     pages = Paginator(queryset, pagination_size_default)
     result = { "pages": pages, "count": queryset.count, "jump": jump(pages, number) }
@@ -56,37 +58,36 @@ def jump(pages, index):
     return res
 
 class Table:
-    def __init__(self, template_body, heads, 
-                 html=None, csv=None, pdf=None):
-        self.template_body = get_template(template_body)
-        
-        self.heads = heads
-        for x in range(0, len(self.heads)):
-            dct = self.heads[x]
-            # to do make, a url safe key
-            dct["asc"] = True
-            self.heads[x] =  dct
-            
-        self.template_wrapper = get_template("table_wrapper.html")
+    def __init__(self, model, fields):
+        self.model = model
+        results = []
+        for head, column, bit in fields:
+            results.append({"name": head, "column":column, "bit":bit})
+        self.fields = results
+        self.template_wrapper = Template(open(os.path.join(path, "table_wrapper.html")).read())
+        self.html_second_column = open(os.path.join(path, "html_second_column.html")).read()
+        self.html_first_column = open(os.path.join(path, "html_first_column.html")).read()
     
     def __call__(self, request, key, queryset):
-        format = request.GET.get("format_%s" % key, "html") 
+        self.key = key
+        format = request.GET.get("format_%s" % self.key, "html") 
         method = getattr(self, "handle_%s" % format, None)
+        queryset = self.model.objects.filter(queryset)
         if method:
-            return format, method(request, key, queryset)
+            return format, method(request, queryset)
         else:
             raise NotImplementedError, "The format: %s is not handled" % format
     
-    def handle_csv(self, request, key, queryset):
+    def handle_csv(self, request, queryset):
         output = StringIO.StringIO()
         csvio = csv.writer(output)
         header = False
-        for obj in queryset:
-            fields = obj._meta.fields
+        for row in queryset:
+            ctx = Context({"object": row })
             if not header:
-                csvio.writerow([f.name for f in fields])
+                csvio.writerow([f["name"] for f in self.fields])
                 header = True
-            values = [ getattr(obj, f.name) for f in fields ]
+            values = [ Template(h["bit"]).render(ctx) for h in self.fields ]
             csvio.writerow(values)
 
         response = HttpResponse(mimetype='text/csv')
@@ -94,7 +95,7 @@ class Table:
         response.write(output.getvalue())
         return response
         
-    def handle_pdf(self, request, key, queryset):
+    def handle_pdf(self, request, queryset):
         if "pdf" not in formats:
             raise ImportError, "The site is not configured to handle pdf."
     
@@ -108,12 +109,12 @@ class Table:
 
         data = []
         header = False
-        for obj in queryset:
-            fields = obj._meta.fields
+        for row in queryset:
             if not header:
-                data.append([f.name for f in fields])
+                data.append([f["name"] for f in self.fields])
                 header = True
-            values = [ getattr(obj, f.name) for f in fields ]
+            ctx = Context({"object": row })
+            values = [ Template(h["bit"]).render(ctx) for h in self.fields ]
             data.append(values)
 
         table = PDFTable(data)
@@ -126,17 +127,17 @@ class Table:
         os.remove(filename)
         return response
     
-    def handle_html(self, request, key, queryset):
+    def handle_html(self, request, queryset):
         # get the default page number
-        default = request.GET.get("page_%s" % key, 1)
+        default = request.GET.get("page_%s" % self.key, 1)
         try:
             default = int(default)
         except (TypeError, ValueError):
             default = 1
         
-        for h in self.heads:
+        for h in self.fields:
             column = h["column"]
-            sort_key = "sort_%s_%s" % (key, column)
+            sort_key = "sort_%s_%s" % (self.key, column)
             value = request.GET.get(sort_key, None)
             h["asc"] = True            
             if value == "asc":
@@ -150,22 +151,47 @@ class Table:
         paginated = paginate(queryset, default)
         rows = []
         for row in paginated["page"].object_list:
-            data = {"object": row}
-            rows.append(self.template_body.render(Context(data)))
-
+            ctx = Context({"object": row})
+            build = []
+            first = hasattr(row, "get_absolute_url") and True or False
+            for h in self.fields:
+                if first:
+                    bit = self.html_first_column % (
+                        row.get_absolute_url(), 
+                        Template(h["bit"]).render(ctx)
+                        )
+                    first = False
+                else:
+                    bit = self.html_second_column % (
+                        Template(h["bit"]).render(ctx)
+                        )
+                build.append(bit)
+            
+            rows.append("".join(build))
         self.context = {
-            "columns": self.heads,
+            "columns": self.fields,
             "rows": rows,
             "object_list": paginated,
-            "table_key": key,
+            "table_key": self.key,
             "formats": formats
         }
         return self.template_wrapper.render(Context(self.context))
 
 tables = {}
-def register(name, head, body):
+def register(name, model, fields):
     global tables
-    tables[name] = Table(head, body)
+    for field in fields: assert len(field) == 3
+    tables[name] = Table(model, fields)
     
-def get(model):
-    return tables[model]
+def get(request, tabs):
+    result = []
+    nonhtml = None
+    x = 1
+    for name, query in tabs:
+        format, tab = tables[name](request, str(x), query)
+        if not nonhtml and format != "html":
+            nonhtml = tab
+        result.append(tab)
+        x += 1
+
+    return nonhtml, result

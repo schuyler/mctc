@@ -2,17 +2,10 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 
-<h2>Active Cases</h2>
+<h2>Cases</h2>
 {{ case_table }}
-<h2>All Cases</h2>
-{{ allcase_table }}
-
 <h2>Event Log</h2>
-<p class="error">To come</p>
-<h2>Alerts</h2>
-<p class="error">To come</p>
-<h2>Case summary</h2>
-{% include "includes/casesummary.html" %}
+{{ event_table }}
 <h2>Message users</h2>
 {% include "includes/sendmessage.html" %}
 

@@ -41,9 +41,12 @@
 </table>
 
 <h2>Event log</h2>
-<p class="notice">To come</p>
-<h2>Report - malnutritions</h2>
-{% include "includes/reports-malnutrition.html" %}
-<h2>Report - malaria</h2>
-{% include "includes/reports-malaria.html" %}
+{{ event }}
+<h2>Malnutrition</h2>
+{{ malnutrition }}
+<h2>Malaria</h2>
+{{ malaria }}
+<h2>Diagnosis</h2>
+{{ diagnosis }}
+
 {% endblock %}
