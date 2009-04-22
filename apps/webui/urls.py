@@ -21,7 +21,7 @@ urlpatterns = patterns('',
     
     (r'^case/edit/(?P<object_id>\d+)/$', "django.views.generic.create_update.update_object", {
         "template_name": "caseedit.html",
-        "form_class": CaseForm 
+        "form_class": CaseForm
     }),
     
     # since we can't change settings, we have to do this as accounts/login

@@ -101,6 +101,5 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'apps.mctc',
-    'apps.webui',
-    "reusable_tables"
+    'apps.webui'
 )

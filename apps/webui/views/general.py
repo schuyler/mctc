@@ -9,66 +9,16 @@ from django.db import connection
 from apps.mctc.models.logs import MessageLog, EventLog
 from apps.mctc.models.general import Case, Zone, Provider
 from apps.mctc.models.reports import ReportMalnutrition, ReportMalaria, ReportDiagnosis
-#from apps.mctc.app import message_users
 
 from apps.webui.shortcuts import as_html, as_csv, as_pdf, paginate, login_required
 from apps.webui.forms.general import MessageForm
-
-from apps.webui.graphs.flot import FlotGraph
-from apps.webui.graphs.average import create_average_for_qs, create_graph
 
 from datetime import datetime, timedelta
 import time
 
 from apps.reusable_tables.table import get
 
-@login_required
-def ajax_message_log(request):
-    # always assume it's one page
-    res = paginate(MessageLog.objects.order_by("-created_at"), 1)
-    context = {
-        "paginated_object_list": res,
-        "paginate_url": "/message-log/"
-    }
-    return as_html(request, "includes/messagelog.html", context)
 
-@login_required
-def message_log(request):
-    # not sure if this is what matt wants yet, obviously doing this for lots
-    # would be a pain, so we'll optimise this later when I know what is needed
-    if request.GET.get("f") == "csv":
-        res = MessageLog.objects.order_by("-created_at")
-        return as_csv(request, res)
-    elif request.GET.get("f") == "pdf":
-        res = MessageLog.objects.order_by("-created_at")
-        return as_pdf(request, res)
-    else:
-        res = paginate(MessageLog.objects.order_by("-created_at"), request.GET.get("p", 1))
-        context = {
-            "paginated_object_list": res,
-            "paginate_url": "/message-log/"
-        }
-        return as_html(request, "messagelog.html", context)
-
-@login_required
-def active_cases(request):
-    qs = Case.objects.order_by("-updated_at");
-    if request.GET.get("f") == "csv":
-        return as_csv(request, qs)
-    elif request.GET.get("f") == "pdf":
-        return as_pdf(request, qs)
-
-    res = paginate(qs, 1, 50)
-    context = {
-        "paginated_object_list": res,
-        "paginate_url": "/message-log/"
-    }
-    if request.is_ajax:
-        return as_html(request, "includes/activecases.html", context)
-    else:
-        return as_html(request, "activecases.html", context)
-
-    
 @login_required
 def dashboard(request):
     nonhtml, tables = get(request, [
@@ -77,7 +27,7 @@ def dashboard(request):
     ])
     if nonhtml:
         return nonhtml
-             
+
     has_provider = True
     try:
         mobile = request.user.provider.mobile
@@ -91,7 +41,7 @@ def dashboard(request):
     except ObjectDoesNotExist:
         has_provider = False
         messageform = None
-        
+
     context = {
         "case_table": tables[0],
         "event_table": tables[1],
@@ -110,9 +60,9 @@ def search_view(request):
     cases = Case.objects.filter(query).order_by("-updated_at")
     format, case_table = get("case_default")(request, "cases", cases)
     if format != "html": return case_table
-    
+
     return as_html(request, "searchview.html", { "case_table": case_table, })
-    
+
 @login_required
 def case_view(request, object_id):
     case = get_object_or_404(Case, id=object_id)
@@ -122,11 +72,11 @@ def case_view(request, object_id):
         ["malaria", Q(case=case)],
         ["event", Q(content_type="case", object_id=object_id)],
         ])
-        
+
     if nonhtml:
         return nonhtml
-    
-    context = { 
+
+    context = {
         "object": case,
         "malnutrition": tables[0],
         "diagnosis": tables[1],
@@ -142,31 +92,37 @@ def district_view(request):
         "districts": Zone.objects.all(),
     }
     if district:
-        nonhtml, tables = get(request, ["case", Q(zone=zone)])
-        if nonhtml: 
+        nonhtml, tables = get(request, (["case", Q(zone=district)],))
+        if nonhtml:
             return nonhtml
-        else:
-            context["cases"] = tables[0]
+        context["cases"] = tables[0]
 
     return as_html(request, "districtview.html", context)
 
 @login_required
 def provider_list(request):
-    res = paginate(Provider.objects.all(), 1)
+    nonhtml, tables = get(request, (["provider", Q()],))
+    if nonhtml:
+        return nonhtml
     context = {
-        "provider_object_list": res,
+        "provider": tables[0],
     }
     return as_html(request, "providerlist.html", context)
 
 @login_required
 def provider_view(request, object_id):
     provider = get_object_or_404(Provider, id=object_id)
-    case_table = Table(request, "cases", 
-                          Case.objects.all().filter(provider=provider), 
-                          "cases_head.html", "cases_body.html")
+    nonhtml, tables = get(request, (
+        ["case", Q(provider=provider)],
+        ["message", Q(sent_by=provider.user)],
+        ["event", Q(content_type="provider", object_id=provider.pk)]
+        ))
+    if nonhtml:
+        return nonhtml
     context = {
         "object": provider,
-        "case_table": case_table,
-#        "message_object_list": paginate(MessageLog.objects.filter(sent_by=provider.user).order_by("-created_at"), 1)       
+        "cases": tables[0],
+        "messages": tables[1],
+        "event": tables[2]
     }
     return as_html(request, "providerview.html", context)

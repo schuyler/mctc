@@ -12,6 +12,14 @@ register("case", Case, [
         ["Zone", "zone", "{{ object.zone }}"],
         ])
 
+register("message", MessageLog, [
+        ["About", "mobile", "{{ object.mobile }}"],
+        ["Message", "text", "{{ object.text }}"],
+        ["Sent by", "sent_by", "{{ object.sent_by }}"],        
+        ["Created", "created_at", '{{ object.created_at|date:"d/m/Y" }}'],
+        ["Handled", "handled", "{{ object.get_handled_display }}"]
+        ])
+
 register("event", EventLog, [
         ["About", None, "{{ object.content_object }}"],
         ["Message", "message", "{{ object.get_message_display }}"],
@@ -25,7 +33,7 @@ register("malnutrition", ReportMalnutrition, [
         ["Weight", "weight", "{{ object.weight }}"],
         ["Height", "height", "{{ object.height }}"],
         ["Provider", "provider", "{{ object.provider }}"],
-        ["Created", None, '{{ object.entered_at|date:"d/m/Y" }}']        
+        ["Created", None, '{{ object.entered_at|date:"d/m/Y" }}']
         ])
 
 register("diagnosis", ReportDiagnosis, [
@@ -33,13 +41,22 @@ register("diagnosis", ReportDiagnosis, [
         ["Diagnosis", "muac", "{{ object.get_dictionary.diagnosis }}"],
         ["Labs", "weight", "{{ object.get_dictionary.labs }}"],
         ["Provider", "provider", "{{ object.provider }}"],
-        ["Created", None, '{{ object.entered_at|date:"d/m/Y" }}']        
-        ]) 
+        ["Created", None, '{{ object.entered_at|date:"d/m/Y" }}']
+        ])
 
 register("malaria", ReportMalaria, [
         ["Result", "result", "{{ object.result }}"],
         ["Bednet", "bednet", "{{ object.bednet }}"],
         ["Diagnosis", "diagnosis", "{{ object.diagnosis }}"],
-        ["Provider", "provider", "{{ object.provider }}"],        
-        ["Created", None, '{{ object.entered_at|date:"d/m/Y" }}']        
-        ])       
+        ["Provider", "provider", "{{ object.provider }}"],
+        ["Created", None, '{{ object.entered_at|date:"d/m/Y" }}']
+        ])
+
+register("provider", Provider, [
+        ["User", "user", "{{ object.user }}"],
+        ["Mobile", "mobile", "{{ object.mobile }}"],
+        ["Role", "diagnosis", "{{ object.role }}"],
+        ["Active", "active", "{{ object.get_active_display }}"],
+        ["Alerts", "alerts", '{{ object.alerts }}'],
+        ["Clinic", "clinic", '{{ object.clinic }}']
+        ])
