@@ -51,7 +51,7 @@ def message_users(mobile, message=None, groups=None, users=None):
     failed = []
     for recipient in recipients:
         msg = quote("@%s %s" % (recipient.id, message))
-        cmd = "http://%s:%s/%s/%s" % (domain, port, mobile, msg)
+        cmd = "http://%s:%s/spomc/%s/%s" % (domain, port, mobile, msg)
         try:
             urlopen(cmd).read()
             passed.append(recipient)
