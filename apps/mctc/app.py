@@ -538,9 +538,9 @@ class App (rapidsms.app.App):
         log(case, "mrdt_taken")        
         return True
 
-    def delete_similar(self, set):
+    def delete_similar(self, queryset):
         try:
-            last_report = set.latest("entered_at")
+            last_report = queryset.latest("entered_at")
             if (datetime.datetime.now() - last_report.entered_at).days == 0:
                 # last report was today. so delete it before filing another.
                 last_report.delete()
