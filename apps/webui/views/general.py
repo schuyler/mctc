@@ -3,7 +3,7 @@
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import get_object_or_404
-from django.db.models import Count, ObjectDoesNotExist, Q, Avg
+from django.db.models import ObjectDoesNotExist, Q
 from django.contrib.auth.models import User, Group
 from django.db import connection
 
@@ -114,6 +114,7 @@ def dashboard(request):
     nonhtml, tables = get(request, [
         ["case", Q()],
         ["event", Q()],
+        ["message", Q()],
     ])
     if nonhtml:
         return nonhtml
@@ -122,6 +123,7 @@ def dashboard(request):
     context = {
         "case_table": tables[0],
         "event_table": tables[1],
+        "message_table": tables[2]
     }    
 
     try:

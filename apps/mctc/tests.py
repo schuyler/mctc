@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from rapidsms.tests.scripted import TestScript
 from django.core.management import call_command
 from django.test import TestCase
@@ -7,7 +8,7 @@ from app import App
 from models.logs import MessageLog, EventLog
 from models.general import Provider, User, Facility
 from models.general import Case, CaseNote
-from models.reports import ReportMalnutrition, ReportMalaria, Observation
+from models.reports import ReportMalnutrition, ReportMalaria, Observation, Diagnosis
 
 from datetime import datetime, date, timedelta
 
@@ -34,13 +35,20 @@ def date_boundaries():
 
     return mapping
 
+loaded = False
 class TestApp (TestScript):
     fixtures = ('test.json', 'observations.json', 'lab_codes.json', 'diagnoses.json', 'diagnoses_categories.json')
     apps = (App,)
-
+    
     def setUp (self):
-        # borrowed from django/test/testcases.py
-        call_command('loaddata', *self.fixtures, **{'verbosity': 0})
+        # since the database is not nuked, there's no point in reloading these every time
+        # this also messes up 13 and 14 which change the db
+        # plus the unit tests are waaaay faster
+        global loaded
+        if not loaded:
+            # borrowed from django/test/testcases.py
+            call_command('loaddata', *self.fixtures, **{'verbosity': 0})            
+            loaded = True
         TestScript.setUp(self)
 
     test_00_Join = """
@@ -411,6 +419,26 @@ class TestApp (TestScript):
         7654321 > cancel +108
         7654321 < Cannot cancel +108: case has malaria reports.        
     """ % (caseAges[-1], caseAges[-1])
+
+#    test_12_utf = """
+#        7654321 > D +91 -084.9 Vaqif Səmədoğl
+#        7654321 < D> +91 D.JAMES C. Malaria
+#    """
+
+    def test_13_diagnosis(self):
+        """ Just a setup for the next bit """
+        d = Diagnosis.objects.get(id=4)
+        d.instructions = "Some test instructions"
+        d.save()
+
+    test_14_diagnosis = """
+        7654322 > D +91 -002
+        7654322 < D> +91 D.JAMES Typhoid        
+
+        7654322 > D +91 -001 
+        7654322 < D> +91 D.JAMES Cholera
+        7654321 < D> +91 Some test instructions
+    """
 
 class TestAlerts(TestCase):
     fixtures = ["users.json", "alerts.json"]
