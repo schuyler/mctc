@@ -8,7 +8,7 @@ from apps.mctc.models.reports import ReportMalnutrition, ReportMalaria, ReportDi
 register("case", Case, [
         ["Id", "ref_id", "{{ object.ref_id }}"],
         ["Name", "last_name", "{{ object.first_name }} {{ object.last_name }}"],
-        ["Provider", "provider", "{{ object.provider }}"],
+        ["Provider", "provider", "{{ object.provider.get_name_display }}"],
         ["Zone", "zone", "{{ object.zone }}"],
         ])
 
@@ -21,35 +21,35 @@ register("message", MessageLog, [
         ])
 
 register("event", EventLog, [
-        ["About", None, "{{ object.content_object }}"],
+        ["About", "content_object", "{{ object.content_object }}"],
         ["Message", "message", "{{ object.get_message_display }}"],
-        ["Created", None, '{{ object.created_at|date:"d/m/Y" }}'],
+        ["Created", "entered_at", '{{ object.created_at|date:"d/m/Y" }}'],
         ["Type", "content_type", "{{ object.content_type }}"]
         ])
 
 register("malnutrition", ReportMalnutrition, [
         ["Status", "status", "{{ object.get_status_display }}"],
-        ["MUAC", "muac", "{{ object.mauc }}"],
+        ["MUAC", "muac", "{{ object.muac }}"],
         ["Weight", "weight", "{{ object.weight }}"],
         ["Height", "height", "{{ object.height }}"],
-        ["Provider", "provider", "{{ object.provider }}"],
-        ["Created", None, '{{ object.entered_at|date:"d/m/Y" }}']
+        ["Provider", "provider", "{{ object.provider.get_name_display }}"],
+        ["Created", "entered_at", '{{ object.entered_at|date:"d/m/Y" }}']
         ])
 
 register("diagnosis", ReportDiagnosis, [
         ["Text", "status", "{{ object.text }}"],
         ["Diagnosis", "muac", "{{ object.get_dictionary.diagnosis }}"],
         ["Labs", "weight", "{{ object.get_dictionary.labs }}"],
-        ["Provider", "provider", "{{ object.provider }}"],
-        ["Created", None, '{{ object.entered_at|date:"d/m/Y" }}']
+        ["Provider", "provider", "{{ object.provider.get_name_display }}"],
+        ["Created", "entered_at", '{{ object.entered_at|date:"d/m/Y" }}']
         ])
 
 register("malaria", ReportMalaria, [
         ["Result", "result", "{{ object.result }}"],
         ["Bednet", "bednet", "{{ object.bednet }}"],
         ["Diagnosis", "diagnosis", "{{ object.diagnosis }}"],
-        ["Provider", "provider", "{{ object.provider }}"],
-        ["Created", None, '{{ object.entered_at|date:"d/m/Y" }}']
+        ["Provider", "provider", "{{ object.provider.get_name_display }}"],
+        ["Created", "entered_at", '{{ object.entered_at|date:"d/m/Y" }}']
         ])
 
 register("provider", Provider, [

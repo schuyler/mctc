@@ -87,6 +87,14 @@ class Provider(models.Model):
     following_users = models.ManyToManyField("Provider", related_name="following_users", blank=True, null=True)
     following_clinics = models.ManyToManyField(Facility, related_name="following_clinics", blank=True, null=True)
 
+    def get_name_display(self):
+        if self.user.first_name or self.user.last_name:
+            return "%s %s" % (self.user.first_name, self.user.last_name)
+        if self.mobile:
+            return str(self.mobile)
+        else:
+            return str(self.id)
+    
     def get_absolute_url(self):
         return "/provider/view/%s/" % self.id
 
@@ -185,18 +193,6 @@ class Case(models.Model):
         else:
             # FIXME: i18n
             return str(int(delta.days/30.4375))+"m"
-
-class Observation(models.Model):
-    uid = models.CharField(max_length=15)
-    name = models.CharField(max_length=255)
-    letter = models.CharField(max_length=2, unique=True)
-
-    class Meta:
-        app_label = "mctc"
-        ordering = ("name",)
-
-    def __unicode__(self):
-        return self.name
 
 class CaseNote(models.Model):
     case        = models.ForeignKey(Case, related_name="notes", db_index=True)

@@ -3,28 +3,33 @@ from django.template.loader import get_template
 from django.core.paginator import Paginator, InvalidPage
 from django.http import HttpResponse, HttpResponseRedirect
 
-pagination_size_default = 5
+pagination_size_default = 10
 
 formats = ["csv",]
 try:
     from reportlab.lib.styles import getSampleStyleSheet
     from reportlab.platypus import SimpleDocTemplate, Paragraph
     from reportlab.platypus import Table as PDFTable
+    from reportlab.platypus import TableStyle
+    from reportlab.lib.enums import TA_LEFT
+    from reportlab.lib import colors 
     formats.append("pdf")
 except ImportError:
     pass
     
-from tempfile import mkstemp
 
 import os
 import csv
 import StringIO
 
+from tempfile import mkstemp
+from datetime import datetime
+
 path = os.path.join(os.path.dirname(__file__), "templates")
 
 def paginate(queryset, number, size=pagination_size_default):
     pages = Paginator(queryset, pagination_size_default)
-    result = { "pages": pages, "count": queryset.count, "jump": jump(pages, number) }
+    result = { "pages": pages, "count": queryset.count(), "jump": jump(pages, number) }
     if pages.num_pages > 1:
         result["paginated"] = True
     else:
@@ -102,10 +107,14 @@ class Table:
         # this is again some quick and dirty sample code    
         elements = []
         styles = getSampleStyleSheet()
+        styles['Title'].alignment = TA_LEFT
+        styles['Title'].fontName = styles['Heading2'].fontName = "Helvetica"
+        styles["Normal"].fontName = "Helvetica"
         filename = mkstemp(".pdf")[-1]
         doc = SimpleDocTemplate(filename)
 
-        elements.append(Paragraph("Message Log", styles['Title']))
+        elements.append(Paragraph("MCTC", styles['Title']))
+        elements.append(Paragraph("%s List" % self.model.__name__, styles['Heading2']))        
 
         data = []
         header = False
@@ -118,7 +127,15 @@ class Table:
             data.append(values)
 
         table = PDFTable(data)
+        table.setStyle(TableStyle([
+            ('ALIGNMENT', (0,0), (-1,-1), 'LEFT'),
+            ('LINEBELOW', (0,0), (-1,-0), 2, colors.black),            
+            ('LINEBELOW', (0,1), (-1,-1), 0.8, colors.lightgrey),
+            ('FONT', (0,0), (-1, -1), "Helvetica"),
+            ('ROWBACKGROUNDS', (0,0), (-1, -1), [colors.whitesmoke, colors.white]),
+        ]))        
         elements.append(table)
+        elements.append(Paragraph("Created: %s" % datetime.now().strftime("%d/%m/%Y"), styles["Normal"]))        
         doc.build(elements)
 
         response = HttpResponse(mimetype='application/pdf')

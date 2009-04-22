@@ -6,6 +6,10 @@
 {{ case_table }}
 <h2>Event Log</h2>
 {{ event_table }}
+
+{% endblock %}
+
+{% block bar %}
 <h2>Message users</h2>
 {% if has_provider %}
 <form method="post">
@@ -17,5 +21,4 @@
 {% else %}
 <p class="error">You need to add in phone number to send messages, you are logged in as {{ user }}.</p>
 {% endif %}
-
 {% endblock %}

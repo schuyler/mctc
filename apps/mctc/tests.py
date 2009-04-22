@@ -6,8 +6,8 @@ from app import App
 
 from models.logs import MessageLog, EventLog
 from models.general import Provider, User, Facility
-from models.general import Case, CaseNote, Observation
-from models.reports import ReportMalnutrition, ReportMalaria
+from models.general import Case, CaseNote
+from models.reports import ReportMalnutrition, ReportMalaria, Observation
 
 from datetime import datetime, date, timedelta
 

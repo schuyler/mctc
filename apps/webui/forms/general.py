@@ -6,10 +6,14 @@ from django.forms.util import ErrorList
 from apps.webui.forms.base import BaseForm, BaseModelForm
 from apps.mctc.models.general import Provider, Case
 
+from urllib import quote
+
 class MessageForm(BaseForm):
     message = forms.CharField(
         label = _("Message text"),
-        required = True
+        required = True,
+# oh if only this worked properly
+#        widget = forms.Textarea(attrs={"class":"span-6", "style": "height; 2em"})
     )
     
     groups = forms.MultipleChoiceField(
@@ -26,6 +30,15 @@ class MessageForm(BaseForm):
     
     def clean(self):
         data = self.cleaned_data
+        if data.get("message"):
+            # the http messaging pushes message through a URL
+            # which means that you can only do ASCII so we'll check
+            # its valid here
+            try:
+                quote(data.get("message"))
+            except KeyError:
+                msg = _("You can only specify ASCII characters in the message.")
+                self._errors["message"] = ErrorList([msg,])
         if not data.get("groups") and not data.get("users"):
             msg = _("You must specify either one or more groups or users.")
             self._errors["groups"] = ErrorList([msg,])
@@ -36,7 +49,13 @@ class MessageForm(BaseForm):
         super(MessageForm, self).__init__(*args, **kw)
         
         groups = [ (str(g.id), g.name) for g in Group.objects.all() ]
-        users = [ (str(u.id), "%s %s" % (u.first_name, u.last_name)) for u in User.objects.all() ]
+        users = []
+        for p in Provider.objects.all().order_by('user__last_name'):
+            if p.user.first_name and p.user.last_name:
+                users.append([str(p.id), "%s %s" % (p.user.first_name, p.user.last_name)])
+            else:
+                users.append([str(p.id), "%s (name not entered)" % p.mobile ])
+                
         self.fields["groups"].choices = groups
         self.fields["users"].choices = users
 
