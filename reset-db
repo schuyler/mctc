@@ -1,6 +1,11 @@
 #!/usr/bin/python
-import os, sys
-os.environ["DJANGO_SETTINGS_MODULE"] = "settings"
+import sys
+import os
+path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+sys.path.append(path)
+
+os.environ['RAPIDSMS_INI'] = os.path.join(path, "rapidsms.ini")
+os.environ['DJANGO_SETTINGS_MODULE'] = 'rapidsms.webui.settings'
 
 if "--force" not in sys.argv:
     print """******** WARNING **********
@@ -18,8 +23,8 @@ from tempfile import mkstemp
 backup = mkstemp(".db")[1]
 print "Database backed up to %s, just in case." % backup
 os.system('mv mctc.db %s' % backup)
-os.system('./manage.py makemessages -l en --pythonpath=. --settings=settings')
-os.system('./manage.py compilemessages --pythonpath=. --settings=settings')
+#os.system('django-admin.py makemessages -l en --pythonpath=. --settings=settings')
+#os.system('django-admin.py compilemessages --pythonpath=. --settings=settings')
 
 from django.contrib.auth import models as auth_app
 from django.contrib.auth.management import create_superuser 
