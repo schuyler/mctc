@@ -94,7 +94,7 @@ class TestApp (TestScript):
         # test direct messaging
         7654321 > join cherry doe jane
         7654321 < 7654321 registered to @jdoe (DOE, Jane) at Charliesburg.
-        7654321 > @2 can you read this? 
+        7654321 > @6 can you read this? 
         1234567 < @jdoe> can you read this?
         1234567 > @jdoe yes, I can read that
         7654321 < @smithk> yes, I can read that
@@ -160,7 +160,7 @@ class TestApp (TestScript):
         0000000 < 0000000 is not a registered number.
 
         7654321 > list @
-        7654321 < @1 ksmith, @2 smithk, @3 jdoe
+        7654321 < @1 admin, @2 staff, @3 nonstaff, @4 nonactive, @5 ksmith, @6 smithk, @7 jdoe
     """
     
     test_03_CancelCases = """
