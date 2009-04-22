@@ -161,25 +161,28 @@ class App (rapidsms.app.App):
     def respond_not_registered (self, message, target):
         raise HandlerFailed(_("User @%s is not registered.") % target)
 
-    @keyword(r'\@(\w+) (.+)')
-    @authenticated
-    def direct_message (self, message, target, text):
+    def find_provider (self, target):
         try:
             if re.match(r'^\d+$', target):
                 provider = Provider.objects.get(id=target)
-                user = provider.user
             else:
                 user = User.objects.get(username__iexact=target)
+                provider = Provider.objects.get(user=user)
+            return provider
         except models.ObjectDoesNotExist:
             # FIXME: try looking up a group
             self.respond_not_registered(message, target)
+
+    @keyword(r'\@(\w+) (.+)')
+    @authenticated
+    def direct_message (self, message, target, text):
+        provider = self.find_provider(target)
         try:
             mobile = user.provider.mobile
         except:
             self.respond_not_registered(message, target)
         sender = message.sender.username
         return message.forward(mobile, "@%s> %s" % (sender, text))
-
 
     # Register a new patient
     @keyword(r'new (\S+) (\S+) ([MF]) ([\d\-]+)( \D+)?( \d+)?( z\d+)?')
@@ -261,6 +264,23 @@ class App (rapidsms.app.App):
         log(message.sender.provider, "case_cancelled")        
         return True
 
+    @keyword(r'transfer \+?(\d+) (?:to )?\@?(\w+)')
+    @authenticated
+    def transfer_case (self, message, ref_id, target):
+        provider = message.sender.provider
+        case = self.find_case(ref_id)
+        new_provider = self.find_provider(target) 
+        case.provider = new_provider
+        case.save()
+        info = new_provider.get_dictionary()
+        info["ref_id"] = case.ref_id
+        message.respond(_("Case +%(ref_id)s transferred to @%(username)s " +
+                          "(%(user_last_name)s, %(user_last_name)s).") % info)
+        message.forward(_("Case +%s transferred to you from @%s.") % (
+                          case.ref_id, provider.user.username))
+        log(case, "case_transferred")        
+        return True
+ 
     @keyword(r'list(?: \+)?')
     @authenticated
     def list_cases (self, message):

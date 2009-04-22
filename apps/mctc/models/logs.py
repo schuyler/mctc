@@ -18,6 +18,7 @@ messages = {
     "user_logged_in": _("User logged into the user interface"),
     "confirmed_join": _("Provider confirmed"),
     "case_cancelled": _("Case was cancelled by the provider"),
+    "case_transferred": _("Case was transferred to the current provider"),
     "note_added": _("Note added to the case by the provider")    
 }
 
