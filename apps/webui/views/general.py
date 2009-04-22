@@ -72,11 +72,25 @@ def message_users(mobile, message=None, groups=None, users=None):
     return results_text
 
 def get_summary(query=Q()):
-    mal = ReportMalnutrition.objects.order_by("-entered_at").distinct().filter(query)
+    # i can't figure out a good way to do this, i'm sure it will all change, so
+    # let's do slow and dirty right now
+    seen = []
+    status = {
+        ReportMalnutrition.MODERATE_STATUS:0,
+        ReportMalnutrition.SEVERE_STATUS:0,
+        ReportMalnutrition.SEVERE_COMP_STATUS:0,
+        ReportMalnutrition.HEALTHY:0,
+    }
+    
+    for rep in ReportMalnutrition.objects.order_by("-entered_at"):
+        if rep.id not in seen:
+            seen.append(rep.id)
+        status[rep.status] += 1
+
     data = {
-        "mam": mal.filter(status=ReportMalnutrition.MODERATE_STATUS).count(),
-        "sam": mal.filter(status=ReportMalnutrition.SEVERE_STATUS).count(),
-        "sam+": mal.filter(status=ReportMalnutrition.SEVERE_COMP_STATUS).count(),
+        "mam": status[ReportMalnutrition.MODERATE_STATUS],
+        "sam": status[ReportMalnutrition.SEVERE_STATUS],
+        "sam+": status[ReportMalnutrition.SEVERE_COMP_STATUS],
         "number": Case.objects.filter(query).count(),
     }
     return data
