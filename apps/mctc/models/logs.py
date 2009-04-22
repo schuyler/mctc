@@ -57,6 +57,7 @@ class MessageLog(models.Model):
 
     class Meta:
         app_label = "mctc"
+        ordering = ("-created_at",)        
 
     def save(self, *args):
         if not self.id:

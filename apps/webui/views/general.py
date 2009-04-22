@@ -114,6 +114,7 @@ def dashboard(request):
     nonhtml, tables = get(request, [
         ["case", Q()],
         ["event", Q()],
+        ["message", Q()],
     ])
     if nonhtml:
         return nonhtml
@@ -122,6 +123,7 @@ def dashboard(request):
     context = {
         "case_table": tables[0],
         "event_table": tables[1],
+        "message_table": tables[2]
     }    
 
     try:
