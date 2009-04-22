@@ -123,3 +123,8 @@ h2 {
 fieldset div {
     padding-top: 0.4em;
 }
+
+.field-error {
+    font-weight: bold;
+    color: #8a1f11;
+}

@@ -10,8 +10,8 @@ from django import forms
 def as_blue_print(self):
     return self._html_output(u"""
     <div>
-        %(errors)s
-        <div>%(label)s</div>
+        
+        <div>%(label)s %(errors)s</div>
         <div>%(field)s</div>
         <div class="help">%(help_text)s</div>
     </div>
@@ -33,7 +33,7 @@ from django.utils.safestring import mark_safe
         
 def as_div(self):
     if not self: return u''
-    return mark_safe(u'<div class="error span-12">%s</div>'
+    return mark_safe(u'<span class="field-error">%s</span>'
             % ''.join([u'%s<br />' % conditional_escape(force_unicode(e)) for e in self]))
             
 forms.util.ErrorList.__unicode__ = as_div

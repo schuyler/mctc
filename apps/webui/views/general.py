@@ -10,7 +10,7 @@ from apps.mctc.models.logs import MessageLog, EventLog
 from apps.mctc.models.general import Case, Zone, Provider
 from apps.mctc.models.reports import ReportMalnutrition, ReportMalaria, ReportDiagnosis
 
-from apps.webui.shortcuts import as_html, as_csv, as_pdf, paginate, login_required
+from apps.webui.shortcuts import as_html, login_required
 from apps.webui.forms.general import MessageForm
 
 from datetime import datetime, timedelta

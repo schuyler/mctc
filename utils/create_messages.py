@@ -1,11 +1,12 @@
 # a simple way to pump messages into the system in bulk
-# note this requires the settings hack
+
 import sys
 import os
 path = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__))))
 sys.path.append(path)
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+os.environ['RAPIDSMS_INI'] = os.path.join(path, "rapidsms.ini")
+os.environ['DJANGO_SETTINGS_MODULE'] = 'rapidsms.webui.settings'
 
 from apps.mctc.models import MessageLog
 from apps.mctc.models import User
