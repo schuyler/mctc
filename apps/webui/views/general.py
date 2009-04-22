@@ -71,27 +71,41 @@ def message_users(mobile, message=None, groups=None, users=None):
         results_text = "No-one was sent that message. Failed for the following: %s" % ", ".join([ str(f) for f in failed])
     return results_text
 
-def get_summary(query=Q()):
+def get_graph(length=100, filter=Q()):
+    end = datetime.now().date()
+    start = end - timedelta(days=100)
+    results = ReportMalnutrition.objects\
+        .filter(Q()).exclude(muac=None)\
+        .filter(entered_at__gt=start)\
+        .filter(entered_at__lte=end)\
+        .order_by("-entered_at")\
+        .values_list("muac", "entered_at")
+    results = [ [ time.mktime(r[1].timetuple()) * 1000,  r[0] ] for r in results ]
+    results = { "start":'"%s"' % start.strftime("%Y/%m/%d"), "end":'"%s"' % end.strftime("%Y/%m/%d"), "results":results }
+    return results
+    
+def get_summary():
     # i can't figure out a good way to do this, i'm sure it will all change, so
     # let's do slow and dirty right now
     seen = []
     status = {
-        ReportMalnutrition.MODERATE_STATUS:0,
-        ReportMalnutrition.SEVERE_STATUS:0,
-        ReportMalnutrition.SEVERE_COMP_STATUS:0,
-        ReportMalnutrition.HEALTHY:0,
+        ReportMalnutrition.MODERATE_STATUS: 0,
+        ReportMalnutrition.SEVERE_STATUS: 0,
+        ReportMalnutrition.SEVERE_COMP_STATUS: 0,
+        ReportMalnutrition.HEALTHY_STATUS: 0,
     }
     
+    # please fix me
     for rep in ReportMalnutrition.objects.order_by("-entered_at"):
-        if rep.id not in seen:
-            seen.append(rep.id)
-        status[rep.status] += 1
+        if rep.status:
+            if rep.id not in seen:
+                seen.append(rep.id)
+            status[rep.status] += 1
 
     data = {
         "mam": status[ReportMalnutrition.MODERATE_STATUS],
         "sam": status[ReportMalnutrition.SEVERE_STATUS],
-        "sam+": status[ReportMalnutrition.SEVERE_COMP_STATUS],
-        "number": Case.objects.filter(query).count(),
+        "samplus": status[ReportMalnutrition.SEVERE_COMP_STATUS],
     }
     return data
 
@@ -127,6 +141,7 @@ def dashboard(request):
             "message_form": messageform,
             "has_provider": has_provider,
             "summary": get_summary(),
+            "graph": get_graph()
         })
 
     return as_html(request, "dashboard.html", context)

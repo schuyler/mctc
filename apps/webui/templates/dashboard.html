@@ -2,6 +2,23 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 
+<h2>MUAC over time</h2>
+<div id="graph" style="width: 500px; height: 200px" />
+<script type="text/javascript">
+$(function() {
+    var d1 = {{ graph.results|safe }};
+    $.plot($("#graph"), [ d1, ],
+        {
+            xaxis: {
+                    mode: "time",
+                    minTickSize: [1, "day"],
+                    min: (new Date({{ graph.start|safe }})).getTime(),
+                    max: (new Date({{ graph.end|safe }})).getTime()
+                }
+        });
+});
+</script>
+</div>
 <h2>Cases</h2>
 {{ case_table }}
 <h2>Event Log</h2>
@@ -10,6 +27,20 @@
 {% endblock %}
 
 {% block bar %}
+<h2>Statistics</h2>
+<table>
+    <tr>
+        <th>MAM</th>
+        <th>SAM</th>
+        <th>SAM+</th>
+    </tr>
+    <tr>
+        <td>{{ summary.mam }}</td>
+        <td>{{ summary.sam }}</td>
+        <td>{{ summary.samplus }}</td>                
+    </tr>
+</table>    
+        
 <h2>Message users</h2>
 {% if has_provider %}
 <form method="post">
