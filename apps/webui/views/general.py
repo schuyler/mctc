@@ -20,6 +20,10 @@ import time
 from urllib import quote, urlopen
 from apps.reusable_tables.table import get
 
+# some webui defaults
+app = {}
+app['name'] = "RapidReport:Health"
+
 # not quite sure how to figure this out programatically
 domain = "localhost"
 port = "8080"
@@ -121,6 +125,7 @@ def dashboard(request):
 
     has_provider = True
     context = {
+		"app": app,
         "case_table": tables[0],
         "event_table": tables[1],
         "message_table": tables[2]
@@ -140,6 +145,7 @@ def dashboard(request):
         messageform = None
 
     context.update({
+			"app": app,
             "message_form": messageform,
             "has_provider": has_provider,
             "summary": get_summary(),
@@ -175,6 +181,7 @@ def case_view(request, object_id):
         return nonhtml
 
     context = {
+		"app": app,
         "object": case,
         "malnutrition": tables[0],
         "diagnosis": tables[1],
@@ -187,6 +194,7 @@ def case_view(request, object_id):
 def district_view(request):
     district = request.GET.get("d")
     context = {
+		"app": app,
         "districts": Zone.objects.all(),
     }
     if district:
@@ -203,6 +211,7 @@ def provider_list(request):
     if nonhtml:
         return nonhtml
     context = {
+		"app": app,
         "provider": tables[0],
     }
     return as_html(request, "providerlist.html", context)
@@ -218,6 +227,7 @@ def provider_view(request, object_id):
     if nonhtml:
         return nonhtml
     context = {
+		"app": app,
         "object": provider,
         "cases": tables[0],
         "messages": tables[1],

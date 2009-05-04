@@ -8,6 +8,8 @@ from apps.mctc.models.reports import ReportMalnutrition, ReportMalaria, ReportDi
 register("case", Case, [
         ["Id", "ref_id", "{{ object.ref_id }}"],
         ["Name", "last_name", "{{ object.first_name }} {{ object.last_name }}"],
+        ["Gender", "gender", "{{ object.gender }}"],
+		["Age", "age", "{{ object.age }}"],
         ["Provider", "provider", "{{ object.provider.get_name_display }}"],
         ["Zone", "zone", "{{ object.zone }}"],
         ])
@@ -47,13 +49,15 @@ register("diagnosis", ReportDiagnosis, [
 register("malaria", ReportMalaria, [
         ["Result", "result", "{{ object.result }}"],
         ["Bednet", "bednet", "{{ object.bednet }}"],
-        ["Diagnosis", "diagnosis", "{{ object.diagnosis }}"],
+        ["Symptoms", "observed", "{{ object.get_dictionary.observed }}"],
         ["Provider", "provider", "{{ object.provider.get_name_display }}"],
         ["Created", "entered_at", '{{ object.entered_at|date:"d/m/Y" }}']
         ])
 
 register("provider", Provider, [
         ["User", "user", "{{ object.user }}"],
+		["Role", "role", "{{ object.role}}"],
+		["First Name", "first_name", "{{ object.user.first_name }}"],
         ["Mobile", "mobile", "{{ object.mobile }}"],
         ["Role", "diagnosis", "{{ object.role }}"],
         ["Active", "active", "{{ object.get_active_display }}"],

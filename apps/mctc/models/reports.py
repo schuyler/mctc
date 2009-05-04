@@ -51,14 +51,15 @@ class ReportMalaria(Report, models.Model):
         get_latest_by = 'entered_at'
         ordering = ("-entered_at",)
         app_label = "mctc"
+        verbose_name = "Malaria Report"
+        verbose_name_plural = "Malaria Reports"
     
     case = models.ForeignKey(Case, db_index=True)
     provider = models.ForeignKey(Provider, db_index=True)
     entered_at = models.DateTimeField(db_index=True)
-    diagnosis = models.ManyToManyField("Diagnosis")
     bednet = models.BooleanField(db_index=True)
     result = models.BooleanField(db_index=True) 
-    observed = models.ManyToManyField(Observation)       
+    observed = models.ManyToManyField(Observation, blank=True)       
 
     def get_dictionary(self):
         return {
@@ -75,10 +76,7 @@ class ReportMalaria(Report, models.Model):
         super(ReportMalaria, self).save(*args)
         
 class ReportMalnutrition(Report, models.Model):
-    class Meta:
-        get_latest_by = 'entered_at'
-        ordering = ("-entered_at",)
-
+    
     MODERATE_STATUS         = 1
     SEVERE_STATUS           = 2
     SEVERE_COMP_STATUS      = 3
@@ -96,8 +94,15 @@ class ReportMalnutrition(Report, models.Model):
     muac        = models.IntegerField(_("MUAC (mm)"), null=True, blank=True)
     height      = models.IntegerField(_("Height (cm)"), null=True, blank=True)
     weight      = models.FloatField(_("Weight (kg)"), null=True, blank=True)
-    observed    = models.ManyToManyField(Observation)
+    observed    = models.ManyToManyField(Observation, blank=True)
     status      = models.IntegerField(choices=STATUS_CHOICES, db_index=True, blank=True, null=True)
+    
+    class Meta:
+        app_label = "mctc"
+        verbose_name = "Malnutrition Report"
+        verbose_name_plural = "Malnutrition Reports"
+        get_latest_by = 'entered_at'
+        ordering = ("-entered_at",)
 
     def get_dictionary(self):
         return {
@@ -124,23 +129,21 @@ class ReportMalnutrition(Report, models.Model):
 
     def diagnosis_msg(self):
         if self.status == ReportMalnutrition.MODERATE_STATUS:
-            msg = _("MAM Child requires supplemental feeding.")
+            msg = "MAM Child requires supplemental feeding."
         elif self.status == ReportMalnutrition.SEVERE_STATUS:
-            msg = _("SAM Patient requires OTP care")
+            msg = "SAM Patient requires OTP care"
         elif self.status == ReportMalnutrition.SEVERE_COMP_STATUS:
-            msg = _("SAM+ Patient requires IMMEDIATE inpatient care")
+            msg = "SAM+ Patient requires IMMEDIATE inpatient care"
         else:
-            msg = _("Child is not malnourished")
-
+            msg = "Child is not malnourished"
+   
         return msg
 
     def save(self, *args):
         if not self.id:
             self.entered_at = datetime.now()
         super(ReportMalnutrition, self).save(*args)
-
-    class Meta:
-        app_label = "mctc"
+        
 
 class Lab(models.Model):
     name = models.CharField(max_length=255)
@@ -188,6 +191,8 @@ class Diagnosis(models.Model):
     class Meta:
         app_label = "mctc"
         ordering = ("code",)
+        verbose_name = "Diagnosis Code"
+        verbose_name_plural = "Diagnosis Codes"
         
 class ReportDiagnosis(Report, models.Model):
     case = models.ForeignKey(Case, db_index=True)
@@ -201,7 +206,7 @@ class ReportDiagnosis(Report, models.Model):
         return self.case
 
     class Meta:
-        verbose_name = "Diagnoses"
+        verbose_name = "Diagnosis Report"
         app_label = "mctc"
 
     def save(self, *args):

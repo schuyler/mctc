@@ -87,6 +87,8 @@ class Provider(models.Model):
     following_users = models.ManyToManyField("Provider", related_name="following_users", blank=True, null=True)
     following_clinics = models.ManyToManyField(Facility, related_name="following_clinics", blank=True, null=True)
 
+
+
     def get_name_display(self):
         if self.user.first_name or self.user.last_name:
             return "%s %s" % (self.user.first_name, self.user.last_name)
@@ -94,6 +96,9 @@ class Provider(models.Model):
             return str(self.mobile)
         else:
             return str(self.id)
+
+    def __unicode__(self):
+        return self.get_name_display()
     
     def get_absolute_url(self):
         return "/provider/view/%s/" % self.id

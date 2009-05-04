@@ -2,7 +2,7 @@
 {% block title %}Case{% endblock %}
 
 {% block breadcrumbs %}
-    <a href="/">MCTC</a>
+    <a href="/">{{app.name}}</a>
     &raquo; <a href="{{ object.get_absolute_url }}">Case</a>    
     &raquo; {{ object.ref_id }}
 {% endblock %}

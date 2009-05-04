@@ -30,9 +30,10 @@
              <div class="span-24 clearfix last">
                      <ul id="tabs">{% for app in apps %}{% if app.tab_link %}
                          <li><a href="{{ app.tab_link }}">{{ app.title }}</a></li>{% endif %}{% endfor %}
-                         {% if user.is_authenticated %}<li><a href="/logout/">Logout</a></li>
+                         {% if user.is_authenticated %}
                          <li><a href="/district/">District</a></li>
-                         <li><a href="/providers/">Providers</a></li>{% else %}
+                         <li><a href="/providers/">Providers</a></li>
+						 <li><a href="/logout/">Logout</a></li>{% else %}
                          <li><a href="/accounts/login/">Login</a></li>{% endif %}
                      </ul>
              </div>             
@@ -43,7 +44,7 @@
                     <input type="search" name="q" value="{{ request.GET.q }}" title="Search this site"/>
                 </form>
             {% block breadcrumbs %}
-                <a href="/">MCTC</a>
+                <a href="/">{{ app.name }}</a>
                 &raquo; Latest Data
             {% endblock %}
             </div>
