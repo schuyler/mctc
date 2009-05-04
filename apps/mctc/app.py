@@ -331,7 +331,7 @@ class App (rapidsms.app.App):
 
     #CMAM Reports
 
-    @keyword(r'\+(\d+) ([\d\.]+)( [\d\.]+)?( [\d\.]+)?( (?:[a-z]\s*)+)')
+    @keyword(r'muac \+(\d+) ([\d\.]+)( [\d\.]+)?( [\d\.]+)?( (?:[a-z]\s*)+)')
     @authenticated
     def report_case (self, message, ref_id, muac,
                      weight, height, complications):

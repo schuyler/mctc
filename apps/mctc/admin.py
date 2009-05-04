@@ -43,6 +43,8 @@ admin.site.register(ReportMalnutrition, ReportMalnutritionAdmin)
 
 class ReportMalariaAdmin(admin.ModelAdmin):
     list_display = ("case", "result", "bednet")
+    verbose_name = "Malaria Report"
+    verbose_name_plural = "Malaria Reports"
 
 admin.site.register(ReportMalaria, ReportMalariaAdmin)
 

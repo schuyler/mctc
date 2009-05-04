@@ -177,64 +177,64 @@ class TestApp (TestScript):
 
     test_03_ReportCase = """
         # authenticated
-        0000000 > +26 7.5 e
+        0000000 > muac +26 7.5 e
         0000000 < 0000000 is not a registered number.
         
         # basic test
-        7654321 > +26 75 n
+        7654321 > muac +26 75 n
         7654321 < MUAC> SAM Patient requires OTP care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm
 
         # cm get converted to mm, g to kg, m to cm
-        7654321 > +26 7.5 2150 1.4 n
+        7654321 > muac +26 7.5 2150 1.4 n
         7654321 < MUAC> SAM Patient requires OTP care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, 2.1 kg, 140 cm
 
         # complications list
-        7654321 > +26 75 21 e a d
+        7654321 > muac +26 75 21 e a d
         7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, 21.0 kg, Appetite Loss, Diarrhea, Edema
 
         # complications list - weight is optional
-        7654321 > +26 75 e a d
+        7654321 > muac +26 75 e a d
         7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, Appetite Loss, Diarrhea, Edema
 
         # complications list - case insensitive
-        7654321 > +26 75 21 N A D
+        7654321 > MUAC +26 75 21 N A D
         7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, 21.0 kg, Appetite Loss, Diarrhea
 
         # more complications, formatted differently
-        7654321 > +26 75 n fcv
+        7654321 > muac +26 75 n fcv
         7654321 < Unknown observation code: fcv
 
         # more complications, formatted differently
-        7654321 > +26 75 n f cg v
+        7654321 > muac +26 75 n f cg v
         7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, Coughing, Fever, Vomiting
 
 
         # one last complication test
-        7654321 > +26 75 21 n u
+        7654321 > muac +26 75 21 n u
         7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 75 mm, 21.0 kg, Unresponsive
 
         # MAM logic test
-        7654321 > +26 120 n
+        7654321 > muac +26 120 n
         7654321 <  MUAC> MAM Child requires supplemental feeding.. +26 MADISON, M, F/4 (Sally). MUAC 120 mm
 
         # Healthy logic test
-        7654321 > +26 125 n
+        7654321 > muac +26 125 n
         7654321 <  MUAC> Child is not malnourished. +26 MADISON, M, F/4 (Sally). MUAC 125 mm
 
         # MUAC fail
-        7654321 > +26 45.5.5 83.1 e foo
+        7654321 > muac +26 45.5.5 83.1 e foo
         7654321 < Can't understand MUAC (mm): 45.5.5
 
         # weight fail
-        7654321 > +26 45 83.1.1 e foo
+        7654321 > muac +26 45 83.1.1 e foo
         7654321 < Can't understand weight (kg): 83.1.1
 
         # height fail
-        7654321 > +26 45 83.1 122.1.1 e foo
+        7654321 > muac +26 45 83.1 122.1.1 e foo
         7654321 < Can't understand height (cm): 122.1.1
 
         # complication fail
-        7654321 > +26 800 N MUST RECEIVE HELP
+        7654321 > muac +26 800 N MUST RECEIVE HELP
         7654321 < Unknown observation code: must
     """
 
@@ -272,7 +272,7 @@ class TestApp (TestScript):
 
     test_05_Fever = """
         # requested change to make f be fever, not h
-        7654321 > +26 105 d v f
+        7654321 > muac +26 105 d v f
         7654321 < MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 105 mm, Diarrhea, Fever, Vomiting
     """
     
@@ -281,7 +281,7 @@ class TestApp (TestScript):
         7654322 > join cherry bob smith
         7654322 < 7654322 registered to @sbob (BOB, Smith) at Charliesburg.
         
-        7654321 > +26 105 d v f
+        7654321 > muac +26 105 d v f
         7654321 <  MUAC> SAM+ Patient requires IMMEDIATE inpatient care. +26 MADISON, M, F/4 (Sally). MUAC 105 mm, Diarrhea, Fever, Vomiting
         # 7654322 < @jdoe reports +26: SAM+, MUAC 105 mm, Diarrhea, Fever, Vomiting
     """
